@@ -1,10 +1,13 @@
 import { eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { product, user } from "@/db/schema";
 import { formatPrice, STATUS_LABELS } from "@/lib/product";
+import { getCurrentUser } from "@/lib/session";
+import DeleteButton from "./delete-button";
 
 // 동적 주소 /products/12 의 12 가 params.id 로 들어온다 (주소에서 온 값이라 항상 문자열)
 type PageProps = {
@@ -46,6 +49,9 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
+  const me = await getCurrentUser();
+  const isOwner = me?.id === item.sellerId; // ?. : 로그인 안 했으면(me 가 null) 그냥 undefined
+
   return (
     <article className="card product-detail">
       <Image
@@ -66,6 +72,15 @@ export default async function ProductPage({ params }: PageProps) {
         <span className={`badge ${item.status}`}>{STATUS_LABELS[item.status]}</span>
       </p>
       {item.description && <p className="description">{item.description}</p>}
+
+      {isOwner && (
+        <div className="row owner-actions">
+          <Link href={`/products/${item.id}/edit`} className="button">
+            수정
+          </Link>
+          <DeleteButton productId={item.id} />
+        </div>
+      )}
     </article>
   );
 }

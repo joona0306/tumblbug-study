@@ -256,3 +256,10 @@ textarea {
 .product-card.sold .card-image {
   opacity: 0.5;
 }
+
+/* 상세 페이지의 내 상품 관리 버튼 */
+.owner-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}

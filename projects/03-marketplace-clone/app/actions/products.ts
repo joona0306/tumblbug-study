@@ -1,6 +1,8 @@
 "use server";
 
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { product } from "@/db/schema";
@@ -122,4 +124,77 @@ export async function createProduct(
     .returning({ id: product.id });
 
   redirect(`/products/${created.id}`);
+}
+
+// "이 번호의 상품 + 주인이 나" 인 상품만 찾는다. 남의 상품이면 undefined
+async function findOwnedProduct(id: number, userId: string) {
+  const [found] = await db
+    .select({ id: product.id, imageUrl: product.imageUrl })
+    .from(product)
+    .where(and(eq(product.id, id), eq(product.userId, userId)));
+  return found;
+}
+
+// 상품 수정 (사진은 새로 골랐을 때만 바꾼다)
+export async function updateProduct(
+  prevState: ProductFormState,
+  formData: FormData,
+): Promise<ProductFormState> {
+  const me = await requireUser();
+  const id = Number(formData.get("id"));
+
+  const parsed = parseProductForm(formData);
+  if (!parsed.ok) {
+    return { error: parsed.error, values: parsed.values };
+  }
+
+  // 1. 내 상품인지 확인 (숨은 칸의 id 를 남의 상품 번호로 바꿔 보내도 여기서 막힌다)
+  const owned = await findOwnedProduct(id, me.id);
+  if (!owned) {
+    return { error: "수정할 수 없는 상품입니다.", values: parsed.values };
+  }
+
+  // 2. 새 사진을 골랐으면 검사하고 올린다
+  let newImageUrl: string | null = null;
+  const image = formData.get("image");
+  if (image instanceof File && image.size > 0) {
+    const imageError = checkImage(image);
+    if (imageError) {
+      return { error: imageError, values: parsed.values };
+    }
+    newImageUrl = await uploadImage(me.id, image);
+  }
+
+  // 3. DB 수정 (새 사진이 있을 때만 imageUrl 도 바꾼다)
+  await db
+    .update(product)
+    .set({ ...parsed.data, ...(newImageUrl ? { imageUrl: newImageUrl } : {}) })
+    .where(and(eq(product.id, id), eq(product.userId, me.id)));
+
+  // 4. 사진을 바꿨다면 옛 사진은 저장소에서 지운다 (안 지우면 아무도 안 쓰는 파일이 쌓인다)
+  if (newImageUrl) {
+    await del(owned.imageUrl);
+  }
+
+  revalidatePath("/");
+  redirect(`/products/${id}`);
+}
+
+// 상품 삭제
+export async function deleteProduct(formData: FormData) {
+  const me = await requireUser();
+  const id = Number(formData.get("id"));
+
+  // 내 상품일 때만 지워지고, 지운 줄의 사진 주소를 돌려받는다
+  const [deleted] = await db
+    .delete(product)
+    .where(and(eq(product.id, id), eq(product.userId, me.id)))
+    .returning({ imageUrl: product.imageUrl });
+
+  if (deleted) {
+    await del(deleted.imageUrl); // 저장소의 사진도 함께 지운다
+  }
+
+  revalidatePath("/");
+  redirect("/dashboard");
 }
