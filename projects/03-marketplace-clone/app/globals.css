@@ -263,3 +263,14 @@ textarea {
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
+
+/* 검색창: 입력칸과 버튼을 한 줄에 */
+.search {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+}
