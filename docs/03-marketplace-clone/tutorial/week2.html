@@ -638,7 +638,8 @@ textarea {
           <ol>
             <li><code>/products/new</code>에서 휴대폰으로 찍은 큰 사진을 고르면 미리보기가 보인다</li>
             <li>제목·가격·카테고리를 쓰고 등록 → 버튼이 "사진 줄이는 중..." → "저장 중..." → 상세 페이지로 이동</li>
-            <li>Vercel → Storage → <code>my-market-dev</code>에서 파일 크기를 보면 원본보다 훨씬 작다</li>
+            <li>Vercel → Storage → <code>my-market-dev</code>에서 파일 크기를 보면 원본보다 훨씬 작다. 처음 화면에는 <code>products/</code> 아래 <strong>판매자별 폴더</strong>만 보이니(판매자가 2명이면 폴더 2개), 폴더를 열어 사진을 확인하세요</li>
+            <li>Neon → Tables → product의 <code>image_url</code> 칸에는 사진이 아니라 <code>https://…/products/…/photo-….jpg</code> 같은 <strong>주소(글자)</strong>만 들어 있다. 사진 파일 수 = 상품 수</li>
             <li>(서버 검사) 사진 없이 등록 → "사진을 1장 골라주세요." / <kbd>F12</kbd>로 가격 칸의 <code>min</code>을 지우고 -5 → "가격은 0원 이상…" — 두 경우 모두 입력한 제목이 남아 있다</li>
           </ol>
         </div>
