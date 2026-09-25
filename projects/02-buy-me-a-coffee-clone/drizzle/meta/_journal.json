@@ -15,6 +15,13 @@
       "when": 1790349106210,
       "tag": "0001_add_bio",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790349346995,
+      "tag": "0002_add_support",
+      "breakpoints": true
     }
   ]
 }
