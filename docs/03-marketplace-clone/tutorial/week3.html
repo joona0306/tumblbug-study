@@ -1,0 +1,1156 @@
+<!doctype html>
+<html lang="ko" data-course="market">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3주차 검색과 권한 · 당근마켓 미니 교재</title>
+  <meta name="description" content="제목 검색, 카테고리·판매중 필터(주소에 상태 담기), 판매 상태 변경, 연락 방법 공개 권한, 내 판매 상품">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week3">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🥕 당근마켓 미니 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주차 · 기획과 TypeScript <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주차 · 상품과 사진 <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3" aria-current="page">3주차 · 검색과 권한 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주차 · 배포·운영 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">3주차 · 5단계</span>
+    <h1>검색·필터·상태, 그리고 누구에게 무엇을 보여줄까</h1>
+    <p class="lead">이번 주는 "찾기"와 "권한"입니다. 검색 조건을 주소에 담는 방법을 배우고, 주소·숨은 칸처럼 <strong>브라우저가 보내는 모든 값</strong>을 서버가 어떻게 걸러내는지 익힙니다.</p>
+
+    <h2 id="flow">먼저 그림으로: 검색 조건은 주소를 타고 SQL이 된다</h2>
+    <figure class="diagram">
+      <svg viewBox="0 0 820 250" role="img" aria-labelledby="q-title q-desc">
+        <title id="q-title">검색 조건이 주소를 거쳐 SQL 조건이 되는 흐름</title>
+        <desc id="q-desc">검색 폼을 제출하면 조건이 주소 뒤에 붙는다. 페이지는 주소의 값을 꺼내 목록에 있는 카테고리인지 검사하고, 통과한 조건만 모아 SQL WHERE 로 만든다.</desc>
+        <defs>
+          <marker id="q-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="d-arrowhead" d="M0,0 L10,5 L0,10 z"/>
+          </marker>
+        </defs>
+        <rect class="d-box d-client" x="10" y="30" width="170" height="110" rx="10"/>
+        <text class="d-title" x="95" y="58" text-anchor="middle">검색 폼 (GET)</text>
+        <text class="d-small" x="95" y="84" text-anchor="middle">검색어: 의자</text>
+        <text class="d-small" x="95" y="102" text-anchor="middle">카테고리: 가구/인테리어</text>
+        <text class="d-small" x="95" y="120" text-anchor="middle">☑ 판매중만 보기</text>
+
+        <rect class="d-muted-box" x="220" y="55" width="200" height="60" rx="8"/>
+        <text class="d-small" x="320" y="78" text-anchor="middle">주소</text>
+        <text class="d-mono" x="320" y="100" text-anchor="middle">/?q=의자&amp;category=…&amp;onSale=1</text>
+
+        <rect class="d-box d-server" x="460" y="20" width="170" height="130" rx="10"/>
+        <text class="d-title" x="545" y="46" text-anchor="middle">page.tsx</text>
+        <text class="d-small" x="545" y="70" text-anchor="middle">searchParams 꺼내기</text>
+        <text class="d-small" x="545" y="92" text-anchor="middle">isCategory? (아니면 무시)</text>
+        <text class="d-small" x="545" y="114" text-anchor="middle">onSale === "1" ?</text>
+        <text class="d-small" x="545" y="136" text-anchor="middle">→ listProducts({…})</text>
+
+        <rect class="d-box d-db" x="670" y="20" width="140" height="130" rx="10"/>
+        <text class="d-title" x="740" y="46" text-anchor="middle">SQL</text>
+        <text class="d-mono" x="740" y="72" text-anchor="middle">WHERE</text>
+        <text class="d-mono" x="740" y="92" text-anchor="middle">title ILIKE</text>
+        <text class="d-mono" x="740" y="108" text-anchor="middle">'%의자%'</text>
+        <text class="d-mono" x="740" y="126" text-anchor="middle">AND category=…</text>
+        <text class="d-mono" x="740" y="142" text-anchor="middle">AND status=…</text>
+
+        <line class="d-line" x1="180" y1="85" x2="218" y2="85" marker-end="url(#q-arrow)"/>
+        <line class="d-line" x1="420" y1="85" x2="458" y2="85" marker-end="url(#q-arrow)"/>
+        <line class="d-line" x1="630" y1="85" x2="668" y2="85" marker-end="url(#q-arrow)"/>
+
+        <text class="d-small" x="410" y="195" text-anchor="middle">주소에 담으면 좋은 점: 새로고침해도 유지 · 링크로 공유 · 뒤로가기로 이전 조건</text>
+        <text class="d-small" x="410" y="218" text-anchor="middle">주의할 점: 주소는 누구나 고칠 수 있다 → 서버가 꺼낸 값을 반드시 검사</text>
+      </svg>
+      <figcaption>화면의 "상태"(지금 어떤 조건으로 보고 있나)를 주소에 두는 방식. 실제 쇼핑몰·검색 서비스 대부분이 이렇게 한다.</figcaption>
+    </figure>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>제목 검색</summary>
+      <div class="step-body">
+        <figure class="code" data-src="lib/queries.ts" data-tag="market-week3-step1">
+          <figcaption><span class="label">lib/queries.ts</span></figcaption>
+          <pre><code>import { desc, eq, ilike } from "drizzle-orm";
+import { db } from "@/db";
+import { product, user } from "@/db/schema";
+
+const LIST_LIMIT = 60; // 첫 화면에 보여줄 최대 개수 (페이지 나누기는 이번 범위에서 제외)
+
+// 목록 카드에 필요한 칸만 고른다
+const cardColumns = {
+  id: product.id,
+  title: product.title,
+  price: product.price,
+  status: product.status,
+  imageUrl: product.imageUrl,
+  category: product.category,
+  sellerName: user.username,
+};
+
+// LIKE 검색에서 %(아무 글자 여러 개), _(아무 글자 하나)는 특별한 뜻이 있다.
+// 사용자가 "100%" 를 검색하면 글자 그대로 찾도록 앞에 \ 를 붙여 "그냥 글자"로 만든다.
+function escapeLike(text: string): string {
+  return text.replace(/[\\%_]/g, (char) =&gt; `\\${char}`);
+}
+
+export type ProductFilter = {
+  q?: string; // 검색어
+};
+
+// 조건에 맞는 최신 상품 목록
+export async function listProducts(filter: ProductFilter = {}) {
+  const q = filter.q?.trim();
+
+  return db
+    .select(cardColumns)
+    .from(product)
+    .innerJoin(user, eq(product.userId, user.id))
+    // ilike: 대소문자를 구분하지 않는 "포함" 검색. 검색어가 없으면 조건 없음(undefined)
+    .where(q ? ilike(product.title, `%${escapeLike(q)}%`) : undefined)
+    .orderBy(desc(product.createdAt))
+    .limit(LIST_LIMIT);
+}
+
+// 목록 한 줄의 타입을 함수의 결과에서 뽑아낸다.
+// Awaited: Promise 를 벗긴 결과 / [number]: 배열의 한 칸
+export type ProductCardData = Awaited&lt;ReturnType&lt;typeof listProducts&gt;&gt;[number];</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 LIKE 와 이스케이프</span>SQL의 <code>LIKE '%의자%'</code>는 "의자가 들어간 것"입니다. 여기서 <code>%</code>는 "아무 글자 여러 개", <code>_</code>는 "아무 글자 하나"라는 특별한 뜻이에요. 사용자가 <code>100%</code>를 검색하면 <code>%</code>가 특별한 뜻으로 해석되지 않도록 앞에 <code>\</code>를 붙여 "그냥 글자"로 만듭니다(이스케이프). <code>ILIKE</code>의 <code>I</code>는 대소문자 무시.</div>
+        <figure class="code" data-src="app/page.tsx" data-tag="market-week3-step1">
+          <figcaption><span class="label">app/page.tsx</span></figcaption>
+          <pre><code>import Link from "next/link";
+import { listProducts } from "@/lib/queries";
+import { getCurrentUser } from "@/lib/session";
+import ProductCard from "./product-card";
+
+// 주소의 ? 뒤에 붙은 값들 (예: /?q=의자 → { q: "의자" }). 없을 수도 있어서 ? 를 붙인다
+type HomeProps = {
+  searchParams: Promise&lt;{ q?: string }&gt;;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const { q = "" } = await searchParams;
+  const user = await getCurrentUser();
+  const products = await listProducts({ q });
+
+  return (
+    &lt;div className="stack"&gt;
+      &lt;div className="row spread"&gt;
+        &lt;h1&gt;🥕 동네 마켓&lt;/h1&gt;
+        {user ? (
+          &lt;span className="row"&gt;
+            &lt;Link href="/dashboard"&gt;내 판매 상품&lt;/Link&gt;
+            &lt;Link href="/products/new" className="button"&gt;
+              내 물건 팔기
+            &lt;/Link&gt;
+          &lt;/span&gt;
+        ) : (
+          &lt;span className="row"&gt;
+            &lt;Link href="/login"&gt;로그인&lt;/Link&gt;
+            &lt;Link href="/signup" className="button"&gt;
+              회원가입
+            &lt;/Link&gt;
+          &lt;/span&gt;
+        )}
+      &lt;/div&gt;
+
+      {/* method 를 적지 않은 폼은 GET: 제출하면 입력값이 주소 뒤에 ?q=... 로 붙어 이 페이지를 다시 연다 */}
+      &lt;form className="search" role="search"&gt;
+        &lt;input name="q" type="search" placeholder="어떤 물건을 찾으세요?" defaultValue={q} aria-label="검색어" /&gt;
+        &lt;button type="submit"&gt;검색&lt;/button&gt;
+      &lt;/form&gt;
+
+      {q &amp;&amp; (
+        &lt;p className="muted small"&gt;
+          &amp;quot;{q}&amp;quot; 검색 결과 {products.length}개 · &lt;Link href="/"&gt;전체 보기&lt;/Link&gt;
+        &lt;/p&gt;
+      )}
+
+      {products.length === 0 ? (
+        &lt;p className="card muted"&gt;{q ? "검색 결과가 없어요. 다른 단어로 찾아보세요." : "아직 올라온 물건이 없어요. 첫 번째로 올려보세요!"}&lt;/p&gt;
+      ) : (
+        &lt;ul className="product-grid"&gt;
+          {products.map((item) =&gt; (
+            &lt;li key={item.id}&gt;
+              &lt;ProductCard item={item} /&gt;
+            &lt;/li&gt;
+          ))}
+        &lt;/ul&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/globals.css" data-tag="market-week3-step1" data-lines="267-276">
+          <figcaption><span class="label">app/globals.css (맨 아래에 추가)</span></figcaption>
+          <pre><code>/* 검색창: 입력칸과 버튼을 한 줄에 */
+.search {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법 (작성자 검증 결과와 비교)</span>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>검색어</th><th>기대 결과</th></tr></thead>
+              <tbody>
+                <tr><td><code>패드</code></td><td>"아이패드…"처럼 중간에 들어간 것도 찾는다</td></tr>
+                <tr><td><code>switch</code> / <code>SWITCH</code></td><td>"Nintendo Switch…"를 둘 다 찾는다 (대소문자 무시)</td></tr>
+                <tr><td><code>%</code></td><td>제목에 실제로 %가 든 상품만 (이스케이프를 안 했다면 <strong>전체</strong>가 나옴)</td></tr>
+                <tr><td><code>'; drop table product;--</code></td><td>0개, 표는 멀쩡 (Drizzle이 값을 SQL과 분리해서 보내기 때문)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>검색 후 주소창에 <code>?q=…</code>가 붙고, 새로고침해도 결과가 유지된다.</p>
+        </div>
+        <div class="box why"><span class="box-title">💡 알려진 한계</span>"스위치"로 검색하면 영어 제목 "Switch"는 못 찾습니다. 글자가 다르니까요. 실제 서비스는 별칭 사전이나 검색 전용 엔진을 쓰는데, 이번 범위 밖입니다. 4주차 개선 아이디어로 적어 두세요.</div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "3주차: 제목 검색"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m3-s1-code"><span>검색 조회·검색 폼 작성</span></label></li>
+          <li><label><input type="checkbox" data-task="m3-s1-check"><span>표의 4가지 검색어 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week3-step1/projects/03-marketplace-clone">market-week3-step1</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>카테고리·판매중 필터</summary>
+      <div class="step-body">
+        <figure class="code" data-src="lib/queries.ts" data-tag="market-week3-step2">
+          <figcaption><span class="label">lib/queries.ts</span></figcaption>
+          <pre><code>import { and, desc, eq, ilike, type SQL } from "drizzle-orm";
+import { db } from "@/db";
+import { product, user } from "@/db/schema";
+import type { Category } from "@/lib/product";
+
+const LIST_LIMIT = 60; // 첫 화면에 보여줄 최대 개수 (페이지 나누기는 이번 범위에서 제외)
+
+// 목록 카드에 필요한 칸만 고른다
+const cardColumns = {
+  id: product.id,
+  title: product.title,
+  price: product.price,
+  status: product.status,
+  imageUrl: product.imageUrl,
+  category: product.category,
+  sellerName: user.username,
+};
+
+// LIKE 검색에서 %(아무 글자 여러 개), _(아무 글자 하나)는 특별한 뜻이 있다.
+// 사용자가 "100%" 를 검색하면 글자 그대로 찾도록 앞에 \ 를 붙여 "그냥 글자"로 만든다.
+function escapeLike(text: string): string {
+  return text.replace(/[\\%_]/g, (char) =&gt; `\\${char}`);
+}
+
+export type ProductFilter = {
+  q?: string; // 검색어
+  category?: Category; // 카테고리 (정해진 목록 중 하나만 들어올 수 있다)
+  onSale?: boolean; // true 면 판매중인 것만
+};
+
+// 조건에 맞는 최신 상품 목록
+export async function listProducts(filter: ProductFilter = {}) {
+  const q = filter.q?.trim();
+
+  // 조건을 하나씩 모은 뒤 and(...) 로 묶는다. 조건이 없으면 전체 목록
+  const conditions: SQL[] = [];
+  // ilike: 대소문자를 구분하지 않는 "포함" 검색
+  if (q) conditions.push(ilike(product.title, `%${escapeLike(q)}%`));
+  if (filter.category) conditions.push(eq(product.category, filter.category));
+  if (filter.onSale) conditions.push(eq(product.status, "selling"));
+
+  return db
+    .select(cardColumns)
+    .from(product)
+    .innerJoin(user, eq(product.userId, user.id))
+    .where(and(...conditions))
+    .orderBy(desc(product.createdAt))
+    .limit(LIST_LIMIT);
+}
+
+// 목록 한 줄의 타입을 함수의 결과에서 뽑아낸다.
+// Awaited: Promise 를 벗긴 결과 / [number]: 배열의 한 칸
+export type ProductCardData = Awaited&lt;ReturnType&lt;typeof listProducts&gt;&gt;[number];</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 조건을 배열에 모으기</span><code>const conditions: SQL[] = []</code>에 켜진 조건만 넣고 <code>and(...conditions)</code>로 묶습니다. 조건이 몇 개든 같은 코드로 처리되고, 하나도 없으면 전체 목록이 됩니다. <code>ProductFilter</code>의 <code>category</code> 타입이 <code>Category</code>라서, 검사 안 한 글자를 넘기면 타입 에러가 납니다.</div>
+        <figure class="code" data-src="app/page.tsx" data-tag="market-week3-step2">
+          <figcaption><span class="label">app/page.tsx</span></figcaption>
+          <pre><code>import Link from "next/link";
+import { CATEGORIES, isCategory } from "@/lib/product";
+import { listProducts } from "@/lib/queries";
+import { getCurrentUser } from "@/lib/session";
+import ProductCard from "./product-card";
+
+// 주소의 ? 뒤에 붙은 값들 (예: /?q=의자&amp;category=도서&amp;onSale=1). 없을 수도 있어서 ? 를 붙인다
+type HomeProps = {
+  searchParams: Promise&lt;{ q?: string; category?: string; onSale?: string }&gt;;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+  const q = params.q ?? "";
+  // 주소는 누구나 고칠 수 있으므로, 목록에 있는 카테고리일 때만 필터로 쓴다
+  const category = params.category &amp;&amp; isCategory(params.category) ? params.category : undefined;
+  const onSale = params.onSale === "1";
+  const filtered = Boolean(q || category || onSale);
+
+  const user = await getCurrentUser();
+  const products = await listProducts({ q, category, onSale });
+
+  return (
+    &lt;div className="stack"&gt;
+      &lt;div className="row spread"&gt;
+        &lt;h1&gt;🥕 동네 마켓&lt;/h1&gt;
+        {user ? (
+          &lt;span className="row"&gt;
+            &lt;Link href="/dashboard"&gt;내 판매 상품&lt;/Link&gt;
+            &lt;Link href="/products/new" className="button"&gt;
+              내 물건 팔기
+            &lt;/Link&gt;
+          &lt;/span&gt;
+        ) : (
+          &lt;span className="row"&gt;
+            &lt;Link href="/login"&gt;로그인&lt;/Link&gt;
+            &lt;Link href="/signup" className="button"&gt;
+              회원가입
+            &lt;/Link&gt;
+          &lt;/span&gt;
+        )}
+      &lt;/div&gt;
+
+      {/* method 를 적지 않은 폼은 GET: 제출하면 입력값이 주소 뒤에 ?q=...&amp;category=... 로 붙어 이 페이지를 다시 연다 */}
+      &lt;form className="filters" role="search"&gt;
+        &lt;div className="search"&gt;
+          &lt;input name="q" type="search" placeholder="어떤 물건을 찾으세요?" defaultValue={q} aria-label="검색어" /&gt;
+          &lt;button type="submit"&gt;검색&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div className="row"&gt;
+          &lt;select name="category" defaultValue={category ?? ""} aria-label="카테고리"&gt;
+            &lt;option value=""&gt;전체 카테고리&lt;/option&gt;
+            {CATEGORIES.map((item) =&gt; (
+              &lt;option key={item} value={item}&gt;
+                {item}
+              &lt;/option&gt;
+            ))}
+          &lt;/select&gt;
+          &lt;label className="checkbox"&gt;
+            &lt;input type="checkbox" name="onSale" value="1" defaultChecked={onSale} /&gt;
+            판매중만 보기
+          &lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/form&gt;
+
+      {filtered &amp;&amp; (
+        &lt;p className="muted small"&gt;
+          조건에 맞는 물건 {products.length}개 · &lt;Link href="/"&gt;조건 지우기&lt;/Link&gt;
+        &lt;/p&gt;
+      )}
+
+      {products.length === 0 ? (
+        &lt;p className="card muted"&gt;
+          {filtered ? "조건에 맞는 물건이 없어요. 조건을 바꿔보세요." : "아직 올라온 물건이 없어요. 첫 번째로 올려보세요!"}
+        &lt;/p&gt;
+      ) : (
+        &lt;ul className="product-grid"&gt;
+          {products.map((item) =&gt; (
+            &lt;li key={item.id}&gt;
+              &lt;ProductCard item={item} /&gt;
+            &lt;/li&gt;
+          ))}
+        &lt;/ul&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <p><code>app/globals.css</code>의 <code>.search { … }</code> 블록을 아래로 <strong>바꾸고</strong>, 체크박스 스타일을 추가합니다. (검색창이 이제 폼이 아니라 폼 안의 <code>div</code>라서 <code>display: flex</code>가 필요해요)</p>
+        <figure class="code" data-src="app/globals.css" data-tag="market-week3-step2" data-lines="268-284">
+          <figcaption><span class="label">app/globals.css</span></figcaption>
+          <pre><code>/* 검색창: 입력칸과 버튼을 한 줄에 */
+.search {
+  display: flex;
+  gap: 8px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 체크박스는 글자 옆에 나란히 */
+label.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>카테고리만, 판매중만, 검색어+카테고리 등 조합해도 맞는 결과가 나온다</li>
+            <li>결과 주소를 복사해 시크릿 창에 붙여 넣으면 같은 조건의 화면이 열린다</li>
+            <li>주소를 직접 <code>?category=해킹</code>으로 바꾸면 무시되고 전체 목록 (서버 검사)</li>
+            <li>"조건 지우기"로 처음 화면</li>
+          </ul>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "3주차: 카테고리와 판매중 필터"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m3-s2-code"><span>필터 조건과 필터 폼 작성</span></label></li>
+          <li><label><input type="checkbox" data-task="m3-s2-check"><span>조합·주소 공유·조작 값 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week3-step2/projects/03-marketplace-clone">market-week3-step2</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>판매 상태 변경 (판매중 ↔ 거래완료)</summary>
+      <div class="step-body">
+        <p><code>lib/product.ts</code>에 판매 상태용 타입 가드를 추가합니다.</p>
+        <figure class="code" data-src="lib/product.ts" data-tag="market-week3-step3">
+          <figcaption><span class="label">lib/product.ts</span></figcaption>
+          <pre><code>import type { ProductStatus } from "@/db/schema";
+
+// 상품 규칙을 한곳에 모아둔다. (화면과 서버가 같은 값을 쓰도록)
+
+// as const: "이 배열은 바뀌지 않는다"는 표시. 덕분에 아래 Category 타입이 정확한 글자 목록이 된다.
+export const CATEGORIES = ["디지털기기", "가구/인테리어", "의류", "도서", "생활가전", "기타"] as const;
+export type Category = (typeof CATEGORIES)[number]; // "디지털기기" | "가구/인테리어" | ... | "기타"
+
+export const TITLE_MAX_LENGTH = 40;
+export const DESCRIPTION_MAX_LENGTH = 1000;
+export const PRICE_MAX = 100_000_000; // 1억 원
+
+// Record&lt;ProductStatus, string&gt;: "selling"과 "sold" 둘 다 빠짐없이 적어야 한다 (하나라도 빠지면 타입 에러)
+export const STATUS_LABELS: Record&lt;ProductStatus, string&gt; = {
+  selling: "판매중",
+  sold: "거래완료",
+};
+
+// 문자열이 정해진 카테고리 중 하나인지 검사한다.
+// 반환 타입 "value is Category": true 이면 TypeScript 가 그 뒤부터 value 를 Category 로 취급한다.
+export function isCategory(value: string): value is Category {
+  return (CATEGORIES as readonly string[]).includes(value);
+}
+
+// 문자열이 정해진 판매 상태 중 하나인지 검사한다.
+// 주의: "value in STATUS_LABELS" 로 쓰면 "toString" 처럼 모든 객체가 물려받는 이름도 통과한다.
+// Object.hasOwn 은 이 객체에 직접 적은 키(selling, sold)만 인정한다.
+export function isProductStatus(value: string): value is ProductStatus {
+  return Object.hasOwn(STATUS_LABELS, value);
+}
+
+// 12000 → "12,000원", 0 → "나눔 🧡"
+export function formatPrice(price: number): string {
+  return price === 0 ? "나눔 🧡" : `${price.toLocaleString("ko-KR")}원`;
+}</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">🆘 작성자가 실제로 빠질 뻔한 함정</span><p>처음엔 <code>return value in STATUS_LABELS;</code>로 썼습니다. 그런데 <code>in</code>은 모든 객체가 물려받는 이름까지 찾아서, <code>"toString"</code> 같은 값도 통과해 버립니다. 누군가 상태 값으로 <code>toString</code>을 보내면 DB에 이상한 값이 들어갈 뻔했어요. <code>Object.hasOwn</code>은 우리가 직접 적은 키(selling, sold)만 인정합니다. <strong>타입 가드도 결국 코드라서 테스트가 필요합니다.</strong></p></div>
+        <p>서버 액션 파일 맨 아래에 <code>changeStatus</code>를 추가합니다. (import에 <code>isProductStatus</code> 추가)</p>
+        <figure class="code" data-src="app/actions/products.ts" data-tag="market-week3-step3">
+          <figcaption><span class="label">app/actions/products.ts</span></figcaption>
+          <pre><code>"use server";
+
+import { del, put } from "@vercel/blob";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { product } from "@/db/schema";
+import {
+  type Category,
+  DESCRIPTION_MAX_LENGTH,
+  isCategory,
+  isProductStatus,
+  PRICE_MAX,
+  TITLE_MAX_LENGTH,
+} from "@/lib/product";
+import { requireUser } from "@/lib/session";
+
+const IMAGE_MAX_BYTES = 2 * 1024 * 1024; // 서버가 받는 사진 최대 2MB (브라우저에서 줄였다면 훨씬 작다)
+
+// 폼에 입력한 값들의 모양 (에러가 나면 다시 채워 주려고 돌려보낸다)
+export type ProductFormValues = {
+  title: string;
+  price: string;
+  category: string;
+  description: string;
+};
+
+export type ProductFormState = {
+  error: string;
+  values: ProductFormValues;
+} | null;
+
+// 검사를 통과한 값들의 모양. price 는 숫자, category 는 정해진 목록 중 하나로 "좁혀진" 타입이다.
+type ValidProduct = {
+  title: string;
+  price: number;
+  category: Category;
+  description: string;
+};
+
+// 폼 값을 꺼내 검사한다. 성공하면 { ok: true, data }, 실패하면 { ok: false, error }.
+// 이렇게 결과를 두 모양 중 하나로 돌려주면, 쓰는 쪽에서 ok 를 확인해야만 data 를 쓸 수 있다.
+function parseProductForm(
+  formData: FormData,
+): { ok: true; data: ValidProduct; values: ProductFormValues } | { ok: false; error: string; values: ProductFormValues } {
+  const values: ProductFormValues = {
+    title: String(formData.get("title") ?? "").trim(),
+    price: String(formData.get("price") ?? "").trim(),
+    category: String(formData.get("category") ?? ""),
+    description: String(formData.get("description") ?? "").trim(),
+  };
+
+  if (!values.title) return { ok: false, error: "제목을 입력해주세요.", values };
+  if (values.title.length &gt; TITLE_MAX_LENGTH) {
+    return { ok: false, error: `제목은 ${TITLE_MAX_LENGTH}자 이하로 써주세요.`, values };
+  }
+
+  const price = Number(values.price);
+  // Number.isInteger: 소수점·글자·빈칸이면 false
+  if (values.price === "" || !Number.isInteger(price) || price &lt; 0 || price &gt; PRICE_MAX) {
+    return { ok: false, error: "가격은 0원 이상의 숫자로 입력해주세요. (0원 = 나눔)", values };
+  }
+
+  if (!isCategory(values.category)) {
+    return { ok: false, error: "카테고리를 골라주세요.", values };
+  }
+  // ↑ 이 검사를 통과했으므로, 여기부터 TypeScript 는 values.category 를 Category 타입으로 안다
+
+  if (values.description.length &gt; DESCRIPTION_MAX_LENGTH) {
+    return { ok: false, error: `설명은 ${DESCRIPTION_MAX_LENGTH}자 이하로 써주세요.`, values };
+  }
+
+  return {
+    ok: true,
+    data: { title: values.title, price, category: values.category, description: values.description },
+    values,
+  };
+}
+
+// 사진 파일 검사. 문제가 없으면 null, 있으면 에러 문장
+function checkImage(file: File): string | null {
+  if (!file.type.startsWith("image/")) return "사진 파일만 올릴 수 있어요.";
+  if (file.size &gt; IMAGE_MAX_BYTES) return "사진이 너무 커요. 2MB 이하로 올려주세요.";
+  return null;
+}
+
+// Vercel Blob 공개 저장소에 사진을 올리고 주소를 돌려받는다
+async function uploadImage(userId: string, file: File): Promise&lt;string&gt; {
+  const blob = await put(`products/${userId}/photo.jpg`, file, {
+    access: "public",
+    addRandomSuffix: true, // 이름 끝에 무작위 글자를 붙여 겹치지 않게 한다
+    contentType: file.type,
+  });
+  return blob.url;
+}
+
+// 상품 등록
+export async function createProduct(
+  prevState: ProductFormState,
+  formData: FormData,
+): Promise&lt;ProductFormState&gt; {
+  const me = await requireUser();
+
+  const parsed = parseProductForm(formData);
+  if (!parsed.ok) {
+    return { error: parsed.error, values: parsed.values };
+  }
+
+  const image = formData.get("image");
+  // instanceof File: 폼 값이 글자가 아니라 "파일"인지 확인. 크기가 0이면 고르지 않은 것
+  if (!(image instanceof File) || image.size === 0) {
+    return { error: "사진을 1장 골라주세요.", values: parsed.values };
+  }
+  const imageError = checkImage(image);
+  if (imageError) {
+    return { error: imageError, values: parsed.values };
+  }
+
+  const imageUrl = await uploadImage(me.id, image);
+
+  const [created] = await db
+    .insert(product)
+    .values({ ...parsed.data, userId: me.id, imageUrl })
+    .returning({ id: product.id });
+
+  redirect(`/products/${created.id}`);
+}
+
+// "이 번호의 상품 + 주인이 나" 인 상품만 찾는다. 남의 상품이면 undefined
+async function findOwnedProduct(id: number, userId: string) {
+  const [found] = await db
+    .select({ id: product.id, imageUrl: product.imageUrl })
+    .from(product)
+    .where(and(eq(product.id, id), eq(product.userId, userId)));
+  return found;
+}
+
+// 상품 수정 (사진은 새로 골랐을 때만 바꾼다)
+export async function updateProduct(
+  prevState: ProductFormState,
+  formData: FormData,
+): Promise&lt;ProductFormState&gt; {
+  const me = await requireUser();
+  const id = Number(formData.get("id"));
+
+  const parsed = parseProductForm(formData);
+  if (!parsed.ok) {
+    return { error: parsed.error, values: parsed.values };
+  }
+
+  // 1. 내 상품인지 확인 (숨은 칸의 id 를 남의 상품 번호로 바꿔 보내도 여기서 막힌다)
+  const owned = await findOwnedProduct(id, me.id);
+  if (!owned) {
+    return { error: "수정할 수 없는 상품입니다.", values: parsed.values };
+  }
+
+  // 2. 새 사진을 골랐으면 검사하고 올린다
+  let newImageUrl: string | null = null;
+  const image = formData.get("image");
+  if (image instanceof File &amp;&amp; image.size &gt; 0) {
+    const imageError = checkImage(image);
+    if (imageError) {
+      return { error: imageError, values: parsed.values };
+    }
+    newImageUrl = await uploadImage(me.id, image);
+  }
+
+  // 3. DB 수정 (새 사진이 있을 때만 imageUrl 도 바꾼다)
+  await db
+    .update(product)
+    .set({ ...parsed.data, ...(newImageUrl ? { imageUrl: newImageUrl } : {}) })
+    .where(and(eq(product.id, id), eq(product.userId, me.id)));
+
+  // 4. 사진을 바꿨다면 옛 사진은 저장소에서 지운다 (안 지우면 아무도 안 쓰는 파일이 쌓인다)
+  if (newImageUrl) {
+    await del(owned.imageUrl);
+  }
+
+  revalidatePath("/");
+  redirect(`/products/${id}`);
+}
+
+// 상품 삭제
+export async function deleteProduct(formData: FormData) {
+  const me = await requireUser();
+  const id = Number(formData.get("id"));
+
+  // 내 상품일 때만 지워지고, 지운 줄의 사진 주소를 돌려받는다
+  const [deleted] = await db
+    .delete(product)
+    .where(and(eq(product.id, id), eq(product.userId, me.id)))
+    .returning({ imageUrl: product.imageUrl });
+
+  if (deleted) {
+    await del(deleted.imageUrl); // 저장소의 사진도 함께 지운다
+  }
+
+  revalidatePath("/");
+  redirect("/dashboard");
+}
+
+// 판매 상태 변경 (판매중 ↔ 거래완료)
+export async function changeStatus(formData: FormData) {
+  const me = await requireUser();
+  const id = Number(formData.get("id"));
+  const status = String(formData.get("status") ?? "");
+
+  // 브라우저가 보낸 값이므로 정해진 두 값 중 하나인지 확인한다 (DB 는 아무 글자나 받아준다)
+  if (!isProductStatus(status)) {
+    return;
+  }
+
+  // 내 상품일 때만 바뀐다
+  await db
+    .update(product)
+    .set({ status })
+    .where(and(eq(product.id, id), eq(product.userId, me.id)));
+
+  revalidatePath("/");
+  revalidatePath(`/products/${id}`);
+}</code></pre>
+        </figure>
+        <p>상세 페이지 관리 버튼에 상태 변경 버튼을 추가합니다.</p>
+        <figure class="code" data-src="app/products/[id]/page.tsx" data-tag="market-week3-step3">
+          <figcaption><span class="label">app/products/[id]/page.tsx</span></figcaption>
+          <pre><code>import { eq } from "drizzle-orm";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { changeStatus } from "@/app/actions/products";
+import { db } from "@/db";
+import { product, user } from "@/db/schema";
+import { formatPrice, STATUS_LABELS } from "@/lib/product";
+import { getCurrentUser } from "@/lib/session";
+import DeleteButton from "./delete-button";
+
+// 동적 주소 /products/12 의 12 가 params.id 로 들어온다 (주소에서 온 값이라 항상 문자열)
+type PageProps = {
+  params: Promise&lt;{ id: string }&gt;;
+};
+
+// 상품 1개와 판매자 이름을 함께 가져온다 (product 와 user 를 이어 붙이기 = join)
+async function findProduct(params: PageProps["params"]) {
+  const id = Number((await params).id);
+  if (!Number.isInteger(id)) return null; // /products/abc 처럼 숫자가 아니면 없는 상품
+
+  const [found] = await db
+    .select({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      category: product.category,
+      description: product.description,
+      status: product.status,
+      imageUrl: product.imageUrl,
+      createdAt: product.createdAt,
+      sellerId: product.userId,
+      sellerName: user.username,
+    })
+    .from(product)
+    .innerJoin(user, eq(product.userId, user.id))
+    .where(eq(product.id, id));
+  return found ?? null;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise&lt;Metadata&gt; {
+  const item = await findProduct(params);
+  return { title: item ? `${item.title} · 동네 마켓` : "상품을 찾을 수 없음" };
+}
+
+export default async function ProductPage({ params }: PageProps) {
+  const item = await findProduct(params);
+  if (!item) {
+    notFound();
+  }
+
+  const me = await getCurrentUser();
+  const isOwner = me?.id === item.sellerId; // ?. : 로그인 안 했으면(me 가 null) 그냥 undefined
+
+  return (
+    &lt;article className="card product-detail"&gt;
+      &lt;Image
+        src={item.imageUrl}
+        alt={item.title}
+        width={1280}
+        height={960}
+        sizes="(max-width: 520px) 100vw, 480px"
+        className="product-image"
+        priority
+      /&gt;
+      &lt;p className="muted small"&gt;
+        {item.category} · @{item.sellerName}
+      &lt;/p&gt;
+      &lt;h1&gt;{item.title}&lt;/h1&gt;
+      &lt;p className="row"&gt;
+        &lt;strong className="price"&gt;{formatPrice(item.price)}&lt;/strong&gt;
+        &lt;span className={`badge ${item.status}`}&gt;{STATUS_LABELS[item.status]}&lt;/span&gt;
+      &lt;/p&gt;
+      {item.description &amp;&amp; &lt;p className="description"&gt;{item.description}&lt;/p&gt;}
+
+      {isOwner &amp;&amp; (
+        &lt;div className="row owner-actions"&gt;
+          &lt;Link href={`/products/${item.id}/edit`} className="button"&gt;
+            수정
+          &lt;/Link&gt;
+          {/* 지금 상태의 반대로 바꾸는 버튼 하나 */}
+          &lt;form action={changeStatus}&gt;
+            &lt;input type="hidden" name="id" value={item.id} /&gt;
+            &lt;input type="hidden" name="status" value={item.status === "selling" ? "sold" : "selling"} /&gt;
+            &lt;button type="submit" className="secondary"&gt;
+              {item.status === "selling" ? "거래완료로 변경" : "판매중으로 되돌리기"}
+            &lt;/button&gt;
+          &lt;/form&gt;
+          &lt;DeleteButton productId={item.id} /&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/article&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>"거래완료로 변경" → 뱃지가 "거래완료", 버튼이 "판매중으로 되돌리기"로 바뀐다</li>
+            <li>목록에서 그 카드 사진이 흐려지고, "판매중만 보기"에서는 빠진다</li>
+            <li>(조작) <kbd>F12</kbd>로 숨은 칸 <code>name="status"</code> 값을 <code>toString</code>이나 <code>deleted</code>로 바꿔 제출 → 상태가 바뀌지 않는다</li>
+          </ul>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "3주차: 판매 상태 변경"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m3-s3-code"><span>타입 가드, changeStatus, 상태 버튼</span></label></li>
+          <li><label><input type="checkbox" data-task="m3-s3-check"><span>상태 변경·필터 반영·조작 값 거부 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week3-step3/projects/03-marketplace-clone">market-week3-step3</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>연락 방법은 로그인한 사람에게만</summary>
+      <div class="step-body">
+        <p>상세 페이지에서 판매자의 <code>contact</code>를 함께 조회하되, <strong>로그인한 경우에만 화면에 그립니다</strong>.</p>
+        <figure class="code" data-src="app/products/[id]/page.tsx" data-tag="market-week3-step4">
+          <figcaption><span class="label">app/products/[id]/page.tsx</span></figcaption>
+          <pre><code>import { eq } from "drizzle-orm";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { changeStatus } from "@/app/actions/products";
+import { db } from "@/db";
+import { product, user } from "@/db/schema";
+import { formatPrice, STATUS_LABELS } from "@/lib/product";
+import { getCurrentUser } from "@/lib/session";
+import DeleteButton from "./delete-button";
+
+// 동적 주소 /products/12 의 12 가 params.id 로 들어온다 (주소에서 온 값이라 항상 문자열)
+type PageProps = {
+  params: Promise&lt;{ id: string }&gt;;
+};
+
+// 상품 1개와 판매자 이름을 함께 가져온다 (product 와 user 를 이어 붙이기 = join)
+async function findProduct(params: PageProps["params"]) {
+  const id = Number((await params).id);
+  if (!Number.isInteger(id)) return null; // /products/abc 처럼 숫자가 아니면 없는 상품
+
+  const [found] = await db
+    .select({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      category: product.category,
+      description: product.description,
+      status: product.status,
+      imageUrl: product.imageUrl,
+      createdAt: product.createdAt,
+      sellerId: product.userId,
+      sellerName: user.username,
+      sellerContact: user.contact, // 개인정보. 아래에서 로그인한 사람에게만 그린다
+    })
+    .from(product)
+    .innerJoin(user, eq(product.userId, user.id))
+    .where(eq(product.id, id));
+  return found ?? null;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise&lt;Metadata&gt; {
+  const item = await findProduct(params);
+  return { title: item ? `${item.title} · 동네 마켓` : "상품을 찾을 수 없음" };
+}
+
+export default async function ProductPage({ params }: PageProps) {
+  const item = await findProduct(params);
+  if (!item) {
+    notFound();
+  }
+
+  const me = await getCurrentUser();
+  const isOwner = me?.id === item.sellerId; // ?. : 로그인 안 했으면(me 가 null) 그냥 undefined
+
+  return (
+    &lt;article className="card product-detail"&gt;
+      &lt;Image
+        src={item.imageUrl}
+        alt={item.title}
+        width={1280}
+        height={960}
+        sizes="(max-width: 520px) 100vw, 480px"
+        className="product-image"
+        priority
+      /&gt;
+      &lt;p className="muted small"&gt;
+        {item.category} · @{item.sellerName}
+      &lt;/p&gt;
+      &lt;h1&gt;{item.title}&lt;/h1&gt;
+      &lt;p className="row"&gt;
+        &lt;strong className="price"&gt;{formatPrice(item.price)}&lt;/strong&gt;
+        &lt;span className={`badge ${item.status}`}&gt;{STATUS_LABELS[item.status]}&lt;/span&gt;
+      &lt;/p&gt;
+      {item.description &amp;&amp; &lt;p className="description"&gt;{item.description}&lt;/p&gt;}
+
+      &lt;section className="contact"&gt;
+        &lt;h2&gt;판매자 연락 방법&lt;/h2&gt;
+        {/* 서버 컴포넌트는 화면에 그린 것만 브라우저로 보낸다. 로그인하지 않았으면 연락 방법은 아예 전달되지 않는다 */}
+        {!me ? (
+          &lt;p className="muted"&gt;
+            &lt;Link href="/login"&gt;로그인&lt;/Link&gt;하면 판매자 연락 방법을 볼 수 있어요.
+          &lt;/p&gt;
+        ) : item.sellerContact ? (
+          &lt;p className="description"&gt;{item.sellerContact}&lt;/p&gt;
+        ) : (
+          &lt;p className="muted"&gt;판매자가 아직 연락 방법을 적지 않았어요.&lt;/p&gt;
+        )}
+        {isOwner &amp;&amp; (
+          &lt;p className="muted small"&gt;
+            내 연락 방법은 &lt;Link href="/dashboard"&gt;내 판매 상품&lt;/Link&gt;에서 바꿀 수 있어요.
+          &lt;/p&gt;
+        )}
+      &lt;/section&gt;
+
+      {isOwner &amp;&amp; (
+        &lt;div className="row owner-actions"&gt;
+          &lt;Link href={`/products/${item.id}/edit`} className="button"&gt;
+            수정
+          &lt;/Link&gt;
+          {/* 지금 상태의 반대로 바꾸는 버튼 하나 */}
+          &lt;form action={changeStatus}&gt;
+            &lt;input type="hidden" name="id" value={item.id} /&gt;
+            &lt;input type="hidden" name="status" value={item.status === "selling" ? "sold" : "selling"} /&gt;
+            &lt;button type="submit" className="secondary"&gt;
+              {item.status === "selling" ? "거래완료로 변경" : "판매중으로 되돌리기"}
+            &lt;/button&gt;
+          &lt;/form&gt;
+          &lt;DeleteButton productId={item.id} /&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/article&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/globals.css" data-tag="market-week3-step4" data-lines="286-301">
+          <figcaption><span class="label">app/globals.css (맨 아래에 추가)</span></figcaption>
+          <pre><code>/* 상세 페이지 연락 방법 */
+.contact {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.contact h2 {
+  font-size: 1rem;
+  margin: 0 0 4px;
+}
+
+.contact p {
+  margin: 0;
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 "숨기기"와 "안 보내기"는 다르다</span><p>CSS로 가리거나 브라우저에서 조건을 걸어 숨기면, 값 자체는 브라우저로 이미 전달되어 <kbd>F12</kbd>로 볼 수 있습니다. 이 페이지는 <strong>서버 컴포넌트</strong>라서, 조건에 맞지 않아 그리지 않은 값은 아예 보내지 않아요. 작성자 검증: 로그인하지 않은 요청의 응답 전체에서 연락처 문자열을 찾았더니 <strong>없었습니다</strong>.</p><p>주의: 이 값을 <code>"use client"</code> 부품에 props로 넘기면 그 순간 브라우저로 전달됩니다. 민감한 값은 서버 컴포넌트에서 거른 뒤에만 넘기세요.</p></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>시크릿 창(로그인 안 함)에서 상세 → "로그인하면 판매자 연락 방법을 볼 수 있어요." <kbd>Ctrl</kbd>+<kbd>U</kbd>(페이지 소스)에서 연락처를 검색해도 없다</li>
+            <li>다른 계정으로 로그인 → 판매자의 연락 방법이 보인다</li>
+            <li>연락 방법을 안 적은 판매자의 상품 → "판매자가 아직 연락 방법을 적지 않았어요."</li>
+          </ul>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "3주차: 연락 방법 공개 권한"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m3-s4-code"><span>연락 방법 영역 작성</span></label></li>
+          <li><label><input type="checkbox" data-task="m3-s4-check"><span>비로그인 소스에 연락처 없음 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week3-step4/projects/03-marketplace-clone">market-week3-step4</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>내 판매 상품</summary>
+      <div class="step-body">
+        <p><code>lib/queries.ts</code>에 내 상품 조회 함수를 추가합니다(판매중·거래완료 모두).</p>
+        <figure class="code" data-src="lib/queries.ts" data-tag="market-week3-step5">
+          <figcaption><span class="label">lib/queries.ts</span></figcaption>
+          <pre><code>import { and, desc, eq, ilike, type SQL } from "drizzle-orm";
+import { db } from "@/db";
+import { product, user } from "@/db/schema";
+import type { Category } from "@/lib/product";
+
+const LIST_LIMIT = 60; // 첫 화면에 보여줄 최대 개수 (페이지 나누기는 이번 범위에서 제외)
+
+// 목록 카드에 필요한 칸만 고른다
+const cardColumns = {
+  id: product.id,
+  title: product.title,
+  price: product.price,
+  status: product.status,
+  imageUrl: product.imageUrl,
+  category: product.category,
+  sellerName: user.username,
+};
+
+// LIKE 검색에서 %(아무 글자 여러 개), _(아무 글자 하나)는 특별한 뜻이 있다.
+// 사용자가 "100%" 를 검색하면 글자 그대로 찾도록 앞에 \ 를 붙여 "그냥 글자"로 만든다.
+function escapeLike(text: string): string {
+  return text.replace(/[\\%_]/g, (char) =&gt; `\\${char}`);
+}
+
+export type ProductFilter = {
+  q?: string; // 검색어
+  category?: Category; // 카테고리 (정해진 목록 중 하나만 들어올 수 있다)
+  onSale?: boolean; // true 면 판매중인 것만
+};
+
+// 조건에 맞는 최신 상품 목록
+export async function listProducts(filter: ProductFilter = {}) {
+  const q = filter.q?.trim();
+
+  // 조건을 하나씩 모은 뒤 and(...) 로 묶는다. 조건이 없으면 전체 목록
+  const conditions: SQL[] = [];
+  // ilike: 대소문자를 구분하지 않는 "포함" 검색
+  if (q) conditions.push(ilike(product.title, `%${escapeLike(q)}%`));
+  if (filter.category) conditions.push(eq(product.category, filter.category));
+  if (filter.onSale) conditions.push(eq(product.status, "selling"));
+
+  return db
+    .select(cardColumns)
+    .from(product)
+    .innerJoin(user, eq(product.userId, user.id))
+    .where(and(...conditions))
+    .orderBy(desc(product.createdAt))
+    .limit(LIST_LIMIT);
+}
+
+// 내가 올린 상품 전체 (판매중·거래완료 모두)
+export async function listMyProducts(userId: string) {
+  return db
+    .select(cardColumns)
+    .from(product)
+    .innerJoin(user, eq(product.userId, user.id))
+    .where(eq(product.userId, userId))
+    .orderBy(desc(product.createdAt));
+}
+
+// 목록 한 줄의 타입을 함수의 결과에서 뽑아낸다.
+// Awaited: Promise 를 벗긴 결과 / [number]: 배열의 한 칸
+export type ProductCardData = Awaited&lt;ReturnType&lt;typeof listProducts&gt;&gt;[number];</code></pre>
+        </figure>
+        <figure class="code" data-src="app/dashboard/page.tsx" data-tag="market-week3-step5">
+          <figcaption><span class="label">app/dashboard/page.tsx</span></figcaption>
+          <pre><code>import Link from "next/link";
+import { signOut } from "@/app/actions/auth";
+import { listMyProducts } from "@/lib/queries";
+import { requireUser } from "@/lib/session";
+import ProductCard from "../product-card";
+import ContactForm from "./contact-form";
+
+export default async function DashboardPage() {
+  // 로그인하지 않은 사람은 이 줄에서 /login 으로 보내지고, 아래 코드는 실행되지 않는다.
+  const user = await requireUser();
+  const products = await listMyProducts(user.id);
+
+  // filter: 조건에 맞는 것만 남긴다 → 개수 세기
+  const sellingCount = products.filter((item) =&gt; item.status === "selling").length;
+  const soldCount = products.length - sellingCount;
+
+  return (
+    &lt;div className="stack"&gt;
+      &lt;div className="card"&gt;
+        &lt;div className="row spread"&gt;
+          &lt;h1&gt;내 판매 상품&lt;/h1&gt;
+          &lt;form action={signOut}&gt;
+            &lt;button type="submit" className="secondary"&gt;
+              로그아웃
+            &lt;/button&gt;
+          &lt;/form&gt;
+        &lt;/div&gt;
+        &lt;p&gt;
+          안녕하세요, &lt;strong&gt;{user.username}&lt;/strong&gt;님! 판매중 {sellingCount}개 · 거래완료 {soldCount}개
+        &lt;/p&gt;
+        &lt;p className="row"&gt;
+          &lt;Link href="/products/new" className="button"&gt;
+            내 물건 팔기
+          &lt;/Link&gt;
+          &lt;Link href="/"&gt;전체 목록 보기&lt;/Link&gt;
+        &lt;/p&gt;
+      &lt;/div&gt;
+
+      {products.length === 0 ? (
+        &lt;p className="card muted"&gt;아직 올린 물건이 없어요.&lt;/p&gt;
+      ) : (
+        &lt;ul className="product-grid"&gt;
+          {products.map((item) =&gt; (
+            &lt;li key={item.id}&gt;
+              &lt;ProductCard item={item} /&gt;
+            &lt;/li&gt;
+          ))}
+        &lt;/ul&gt;
+      )}
+
+      &lt;div className="card"&gt;
+        &lt;h2&gt;연락 방법&lt;/h2&gt;
+        &lt;p className="muted small"&gt;상품에 관심 있는 사람이 이 방법으로 연락해요. 전화번호보다 오픈채팅 링크를 추천해요.&lt;/p&gt;
+        &lt;ContactForm currentContact={user.contact} /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>"판매중 ○개 · 거래완료 ○개"가 실제와 맞고, 내 상품만(거래완료 포함) 카드로 보인다. 다른 계정은 자기 상품만 보인다.</div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "3주차: 내 판매 상품"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m3-s5-code"><span>내 상품 조회와 화면</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week3-step5/projects/03-marketplace-clone">market-week3-step5</a></p>
+      </div>
+    </details>
+
+    <h2 id="retro">3주차 회고</h2>
+    <div class="retro card">
+      <label for="m3-note-1">이번 주에 한 것</label>
+      <textarea id="m3-note-1" data-note="m3-did"></textarea>
+      <label for="m3-note-2">새로 이해한 것 (예: 브라우저가 보내는 값 중 서버가 검사한 것을 모두 적어보면?)</label>
+      <textarea id="m3-note-2" data-note="m3-learned"></textarea>
+      <label for="m3-note-3">막혔던 것과 해결 방법</label>
+      <textarea id="m3-note-3" data-note="m3-stuck"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="m3-retro"><span>3주차 회고 3줄 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week2.html"><small>이전</small>← 2주차 · 상품과 사진</a>
+      <a class="card next" href="week4.html"><small>다음</small>4주차 · 배포·운영 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-26 · Next.js 16.3.6 · TypeScript 5.9.3 · Drizzle ORM 0.45.3</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

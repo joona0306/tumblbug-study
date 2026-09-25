@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="ko" data-course="market">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1주차 기획과 TypeScript · 당근마켓 미니 교재</title>
+  <meta name="description" content="경쟁 분석, user-product 관계도, 카드 디자인, 1단계 코드 가져오기, JavaScript → TypeScript 전환, 연락 방법">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week1">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🥕 당근마켓 미니 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1" aria-current="page">1주차 · 기획과 TypeScript <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주차 · 상품과 사진 <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주차 · 검색과 권한 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주차 · 배포·운영 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">1주차 · 7단계</span>
+    <h1>기획하고, 1단계 코드를 TypeScript로 바꾸기</h1>
+    <p class="lead">기획·디자인은 1·2단계에서 익힌 방식대로 빠르게 하고, 이번 주의 대부분은 <strong>TypeScript 전환</strong>에 씁니다. 에러가 여러 개 나오는데, 그게 정상이고 이번 주의 학습 재료입니다.</p>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>경쟁 서비스 3개 써보기</summary>
+      <div class="step-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>서비스</th><th>볼 것</th></tr></thead>
+            <tbody>
+              <tr><td>당근 (앱)</td><td>이번에 따라 만들 대상. 목록 카드에 무엇이 보이나(사진·제목·가격·동네·시간), 상품 등록 순서</td></tr>
+              <tr><td>번개장터</td><td>검색·카테고리 필터 방식, 판매완료 표시</td></tr>
+              <tr><td>중고나라</td><td>판매자에게 연락하는 방식, 개인정보를 얼마나 보여주나</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>이번에는 <strong>목록 카드에 들어가는 정보의 순서</strong>를 특히 눈여겨보세요. 작은 카드 안에서 무엇을 가장 크게 보여주는지가 곧 디자인 결정입니다.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m1-compete"><span>경쟁 서비스 3개 둘러보고 비교표 채우기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>문제·범위·성공 지표</summary>
+      <div class="step-body">
+        <figure class="code">
+          <figcaption><span class="label">기획.md (이 교재의 결정)</span></figcaption>
+          <pre><code>## 문제 정의
+동네 사람들이 안 쓰는 물건을 올리고, 필요한 사람이 검색·필터로 찾아 판매자에게 연락할 수 있게 한다.
+(채팅은 제외 — 연락 방법만 공개)
+
+## 기능 범위
+| 포함 | 제외 |
+|---|---|
+| 상품 등록/수정/삭제 (사진 1장) | 채팅, 사진 여러 장 |
+| 목록 + 제목 검색 | 동네 인증(위치), 정렬 옵션 |
+| 카테고리 필터, 판매중만 보기 | 찜하기, 알림 |
+| 판매 상태 (판매중 ↔ 거래완료) | 신고/차단, 거래 후기 |
+| 연락 방법 (로그인한 사람에게만) | 결제·안전거래 |
+
+## 성공 지표
+등록된 상품 중 거래완료로 바뀐 비율</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 사진은 1장만?</span>사진이 여러 장이면 "순서 바꾸기, 한 장만 지우기, 대표 사진 고르기"가 따라옵니다. 파일 업로드를 처음 배우는 단계에서는 1장으로 흐름 전체(올리기 → 보여주기 → 바꾸기 → 지우기)를 확실히 익히는 게 먼저입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m1-scope"><span>문제 정의·포함/제외 표·성공 지표 쓰기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>와이어프레임 + 관계도</summary>
+      <div class="step-body">
+        <p>와이어프레임은 4장: ① 목록(검색창·필터·카드 격자), ② 상세(사진·가격·판매자·연락 방법·내 상품이면 관리 버튼), ③ 등록/수정 폼, ④ 내 판매 상품.</p>
+        <figure class="diagram">
+          <svg viewBox="0 0 820 260" role="img" aria-labelledby="erd-title erd-desc">
+            <title id="erd-title">user-product 관계도</title>
+            <desc id="erd-desc">user 표 하나에 product 표 여러 줄이 user_id 로 연결된다. user 에는 연락 방법 contact 칸이 추가되고, product 에는 제목, 가격, 카테고리, 설명, 상태, 사진 주소가 있다.</desc>
+            <rect class="d-box d-client" x="30" y="30" width="260" height="200" rx="10"/>
+            <rect class="d-c-client" x="30" y="30" width="260" height="34" rx="10"/>
+            <rect class="d-c-client" x="30" y="50" width="260" height="14"/>
+            <text class="d-on-color" x="160" y="53" text-anchor="middle" font-size="15" font-weight="700">user (판매자)</text>
+            <text class="d-mono" x="46" y="90">🔑 id</text>
+            <text class="d-mono" x="46" y="112">email, username</text>
+            <text class="d-mono" x="46" y="140" font-weight="700">contact  ← 이번에 추가</text>
+            <text class="d-small" x="46" y="160">(오픈채팅 링크 등 연락 방법)</text>
+            <text class="d-small" x="46" y="200">session, account 표는 1·2단계와 같음</text>
+
+            <rect class="d-box d-db" x="500" y="20" width="290" height="220" rx="10" stroke-width="3"/>
+            <text class="d-title" x="645" y="48" text-anchor="middle">product (상품)</text>
+            <text class="d-mono" x="516" y="76">🔑 id</text>
+            <text class="d-mono" x="516" y="98">🔗 user_id</text>
+            <text class="d-mono" x="516" y="120">title, price, category</text>
+            <text class="d-mono" x="516" y="142">description</text>
+            <text class="d-mono" x="516" y="164">status  (selling | sold)</text>
+            <text class="d-mono" x="516" y="186">image_url  → Vercel Blob</text>
+            <text class="d-mono" x="516" y="208">created_at, updated_at</text>
+
+            <line class="d-line" x1="290" y1="98" x2="496" y2="98"/>
+            <text class="d-text" x="300" y="90" font-weight="700">1</text>
+            <path class="d-line" d="M484,90 L498,98 L484,106"/>
+            <text class="d-text" x="470" y="90" font-weight="700">N</text>
+            <text class="d-small" x="393" y="120" text-anchor="middle">판매자 1명이 상품 여러 개</text>
+          </svg>
+          <figcaption>1단계 user–link, 2단계 user–support 와 같은 1:N 모양이다. 이번에는 사진 "파일"이 아니라 사진 "주소"를 저장한다는 점이 다르다.</figcaption>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m1-wire"><span>와이어프레임 4장</span></label></li>
+          <li><label><input type="checkbox" data-task="m1-erd"><span>관계도를 내 손으로 따라 그리기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>디자인: 작은 카드 안의 위계</summary>
+      <div class="step-body">
+        <p>목록은 휴대폰에서 2열 카드로 보여줍니다. 카드는 작아서 <strong>무엇을 크게, 무엇을 작게</strong>가 특히 중요해요.</p>
+        <ol>
+          <li><strong>사진</strong> — 가장 크게. 사진 비율이 제각각이어도 카드 높이가 맞도록 4:3으로 잘라서 보여준다</li>
+          <li><strong>제목</strong> — 한 줄. 길면 "…"로 자른다</li>
+          <li><strong>가격</strong> — 굵게. 0원은 "나눔 🧡"</li>
+          <li><strong>카테고리·상태</strong> — 작고 흐리게. 거래완료는 사진까지 흐리게 해서 한눈에 구분</li>
+        </ol>
+        <p>색·글꼴·모서리는 1단계 디자인 결정표를 그대로 씁니다. 사진에는 <strong>대체 텍스트(alt)</strong>로 상품 제목을 넣기로 정합니다. 화면을 읽어주는 프로그램을 쓰는 사람도 무슨 사진인지 알 수 있게요.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m1-design"><span>카드 정보 위계와 사진 비율 정하기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>1단계 코드 가져와 시작하기</summary>
+      <div class="step-body">
+        <p><a href="../../02-buy-me-a-coffee-clone/tutorial/week1.html#step-5">2단계 1주차 5단계</a>와 똑같이 합니다. 폴더 이름만 <code>my-market</code>으로 바꾸세요.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>cd ~/dev
+git clone my-links my-market
+cd my-market
+rm -rf .git
+git init
+npm install
+rm -rf app/actions/links.js app/dashboard/link-form.js app/dashboard/link-item.js lib/links.js "app/[username]" sql drizzle
+code .</code></pre>
+        </figure>
+        <p>그다음 2단계 때처럼 <code>db/schema.js</code>에서 link 표를 빼고, <code>app/globals.css</code>에서 <code>.link-list {</code>부터 끝까지 지웁니다. 첫 화면·제목·대시보드 문구는 동네 마켓에 맞게 바꿉니다.</p>
+        <figure class="code" data-src="app/page.js" data-tag="market-week1-step1">
+          <figcaption><span class="label">app/page.js</span></figcaption>
+          <pre><code>import Link from "next/link";
+import { getCurrentUser } from "@/lib/session";
+
+export default async function Home() {
+  // 이미 로그인했다면 대시보드로 가는 버튼을, 아니면 가입/로그인 버튼을 보여준다.
+  const user = await getCurrentUser();
+
+  return (
+    &lt;div className="card"&gt;
+      &lt;h1&gt;🥕 동네 마켓&lt;/h1&gt;
+      &lt;p className="muted"&gt;안 쓰는 물건을 올리고, 필요한 물건을 찾아보세요.&lt;/p&gt;
+      {user ? (
+        &lt;p&gt;
+          &lt;Link href="/dashboard" className="button"&gt;
+            내 판매 상품
+          &lt;/Link&gt;
+        &lt;/p&gt;
+      ) : (
+        &lt;p&gt;
+          &lt;Link href="/signup" className="button"&gt;
+            회원가입
+          &lt;/Link&gt;{" "}
+          &lt;Link href="/login"&gt;로그인&lt;/Link&gt;
+        &lt;/p&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/layout.js" data-tag="market-week1-step1">
+          <figcaption><span class="label">app/layout.js</span></figcaption>
+          <pre><code>import { Analytics } from "@vercel/analytics/next";
+import "./globals.css";
+
+export const metadata = {
+  title: "동네 마켓",
+  description: "동네 중고거래 서비스",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="ko"&gt;
+      &lt;body&gt;
+        &lt;main className="container"&gt;{children}&lt;/main&gt;
+        {/* 방문 기록(페이지뷰)을 Vercel에 보낸다. 내 컴퓨터(개발 모드)에서는 보내지 않는다 */}
+        &lt;Analytics /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/dashboard/page.js" data-tag="market-week1-step1">
+          <figcaption><span class="label">app/dashboard/page.js</span></figcaption>
+          <pre><code>import { signOut } from "@/app/actions/auth";
+import { requireUser } from "@/lib/session";
+
+export default async function DashboardPage() {
+  // 로그인하지 않은 사람은 이 줄에서 /login 으로 보내지고, 아래 코드는 실행되지 않는다.
+  const user = await requireUser();
+
+  return (
+    &lt;div className="card"&gt;
+      &lt;div className="row spread"&gt;
+        &lt;h1&gt;내 판매 상품&lt;/h1&gt;
+        &lt;form action={signOut}&gt;
+          &lt;button type="submit" className="secondary"&gt;
+            로그아웃
+          &lt;/button&gt;
+        &lt;/form&gt;
+      &lt;/div&gt;
+      &lt;p&gt;
+        안녕하세요, &lt;strong&gt;{user.username}&lt;/strong&gt;님!
+      &lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <p>Neon에 새 프로젝트 <code>my-market</code>을 만들고, 새 <code>.env.local</code>(DB 주소, 새 비밀키, <code>BETTER_AUTH_URL</code>)을 만든 뒤 로그인 표를 만듭니다.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>npx drizzle-kit generate --name init
+npm run db:migrate
+npm run dev
+git add .
+git commit -m "1주차: 1단계 코드에서 시작"</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>첫 화면에 "🥕 동네 마켓", 가입 → "내 판매 상품 / 안녕하세요, ○○님!"</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m1-copy"><span>1단계 복사·정리, 새 DB, 가입 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week1-step1/projects/03-marketplace-clone">market-week1-step1</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>JavaScript → TypeScript 전환</summary>
+      <div class="step-body">
+        <div class="box term"><span class="box-title">📖 용어 풀이</span>
+          <ul>
+            <li><strong>타입</strong>: 값의 모양. <code>"사과"</code>는 <code>string</code>(글자), <code>3000</code>은 <code>number</code>(숫자), <code>{ email: string }</code>은 "email 칸에 글자가 든 객체".</li>
+            <li><strong>TypeScript</strong>: JavaScript에 타입을 적을 수 있게 한 언어. 브라우저·서버에서 실행되기 전에 JavaScript로 바뀌므로, 실행 결과는 같고 <strong>실수를 미리 알려주는 기능</strong>만 더해집니다.</li>
+            <li><strong>.ts / .tsx</strong>: TypeScript 파일. 화면(JSX, <code>&lt;div&gt;</code> 같은 태그)이 들어 있으면 <code>.tsx</code>, 아니면 <code>.ts</code>.</li>
+            <li><strong>strict 모드</strong>: 가장 꼼꼼하게 검사하는 설정. "없을 수도 있는 값"을 그냥 쓰면 에러를 냅니다. 처음엔 귀찮지만 실제 버그를 가장 많이 잡아줍니다.</li>
+          </ul>
+        </div>
+
+        <h3>① 타입 도구 설치</h3>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>npm install --save-exact -D typescript@5.9.3 @types/node@20.19.43 @types/react@19.3.0 @types/react-dom@19.3.0</code></pre>
+        </figure>
+        <p class="code-note"><code>@types/…</code>는 "Node.js와 React에 어떤 함수·값이 있는지"를 TypeScript에게 알려주는 설명서 패키지입니다. 버전은 Next.js 16.3.6의 공식 TypeScript 템플릿과 같은 계열로 맞췄어요.</p>
+
+        <h3>② 파일 이름 바꾸기 (16개)</h3>
+        <p><code>git mv</code>는 Git 기록을 유지한 채 이름을 바꿉니다. 화면이 있는 파일은 <code>.tsx</code>, 나머지는 <code>.ts</code>입니다.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git mv app/layout.js app/layout.tsx
+git mv app/page.js app/page.tsx
+git mv app/login/page.js app/login/page.tsx
+git mv app/signup/page.js app/signup/page.tsx
+git mv app/dashboard/page.js app/dashboard/page.tsx
+git mv app/not-found.js app/not-found.tsx
+git mv app/actions/auth.js app/actions/auth.ts
+git mv app/api/health/route.js app/api/health/route.ts
+git mv "app/api/auth/[...all]/route.js" "app/api/auth/[...all]/route.ts"
+git mv lib/auth.js lib/auth.ts
+git mv lib/session.js lib/session.ts
+git mv db/index.js db/index.ts
+git mv db/schema.js db/schema.ts
+git mv db/auth-schema.js db/auth-schema.ts
+git mv drizzle.config.js drizzle.config.ts
+git mv next.config.mjs next.config.ts
+git rm jsconfig.json</code></pre>
+        </figure>
+        <p class="code-note"><code>scripts/migrate.mjs</code>와 <code>eslint.config.mjs</code>는 그대로 둡니다. Node.js가 직접 실행하는 파일이라 TypeScript로 바꾸면 따로 변환 도구가 필요해집니다.</p>
+
+        <h3>③ 설정 파일 3개</h3>
+        <p>프로젝트 최상위에 <code>tsconfig.json</code>을 만듭니다. <code>create-next-app</code>이 TypeScript 프로젝트에 만들어 주는 것과 같은 내용이에요. 지운 <code>jsconfig.json</code>의 <code>@/</code> 경로 설정(<code>paths</code>)도 여기 들어 있습니다.</p>
+        <figure class="code" data-src="tsconfig.json" data-tag="market-week1-step2">
+          <figcaption><span class="label">tsconfig.json</span></figcaption>
+          <pre><code>{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="next.config.ts" data-tag="market-week1-step2">
+          <figcaption><span class="label">next.config.ts</span></figcaption>
+          <pre><code>import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;</code></pre>
+        </figure>
+        <p><code>eslint.config.mjs</code>에 TypeScript 규칙(<code>nextTs</code>)을 추가합니다.</p>
+        <figure class="code" data-src="eslint.config.mjs" data-tag="market-week1-step2">
+          <figcaption><span class="label">eslint.config.mjs</span></figcaption>
+          <pre><code>import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;</code></pre>
+        </figure>
+
+        <h3>④ 타입 검사를 돌리고 에러를 하나씩 고치기</h3>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash) — 타입만 검사하고 파일은 만들지 않음</span></figcaption>
+          <pre><code>npx tsc --noEmit</code></pre>
+        </figure>
+        <p>작성자가 실제로 실행했을 때 나온 에러입니다. 여러분도 비슷하게 나올 거예요.</p>
+        <figure class="code">
+          <figcaption><span class="label">tsc 결과 (요약)</span></figcaption>
+          <pre><code>app/actions/auth.ts: error TS7006: Parameter 'error' implicitly has an 'any' type.
+app/actions/auth.ts: error TS2538: Type 'undefined' cannot be used as an index type.
+app/actions/auth.ts: error TS7006: Parameter 'prevState' implicitly has an 'any' type.
+app/actions/auth.ts: error TS7006: Parameter 'formData' implicitly has an 'any' type.
+app/layout.tsx:      error TS7031: Binding element 'children' implicitly has an 'any' type.
+db/index.ts:         error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+drizzle.config.ts:   error TS2345: ... Type 'string | undefined' is not assignable to type 'string'.</code></pre>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>에러가 하는 말</th><th>번역</th><th>고치는 법</th></tr></thead>
+            <tbody>
+              <tr><td><code>implicitly has an 'any' type</code></td><td>"이 매개변수가 어떤 값인지 모르겠어"</td><td>타입을 적어준다 (<code>formData: FormData</code>)</td></tr>
+              <tr><td><code>'string | undefined' is not assignable to 'string'</code></td><td>"환경 변수가 없을 수도 있는데 괜찮아?"</td><td>없으면 분명한 에러를 내는 함수(<code>requireEnv</code>)를 거친다</td></tr>
+              <tr><td><code>'undefined' cannot be used as an index type</code></td><td>"에러 코드가 없을 수도 있는데 그걸로 표를 찾아?"</td><td>코드가 있을 때만 찾는다 (<code>code &amp;&amp; …</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box why"><span class="box-title">💡 이 에러들은 진짜 버그 후보예요</span><code>.env.local</code>에 <code>DATABASE_URL</code>을 빠뜨리면 JavaScript에서는 한참 뒤에 이해하기 어려운 에러가 났습니다. 이제는 TypeScript가 "없을 수도 있다"를 미리 알려주고, <code>requireEnv</code>가 "환경 변수 DATABASE_URL 이(가) 없습니다"라고 정확히 말해줍니다.</div>
+        <p>새 파일 <code>lib/env.ts</code>를 만들고, 나머지 파일을 고칩니다.</p>
+        <figure class="code" data-src="lib/env.ts" data-tag="market-week1-step2">
+          <figcaption><span class="label">lib/env.ts</span></figcaption>
+          <pre><code>// 꼭 있어야 하는 환경 변수를 꺼낸다. 없으면 바로 알아볼 수 있는 에러를 낸다.
+// process.env.XXX 의 타입은 string | undefined 라서(없을 수도 있으니까), 이 함수를 거치면 string 이 된다.
+export function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`환경 변수 ${name} 이(가) 없습니다. .env.local 을 확인하세요.`);
+  }
+  return value;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="db/index.ts" data-tag="market-week1-step2">
+          <figcaption><span class="label">db/index.ts</span></figcaption>
+          <pre><code>import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import { requireEnv } from "@/lib/env";
+import * as schema from "./schema";
+
+// .env.local 에 넣어둔 Neon 접속 주소로 DB 연결 통로를 만든다.
+const sql = neon(requireEnv("DATABASE_URL"));
+
+// 앞으로 모든 DB 작업은 이 db 객체를 통해 한다.
+export const db = drizzle({ client: sql, schema });</code></pre>
+        </figure>
+        <figure class="code" data-src="drizzle.config.ts" data-tag="market-week1-step2">
+          <figcaption><span class="label">drizzle.config.ts</span></figcaption>
+          <pre><code>import { loadEnvConfig } from "@next/env";
+import { defineConfig } from "drizzle-kit";
+import { requireEnv } from "./lib/env";
+
+// drizzle-kit은 Next.js 밖에서 실행되므로, .env.local 을 직접 읽어오게 한다.
+// (두 번째 값 true = "개발 모드"로 읽기. 내 컴퓨터에서는 항상 개발용 DB를 쓰도록)
+loadEnvConfig(process.cwd(), true);
+
+export default defineConfig({
+  schema: "./db/schema.ts", // 테이블 설계도 파일 (TypeScript 로 바꾸면서 .ts 로)
+  out: "./drizzle", // 마이그레이션(변경 기록) 파일이 저장될 폴더
+  dialect: "postgresql",
+  dbCredentials: {
+    url: requireEnv("DATABASE_URL"),
+  },
+});</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">🆘 놓치기 쉬운 곳</span><code>drizzle.config.ts</code> 안의 <code>schema: "./db/schema.js"</code>도 <code>.ts</code>로 바꿔야 합니다. 파일 이름을 바꿨는데 설정 안의 글자는 그대로라서, 나중에 <code>drizzle-kit generate</code>가 표를 못 찾습니다. 타입 검사로는 잡히지 않는 실수예요.</div>
+        <figure class="code" data-src="app/layout.tsx" data-tag="market-week1-step2">
+          <figcaption><span class="label">app/layout.tsx</span></figcaption>
+          <pre><code>import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "동네 마켓",
+  description: "동네 중고거래 서비스",
+};
+
+// children: 이 레이아웃 안에 들어갈 각 페이지의 내용. React가 그릴 수 있는 무엇이든(ReactNode) 올 수 있다.
+export default function RootLayout({ children }: Readonly&lt;{ children: React.ReactNode }&gt;) {
+  return (
+    &lt;html lang="ko"&gt;
+      &lt;body&gt;
+        &lt;main className="container"&gt;{children}&lt;/main&gt;
+        {/* 방문 기록(페이지뷰)을 Vercel에 보낸다. 내 컴퓨터(개발 모드)에서는 보내지 않는다 */}
+        &lt;Analytics /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/actions/auth.ts" data-tag="market-week1-step2">
+          <figcaption><span class="label">app/actions/auth.ts</span></figcaption>
+          <pre><code>"use server";
+
+import { APIError } from "better-auth/api";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+
+// 가입·로그인 폼이 서버에서 돌려받는 결과의 모양.
+// 처음에는 아무 결과도 없으므로(null) "| null"을 붙인다.
+export type AuthFormState = {
+  error: string;
+  email: string;
+  username?: string; // ? = 있을 수도, 없을 수도 있음 (로그인 폼에는 username 이 없다)
+} | null;
+
+// Better Auth가 돌려주는 영어 에러 코드를 사용자에게 보여줄 한국어 문장으로 바꾼다.
+// Record&lt;string, string&gt; = "문자열 키 → 문자열 값" 모양의 객체
+const ERROR_MESSAGES: Record&lt;string, string&gt; = {
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "이미 가입된 이메일입니다.",
+  USERNAME_IS_ALREADY_TAKEN: "이미 사용 중인 사용자 이름입니다.",
+  USERNAME_TOO_SHORT: "사용자 이름은 3자 이상이어야 합니다.",
+  USERNAME_TOO_LONG: "사용자 이름은 20자 이하여야 합니다.",
+  INVALID_USERNAME: "사용자 이름은 영문 소문자, 숫자, 밑줄(_)만 쓸 수 있습니다.",
+  PASSWORD_TOO_SHORT: "비밀번호는 8자 이상이어야 합니다.",
+  INVALID_EMAIL: "이메일 형식이 올바르지 않습니다.",
+  INVALID_EMAIL_OR_PASSWORD: "이메일 또는 비밀번호가 틀렸습니다.",
+};
+
+// catch 로 잡은 에러는 무엇이 던져졌는지 모르므로 타입이 unknown 이다.
+function toMessage(error: unknown): string {
+  if (error instanceof APIError) {
+    const code = error.body?.code; // 코드가 없을 수도 있다 (string | undefined)
+    return (code &amp;&amp; ERROR_MESSAGES[code]) || "요청을 처리하지 못했습니다. 다시 시도해주세요.";
+  }
+  console.error(error); // 예상 못 한 에러는 서버 로그에 남긴다
+  return "알 수 없는 오류가 발생했습니다.";
+}
+
+// 폼 값은 비어 있을 수도, 파일일 수도 있어서 타입이 복잡하다. 글자로 꺼내는 도우미.
+function text(formData: FormData, name: string): string {
+  return String(formData.get(name) ?? "");
+}
+
+// 회원가입: 폼에서 받은 값으로 Better Auth에 가입을 요청한다.
+// (첫 번째 인자 prevState는 useActionState가 넘겨주는 "이전 결과"로, 여기선 쓰지 않는다)
+export async function signUp(prevState: AuthFormState, formData: FormData): Promise&lt;AuthFormState&gt; {
+  const email = text(formData, "email");
+  const password = text(formData, "password");
+  const username = text(formData, "username");
+
+  try {
+    await auth.api.signUpEmail({
+      body: { email, password, username, name: username },
+    });
+  } catch (error) {
+    return { error: toMessage(error), email, username };
+  }
+
+  // 가입에 성공하면 자동으로 로그인된 상태(쿠키 발급)가 되므로 대시보드로 보낸다.
+  redirect("/dashboard");
+}
+
+// 로그인: 이메일과 비밀번호가 맞으면 세션 쿠키를 발급받는다.
+export async function signIn(prevState: AuthFormState, formData: FormData): Promise&lt;AuthFormState&gt; {
+  const email = text(formData, "email");
+  const password = text(formData, "password");
+
+  try {
+    await auth.api.signInEmail({ body: { email, password } });
+  } catch (error) {
+    return { error: toMessage(error), email };
+  }
+
+  redirect("/dashboard");
+}
+
+// 로그아웃: DB의 세션을 지우고 브라우저의 로그인 쿠키도 삭제한 뒤 첫 화면으로 보낸다.
+export async function signOut() {
+  await auth.api.signOut({ headers: await headers() });
+  redirect("/");
+}</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 코드 읽는 법</span>
+          <ul>
+            <li><code>type AuthFormState = { … } | null</code> — 새 타입에 이름을 붙인다. <code>|</code>는 "또는".</li>
+            <li><code>username?: string</code> — 물음표는 "없을 수도 있음".</li>
+            <li><code>Record&lt;string, string&gt;</code> — "글자 키 → 글자 값" 모양의 객체.</li>
+            <li><code>error: unknown</code> — catch로 잡은 에러는 무엇이 던져졌는지 모르므로 <code>unknown</code>. <code>instanceof</code>로 확인한 뒤에야 안의 값을 쓸 수 있다.</li>
+            <li><code>Promise&lt;AuthFormState&gt;</code> — "나중에 AuthFormState를 돌려주는 비동기 함수".</li>
+          </ul>
+        </div>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <ul>
+            <li><code>npx tsc --noEmit</code>이 <strong>아무것도 출력하지 않는다</strong> (에러 0개)</li>
+            <li><code>npm run lint</code> 통과, <code>npm run build</code>에 <code>Finished TypeScript</code></li>
+            <li><code>npx drizzle-kit generate</code> → <code>No schema changes, nothing to migrate</code> (TS 설정을 제대로 읽음)</li>
+            <li>로그인 화면에서 틀린 비밀번호 → 에러 표시, 맞는 비밀번호 → 대시보드 (동작은 JavaScript 때와 똑같다)</li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary><code>Module not found: Can't resolve '@/lib/session'</code></summary><p><code>jsconfig.json</code>을 지우고 <code>tsconfig.json</code>을 아직 안 만든 상태입니다. <code>@/</code> 경로는 <code>tsconfig.json</code>의 <code>paths</code>가 알려줍니다.</p></details>
+          <details><summary>VSCode에 빨간 줄이 남아 있어요 (tsc는 통과)</summary><p><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → "TypeScript: Select TypeScript Version" → "Use Workspace Version"을 고르고, 창을 다시 불러오세요(Developer: Reload Window).</p></details>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "1주차: TypeScript 전환"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m1-ts-install"><span>타입 도구 설치, 파일 16개 이름 변경, 설정 3개</span></label></li>
+          <li><label><input type="checkbox" data-task="m1-ts-fix"><span>tsc 에러를 모두 고쳐 0개 만들기</span></label></li>
+          <li><label><input type="checkbox" data-task="m1-ts-check"><span>lint·build·로그인 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week1-step2/projects/03-marketplace-clone">market-week1-step2</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 7단계 ======================= -->
+    <details class="step" id="step-7">
+      <summary><span class="step-num">7</span>판매자 연락 방법 칸 (TypeScript로 첫 기능)</summary>
+      <div class="step-body">
+        <p>2단계에서 크리에이터 소개(<code>bio</code>)를 추가한 방법 그대로, 이번엔 <code>contact</code> 칸을 추가합니다. 달라진 건 타입을 적는다는 것뿐이에요.</p>
+        <figure class="code" data-src="lib/auth.ts" data-tag="market-week1-step3">
+          <figcaption><span class="label">lib/auth.ts</span></figcaption>
+          <pre><code>import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
+import { username } from "better-auth/plugins";
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+
+// 공개 페이지 주소가 /사용자이름 이라서, 이미 쓰고 있는 주소와 겹치는 이름은 막는다.
+// (예: 누가 "login"으로 가입하면 /login 페이지와 충돌)
+const RESERVED_USERNAMES = ["login", "signup", "dashboard", "api", "admin"];
+
+export const auth = betterAuth({
+  // 사용자·세션 정보를 우리 Neon DB에 Drizzle을 통해 저장한다.
+  database: drizzleAdapter(db, { provider: "pg", schema }),
+
+  // 이메일 + 비밀번호 로그인을 켠다.
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+  },
+
+  // user 표에 우리 서비스에 필요한 칸을 추가한다.
+  user: {
+    additionalFields: {
+      // 판매자 연락 방법 (예: 카카오톡 오픈채팅 링크). 가입할 때는 받지 않고, 내 판매 상품 화면에서 수정한다.
+      contact: { type: "string", required: false, input: false },
+    },
+  },
+
+  plugins: [
+    // user 표에 username 칸을 추가해주는 플러그인
+    username({
+      minUsernameLength: 3,
+      maxUsernameLength: 20,
+      // 입력값을 소문자로 바꾼 "다음에" 검사한다. (Andrew → andrew 로 통과)
+      validationOrder: { username: "post-normalization" },
+      usernameValidator: (name) =&gt;
+        /^[a-z0-9_]+$/.test(name) &amp;&amp; !RESERVED_USERNAMES.includes(name),
+    }),
+    // 서버 액션에서 로그인할 때 쿠키를 자동으로 심어준다. (항상 마지막에 둘 것)
+    nextCookies(),
+  ],
+});</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash) — 설정 파일 이름이 .ts 로 바뀐 것에 주의</span></figcaption>
+          <pre><code>npx auth@1.7.6 generate --config lib/auth.ts --output db/auth-schema.ts --yes
+npx drizzle-kit generate --name add_contact
+npm run db:migrate</code></pre>
+        </figure>
+        <figure class="code" data-src="app/actions/profile.ts" data-tag="market-week1-step3">
+          <figcaption><span class="label">app/actions/profile.ts</span></figcaption>
+          <pre><code>"use server";
+
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { requireUser } from "@/lib/session";
+
+const CONTACT_MAX_LENGTH = 100;
+
+// 연락 방법 폼의 결과 모양
+export type ContactFormState = {
+  contact: string;
+  error?: string;
+  success?: boolean;
+} | null;
+
+// 판매자 연락 방법 수정
+export async function updateContact(
+  prevState: ContactFormState,
+  formData: FormData,
+): Promise&lt;ContactFormState&gt; {
+  const me = await requireUser();
+  const contact = String(formData.get("contact") ?? "").trim();
+
+  if (contact.length &gt; CONTACT_MAX_LENGTH) {
+    return { error: `연락 방법은 ${CONTACT_MAX_LENGTH}자 이하로 써주세요.`, contact };
+  }
+
+  // 로그인한 "나"의 줄만 바꾼다.
+  await db.update(user).set({ contact }).where(eq(user.id, me.id));
+
+  revalidatePath("/dashboard");
+  return { success: true, contact };
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/dashboard/contact-form.tsx" data-tag="market-week1-step3">
+          <figcaption><span class="label">app/dashboard/contact-form.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import { useActionState } from "react";
+import { updateContact } from "@/app/actions/profile";
+
+// 부품이 받는 값(props)의 모양을 적어 둔다. currentContact 는 아직 안 적었으면 null 일 수 있다.
+type ContactFormProps = {
+  currentContact: string | null | undefined;
+};
+
+export default function ContactForm({ currentContact }: ContactFormProps) {
+  const [state, formAction, pending] = useActionState(updateContact, null);
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;label&gt;
+        연락 방법 (로그인한 사람에게만 보여요)
+        &lt;input
+          name="contact"
+          maxLength={100}
+          placeholder="예: 카카오톡 오픈채팅 https://open.kakao.com/..."
+          defaultValue={state?.contact ?? currentContact ?? ""}
+        /&gt;
+      &lt;/label&gt;
+      {state?.error &amp;&amp; &lt;p className="error"&gt;{state.error}&lt;/p&gt;}
+      {state?.success &amp;&amp; &lt;p className="muted small"&gt;저장했어요.&lt;/p&gt;}
+      &lt;button type="submit" disabled={pending}&gt;
+        {pending ? "저장 중..." : "연락 방법 저장"}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 props 에 타입 붙이기</span><code>type ContactFormProps = { currentContact: string | null | undefined }</code>는 "이 부품을 쓸 때 <code>currentContact</code>를 넘겨야 하고, 그 값은 글자이거나 비어 있을 수 있다"는 약속입니다. 부품을 쓰는 쪽에서 숫자를 넘기거나 빠뜨리면 바로 빨간 줄이 생겨요.</div>
+        <figure class="code" data-src="app/dashboard/page.tsx" data-tag="market-week1-step3">
+          <figcaption><span class="label">app/dashboard/page.tsx</span></figcaption>
+          <pre><code>import { signOut } from "@/app/actions/auth";
+import { requireUser } from "@/lib/session";
+import ContactForm from "./contact-form";
+
+export default async function DashboardPage() {
+  // 로그인하지 않은 사람은 이 줄에서 /login 으로 보내지고, 아래 코드는 실행되지 않는다.
+  const user = await requireUser();
+
+  return (
+    &lt;div className="stack"&gt;
+      &lt;div className="card"&gt;
+        &lt;div className="row spread"&gt;
+          &lt;h1&gt;내 판매 상품&lt;/h1&gt;
+          &lt;form action={signOut}&gt;
+            &lt;button type="submit" className="secondary"&gt;
+              로그아웃
+            &lt;/button&gt;
+          &lt;/form&gt;
+        &lt;/div&gt;
+        &lt;p&gt;
+          안녕하세요, &lt;strong&gt;{user.username}&lt;/strong&gt;님!
+        &lt;/p&gt;
+      &lt;/div&gt;
+
+      &lt;div className="card"&gt;
+        &lt;h2&gt;연락 방법&lt;/h2&gt;
+        &lt;p className="muted small"&gt;상품에 관심 있는 사람이 이 방법으로 연락해요. 전화번호보다 오픈채팅 링크를 추천해요.&lt;/p&gt;
+        &lt;ContactForm currentContact={user.contact} /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 user.contact 에 빨간 줄이 안 생기는 이유</span>우리는 <code>user</code>의 타입을 직접 적지 않았는데도 <code>user.contact</code>를 쓸 수 있습니다. Better Auth가 <code>lib/auth.ts</code>의 <code>additionalFields</code>를 읽어서 로그인 사용자 타입에 <code>contact</code>를 자동으로 넣어주기 때문이에요. 반대로 <code>user.contactt</code>처럼 오타를 내면 즉시 에러가 납니다. 이게 타입의 힘입니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li><code>npx tsc --noEmit</code> 에러 0개</li>
+            <li>내 판매 상품 화면에서 연락 방법 저장 → "저장했어요." → 새로고침해도 유지</li>
+            <li>(실험) <code>contact-form.tsx</code>를 쓰는 곳에서 <code>currentContact={123}</code>으로 바꿔 보면 빨간 줄 → 원래대로 되돌리기</li>
+          </ul>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "1주차: 판매자 연락 방법"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="m1-contact"><span>contact 칸 추가 마이그레이션 + 수정 폼</span></label></li>
+          <li><label><input type="checkbox" data-task="m1-contact-check"><span>tsc 통과, 저장·새로고침 확인, 타입 실험</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/market-week1-step3/projects/03-marketplace-clone">market-week1-step3</a></p>
+      </div>
+    </details>
+
+    <h2 id="retro">1주차 회고</h2>
+    <div class="retro card">
+      <label for="m1-note-1">이번 주에 한 것</label>
+      <textarea id="m1-note-1" data-note="m1-did"></textarea>
+      <label for="m1-note-2">새로 이해한 것 (예: TypeScript가 잡아준 실수 중 가장 인상적인 것은?)</label>
+      <textarea id="m1-note-2" data-note="m1-learned"></textarea>
+      <label for="m1-note-3">막혔던 것과 해결 방법</label>
+      <textarea id="m1-note-3" data-note="m1-stuck"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="m1-retro"><span>1주차 회고 3줄 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="index.html"><small>이전</small>← 시작하기 전</a>
+      <a class="card next" href="week2.html"><small>다음</small>2주차 · 상품과 사진 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-26 · TypeScript 5.9.3 · @types/node 20.19.43 · @types/react 19.3.0 · Next.js 16.3.6</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>
