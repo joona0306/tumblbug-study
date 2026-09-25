@@ -5,6 +5,7 @@ import { link } from "@/db/schema";
 import { MAX_LINKS } from "@/lib/links";
 import { requireUser } from "@/lib/session";
 import LinkForm from "./link-form";
+import LinkItem from "./link-item";
 
 export default async function DashboardPage() {
   // 로그인하지 않은 사람은 이 줄에서 /login 으로 보내지고, 아래 코드는 실행되지 않는다.
@@ -32,12 +33,7 @@ export default async function DashboardPage() {
         ) : (
           <ul className="link-list">
             {links.map((item) => (
-              <li key={item.id} className="link-item">
-                <div>
-                  <strong>{item.title}</strong>
-                  <div className="muted small">{item.url}</div>
-                </div>
-              </li>
+              <LinkItem key={item.id} item={item} />
             ))}
           </ul>
         )}

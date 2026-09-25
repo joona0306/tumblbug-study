@@ -1,6 +1,6 @@
 "use server";
 
-import { count, eq, max } from "drizzle-orm";
+import { and, count, eq, max } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { link } from "@/db/schema";
@@ -49,4 +49,43 @@ export async function createLink(prevState, formData) {
 
   refreshPages(user.username);
   return { success: true };
+}
+
+// 링크 수정
+export async function updateLink(prevState, formData) {
+  const user = await requireUser();
+
+  const id = Number(formData.get("id"));
+  const title = formData.get("title")?.trim();
+  const url = formData.get("url")?.trim();
+
+  const error = validateLinkInput(title, url);
+  if (error) {
+    return { error, title, url };
+  }
+
+  // "이 id 이면서 + 내 링크인 것"만 수정한다. 남의 링크 id를 보내도 아무것도 바뀌지 않는다.
+  const updated = await db
+    .update(link)
+    .set({ title, url })
+    .where(and(eq(link.id, id), eq(link.userId, user.id)))
+    .returning({ id: link.id });
+
+  if (updated.length === 0) {
+    return { error: "링크를 찾을 수 없습니다." };
+  }
+
+  refreshPages(user.username);
+  return { success: true };
+}
+
+// 링크 삭제
+export async function deleteLink(formData) {
+  const user = await requireUser();
+  const id = Number(formData.get("id"));
+
+  // 수정과 마찬가지로, 내 링크일 때만 삭제된다.
+  await db.delete(link).where(and(eq(link.id, id), eq(link.userId, user.id)));
+
+  refreshPages(user.username);
 }
