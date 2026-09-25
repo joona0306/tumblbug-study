@@ -1,0 +1,64 @@
+/* 1. 색상을 변수로 정해두기: 나중에 한 곳만 바꾸면 전체 색이 바뀐다 */
+:root {
+  --bg: #f7f7f8;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #e2e2e5;
+  --primary: #2f6fed;
+}
+
+/* 2. 페이지 전체: 배경색, 글꼴, 가운데 정렬 */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 480px; /* 너무 넓어지지 않게 */
+  margin: 0 auto; /* 좌우 여백을 똑같이 → 가운데 정렬 */
+  padding: 48px 16px;
+}
+
+h1 {
+  font-size: 1.6rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin-top: 32px;
+}
+
+/* 3. class="muted" 가 붙은 요소만 흐린 글씨로 */
+.muted {
+  color: var(--muted);
+}
+
+/* 4. 링크 목록을 Linktree 처럼 둥근 버튼 모양으로 */
+.links {
+  list-style: none; /* 앞의 점(•) 없애기 */
+  padding: 0;
+  display: flex;
+  flex-direction: column; /* 위에서 아래로 쌓기 */
+  gap: 12px; /* 버튼 사이 간격 */
+}
+
+.links a {
+  display: block;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px; /* 아주 크게 → 양 끝이 완전히 둥글게 */
+  color: var(--text);
+  text-align: center;
+  font-weight: 600;
+  text-decoration: none; /* 밑줄 없애기 */
+}
+
+/* 마우스를 올렸을 때 */
+.links a:hover {
+  border-color: var(--primary);
+}
