@@ -1,6 +1,7 @@
-import { desc, eq, ilike } from "drizzle-orm";
+import { and, desc, eq, ilike, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { product, user } from "@/db/schema";
+import type { Category } from "@/lib/product";
 
 const LIST_LIMIT = 60; // 첫 화면에 보여줄 최대 개수 (페이지 나누기는 이번 범위에서 제외)
 
@@ -23,18 +24,26 @@ function escapeLike(text: string): string {
 
 export type ProductFilter = {
   q?: string; // 검색어
+  category?: Category; // 카테고리 (정해진 목록 중 하나만 들어올 수 있다)
+  onSale?: boolean; // true 면 판매중인 것만
 };
 
 // 조건에 맞는 최신 상품 목록
 export async function listProducts(filter: ProductFilter = {}) {
   const q = filter.q?.trim();
 
+  // 조건을 하나씩 모은 뒤 and(...) 로 묶는다. 조건이 없으면 전체 목록
+  const conditions: SQL[] = [];
+  // ilike: 대소문자를 구분하지 않는 "포함" 검색
+  if (q) conditions.push(ilike(product.title, `%${escapeLike(q)}%`));
+  if (filter.category) conditions.push(eq(product.category, filter.category));
+  if (filter.onSale) conditions.push(eq(product.status, "selling"));
+
   return db
     .select(cardColumns)
     .from(product)
     .innerJoin(user, eq(product.userId, user.id))
-    // ilike: 대소문자를 구분하지 않는 "포함" 검색. 검색어가 없으면 조건 없음(undefined)
-    .where(q ? ilike(product.title, `%${escapeLike(q)}%`) : undefined)
+    .where(and(...conditions))
     .orderBy(desc(product.createdAt))
     .limit(LIST_LIMIT);
 }

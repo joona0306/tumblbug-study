@@ -220,7 +220,8 @@ textarea {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* minmax(0, 1fr): 칸이 내용(긴 제목)보다 좁아질 수 있게 해서 화면 밖으로 넘치지 않게 한다 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -266,11 +267,18 @@ textarea {
 
 /* 검색창: 입력칸과 버튼을 한 줄에 */
 .search {
-  flex-direction: row;
+  display: flex;
   gap: 8px;
 }
 
 .search input {
   flex: 1;
   min-width: 0;
+}
+
+/* 체크박스는 글자 옆에 나란히 */
+label.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
 }
