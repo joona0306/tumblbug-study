@@ -1,0 +1,15 @@
+CREATE TABLE "product" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"title" text NOT NULL,
+	"price" integer NOT NULL,
+	"category" text NOT NULL,
+	"description" text DEFAULT '' NOT NULL,
+	"status" text DEFAULT 'selling' NOT NULL,
+	"image_url" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+ALTER TABLE "product" ADD CONSTRAINT "product_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "product_userId_idx" ON "product" USING btree ("user_id");
