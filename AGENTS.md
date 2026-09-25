@@ -18,6 +18,9 @@ Codex CLI, Claude Code 등 AI 코딩 에이전트는 세션 시작 시 이 파�
 1. `projects/xx/`에 **정답 코드를 먼저 만들고 실제로 실행해 검증**한다 (빌드 + 핵심 흐름 동작 확인)
 2. 교재의 각 단계마다 git 태그로 체크포인트를 남긴다 (예: `week2-step3`)
 3. 검증된 코드를 바탕으로 `docs/xx/tutorial/`의 HTML 교재를 쓴다
+   - 코드 블록은 `<figure class="code" data-src="파일경로" data-tag="태그">` 형식으로 비워 두고,
+     `node tools/sync-tutorial-code.mjs <교재 폴더> <정답 코드 폴더>`로 태그 시점의 코드를 채운다
+     (손으로 코드를 복사해 넣지 말 것 — 교재와 정답 코드가 어긋나는 원인)
 4. 교재 하단에 "마지막 검증 날짜 + 패키지 버전"을 표시한다
 
 ## 작업 방식

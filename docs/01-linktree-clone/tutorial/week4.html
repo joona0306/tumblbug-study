@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4주차 배포·운영 · Linktree 클론 교재</title>
+  <meta name="description" content="Vercel 배포, 개발/운영 DB 분리, 로그 보기, 지인 테스트, 완료 기준 점검">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week4">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🔗 Linktree 클론 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주차 · 기획 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주차 · 로그인 <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주차 · 링크 관리 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4" aria-current="page">4주차 · 배포·운영 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">4주차 · 6단계</span>
+    <h1>배포하고, 운영하고, 한 번 개선하기</h1>
+    <p class="lead">
+      지금까지는 내 컴퓨터(<code>localhost</code>)에서만 돌아갔습니다. 이번 주에는 실제 인터넷 주소로 서비스를 열고,
+      실제 사람이 쓰게 하고, 문제가 생기면 어디를 봐야 하는지 배웁니다.
+    </p>
+
+    <div class="box term"><span class="box-title">📖 용어 풀이</span>
+      <ul>
+        <li><strong>배포(Deploy)</strong>: 내 코드를 24시간 켜져 있는 남의 컴퓨터(서버)에 올려서, 누구나 인터넷 주소로 접속할 수 있게 만드는 것.</li>
+        <li><strong>운영(Operation)</strong>: 배포한 서비스가 잘 돌아가는지 지켜보고, 문제를 고치고, 사용자 의견을 반영하는 일. 서비스는 배포가 끝이 아니라 시작입니다.</li>
+      </ul>
+    </div>
+
+    <h2 id="picture">먼저 그림으로: 개발 환경과 운영 환경</h2>
+    <figure class="diagram">
+      <svg viewBox="0 0 820 320" role="img" aria-labelledby="deploy-title deploy-desc">
+        <title id="deploy-title">배포 구조도</title>
+        <desc id="deploy-desc">내 컴퓨터는 Neon의 dev 브랜치 DB를 쓰고, git push로 GitHub에 올리면 Vercel이 자동으로 마이그레이션과 빌드를 한 뒤 production 브랜치 DB를 쓰는 서비스를 실행한다. 방문자는 vercel.app 주소로 접속한다.</desc>
+        <defs>
+          <marker id="deploy-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="d-arrowhead" d="M0,0 L10,5 L0,10 z"/>
+          </marker>
+        </defs>
+        <!-- 내 컴퓨터 -->
+        <rect class="d-box d-client" x="10" y="30" width="170" height="84" rx="10"/>
+        <text class="d-title" x="95" y="60" text-anchor="middle">내 컴퓨터</text>
+        <text class="d-small" x="95" y="82" text-anchor="middle">npm run dev</text>
+        <text class="d-small" x="95" y="100" text-anchor="middle">(개발 환경)</text>
+        <!-- GitHub -->
+        <rect class="d-box d-ext" x="245" y="30" width="150" height="84" rx="10"/>
+        <text class="d-title" x="320" y="66" text-anchor="middle">GitHub</text>
+        <text class="d-small" x="320" y="88" text-anchor="middle">코드 보관소</text>
+        <!-- Vercel -->
+        <rect class="d-box d-server" x="460" y="14" width="200" height="146" rx="10"/>
+        <text class="d-title" x="560" y="40" text-anchor="middle">Vercel (운영 환경)</text>
+        <text class="d-small" x="475" y="66">① scripts/migrate.mjs</text>
+        <text class="d-small" x="475" y="86">② next build</text>
+        <text class="d-small" x="475" y="106">③ 싱가포르(sin1)에서 실행</text>
+        <text class="d-mono" x="475" y="140">my-links.vercel.app</text>
+        <!-- 방문자 -->
+        <rect class="d-box d-client" x="700" y="40" width="112" height="64" rx="10"/>
+        <text class="d-text" x="756" y="68" text-anchor="middle" font-weight="700">방문자</text>
+        <text class="d-small" x="756" y="88" text-anchor="middle">(휴대폰)</text>
+        <!-- Neon -->
+        <rect class="d-muted-box" x="10" y="205" width="800" height="105" rx="12" stroke-dasharray="6 4"/>
+        <text class="d-small" x="796" y="225" text-anchor="end" font-weight="700">Neon 프로젝트 my-links</text>
+        <rect class="d-box d-db" x="30" y="236" width="140" height="60" rx="30"/>
+        <text class="d-text" x="100" y="262" text-anchor="middle" font-weight="700">dev 브랜치</text>
+        <text class="d-small" x="100" y="281" text-anchor="middle">연습용 데이터</text>
+        <rect class="d-box d-db" x="490" y="236" width="140" height="60" rx="30" stroke-width="3"/>
+        <text class="d-text" x="560" y="262" text-anchor="middle" font-weight="700">production</text>
+        <text class="d-small" x="560" y="281" text-anchor="middle">실제 사용자 데이터</text>
+        <!-- 화살표 -->
+        <line class="d-line" x1="180" y1="72" x2="243" y2="72" marker-end="url(#deploy-arrow)"/>
+        <text class="d-small" x="212" y="64" text-anchor="middle">git push</text>
+        <line class="d-line" x1="395" y1="72" x2="458" y2="72" marker-end="url(#deploy-arrow)"/>
+        <text class="d-small" x="427" y="64" text-anchor="middle">자동 배포</text>
+        <line class="d-line" x1="698" y1="72" x2="662" y2="72" marker-end="url(#deploy-arrow)"/>
+        <line class="d-line" x1="95" y1="114" x2="95" y2="234" marker-end="url(#deploy-arrow)"/>
+        <text class="d-small" x="103" y="175">.env.local</text>
+        <line class="d-line" x1="560" y1="160" x2="560" y2="234" marker-end="url(#deploy-arrow)"/>
+        <text class="d-small" x="568" y="200">Vercel 환경 변수</text>
+      </svg>
+      <figcaption>내 컴퓨터는 연습용 DB(dev), 실제 서비스는 운영용 DB(production)를 쓴다. 코드를 push하면 Vercel이 알아서 DB 구조를 맞추고 새 버전을 연다.</figcaption>
+    </figure>
+    <div class="box why"><span class="box-title">💡 왜 DB를 둘로 나누나요?</span>개발하다 보면 테스트 계정을 만들고, 링크를 지우고, 표 구조를 바꿔보는 일이 계속 생깁니다. 이걸 실제 사용자 데이터가 있는 DB에서 하면, 실수 한 번에 사용자의 링크가 사라집니다. 그래서 <strong>연습은 dev에서, 실제 서비스는 production에서</strong> 합니다.</div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>배포 준비 코드</summary>
+      <div class="step-body">
+        <p>운영 DB에도 표를 만들어야 합니다. 매번 손으로 하면 빠뜨리기 쉬우니, <strong>배포할 때마다 자동으로</strong> 마이그레이션이 실행되게 합니다. 새 폴더 <code>scripts</code>를 만들고 아래 파일을 만듭니다.</p>
+        <figure class="code" data-src="scripts/migrate.mjs" data-tag="linktree-week4-step1">
+          <figcaption><span class="label">scripts/migrate.mjs</span></figcaption>
+          <pre><code>// Vercel에 "운영(Production)" 배포를 할 때, 앱을 빌드하기 직전에 실행된다.
+// drizzle/ 폴더의 마이그레이션(테이블 변경 기록) 중 아직 운영 DB에 적용되지 않은 것만 적용한다.
+// 이미 적용된 기록은 건너뛰므로 여러 번 실행해도 안전하다.
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import { migrate } from "drizzle-orm/neon-http/migrator";
+
+// 내 컴퓨터에서 npm run build 를 할 때는 VERCEL_ENV 가 없으므로 건너뛴다.
+if (process.env.VERCEL_ENV !== "production") {
+  console.log("[migrate] 운영 배포가 아니므로 DB 마이그레이션을 건너뜁니다.");
+  process.exit(0);
+}
+
+if (!process.env.DATABASE_URL) {
+  console.error("[migrate] DATABASE_URL 환경 변수가 없습니다. Vercel 프로젝트 설정을 확인하세요.");
+  process.exit(1);
+}
+
+const db = drizzle({ client: neon(process.env.DATABASE_URL) });
+await migrate(db, { migrationsFolder: "./drizzle" });
+console.log("[migrate] 운영 DB 마이그레이션 완료");</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 코드 읽는 법</span><code>VERCEL_ENV</code>는 Vercel이 자동으로 넣어주는 환경 변수로, 운영 배포면 <code>"production"</code>입니다. 내 컴퓨터에는 이 값이 없으니 건너뜁니다. 파일 확장자 <code>.mjs</code>는 "최신 방식(import) 자바스크립트 파일"이라는 표시입니다.</div>
+        <p><code>package.json</code>의 <code>"build"</code> 한 줄을 바꿔서, 빌드 직전에 이 스크립트가 돌게 합니다.</p>
+        <figure class="code" data-src="package.json" data-tag="linktree-week4-step1" data-lines="5-13">
+          <figcaption><span class="label">package.json (scripts 부분 — build 줄이 바뀜)</span></figcaption>
+          <pre><code>  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/migrate.mjs &amp;&amp; next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },</code></pre>
+        </figure>
+        <p>프로젝트 최상위에 <code>vercel.json</code>을 만들어 서버 위치를 싱가포르로 정합니다.</p>
+        <figure class="code" data-src="vercel.json" data-tag="linktree-week4-step1">
+          <figcaption><span class="label">vercel.json</span></figcaption>
+          <pre><code>{
+  "regions": ["sin1"]
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 서버 위치가 왜 중요한가요?</span>Vercel의 기본 서버는 미국에 있습니다. 우리 DB는 싱가포르에 있으니, 페이지 하나를 열 때마다 미국↔싱가포르를 여러 번 오가느라 느려집니다. 서버를 DB 옆(싱가포르, <code>sin1</code>)에 두면 빨라집니다.</div>
+        <p>마지막으로 <code>drizzle.config.js</code>에서 한 줄을 바꿉니다. <code>loadEnvConfig(process.cwd())</code> → <code>loadEnvConfig(process.cwd(), true)</code></p>
+        <figure class="code" data-src="drizzle.config.js" data-tag="linktree-week4-step1">
+          <figcaption><span class="label">drizzle.config.js</span></figcaption>
+          <pre><code>import { loadEnvConfig } from "@next/env";
+import { defineConfig } from "drizzle-kit";
+
+// drizzle-kit은 Next.js 밖에서 실행되므로, .env.local 을 직접 읽어오게 한다.
+// (두 번째 값 true = "개발 모드"로 읽기. 내 컴퓨터에서는 항상 개발용 DB를 쓰도록)
+loadEnvConfig(process.cwd(), true);
+
+export default defineConfig({
+  schema: "./db/schema.js", // 테이블 설계도 파일
+  out: "./drizzle", // 마이그레이션(변경 기록) 파일이 저장될 폴더
+  dialect: "postgresql",
+  dbCredentials: {
+    url: process.env.DATABASE_URL,
+  },
+});</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 true 하나가 왜 필요해요?</span>이 값이 없으면 drizzle-kit이 "운영 모드"로 환경 변수를 읽습니다. 나중에 운영용 설정 파일(<code>.env.production.local</code>)을 만들면, 내 컴퓨터에서 친 <code>npm run db:migrate</code>가 <strong>운영 DB</strong>에 실행될 수 있어요. <code>true</code>(개발 모드)로 고정해 항상 개발 DB를 쓰게 합니다.</div>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <p>내 컴퓨터에서 운영용 빌드를 해봅니다. 개발 서버는 꺼 두세요.</p>
+          <figure class="code cmd"><figcaption><span class="label">터미널 (Git Bash)</span></figcaption><pre><code>npm run build</code></pre></figure>
+          <p>맨 처음에 <code>[migrate] 운영 배포가 아니므로 DB 마이그레이션을 건너뜁니다.</code>, 마지막에 <code>✓ Compiled successfully</code>와 주소 목록(<code>/dashboard</code>, <code>/[username]</code> 등)이 나오면 성공입니다.</p>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "4주차 1단계: 배포 준비"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s1-code"><span>migrate.mjs, build 스크립트, vercel.json, drizzle.config.js 수정</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s1-build"><span>npm run build 성공 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/linktree-week4-step1/projects/01-linktree-clone">linktree-week4-step1</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>GitHub에 코드 올리기</summary>
+      <div class="step-body">
+        <ol>
+          <li><a href="https://github.com/new">github.com/new</a>에서 새 저장소를 만듭니다. Repository name: <code>my-links</code>, Public 또는 Private 아무거나. <strong>README, .gitignore 추가는 모두 체크하지 마세요</strong> (이미 있음)</li>
+          <li>만들고 나면 나오는 주소(<code>https://github.com/내아이디/my-links.git</code>)를 복사합니다</li>
+        </ol>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash) — 주소는 내 것으로</span></figcaption>
+          <pre><code>git remote add origin https://github.com/내아이디/my-links.git
+git branch -M main
+git push -u origin main</code></pre>
+        </figure>
+        <p class="code-note">처음 push하면 브라우저 창이 열리며 GitHub 로그인을 요청할 수 있습니다. 로그인하고 허용하면 됩니다.</p>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>remote / push</strong>: remote는 "인터넷에 있는 내 저장소 주소", push는 "내 컴퓨터의 커밋들을 그곳으로 올리기"입니다. <code>origin</code>은 그 주소에 붙인 별명입니다.</div>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <ul>
+            <li>GitHub 저장소 페이지를 새로고침하면 <code>app</code>, <code>db</code>, <code>lib</code> 폴더 등이 보인다</li>
+            <li><strong><code>.env.local</code> 파일이 목록에 없다</strong> (있으면 즉시 저장소를 Private으로 바꾸고, Neon에서 DB 비밀번호를 재설정하세요)</li>
+            <li>커밋 기록(Commits)에 2~4주차 동안 남긴 단계별 커밋이 보인다</li>
+          </ul>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s2-push"><span>GitHub 저장소 만들고 push</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s2-secret"><span>GitHub에 .env.local이 없는 것 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>개발용 DB와 운영용 DB 나누기</summary>
+      <div class="step-body">
+        <p>Neon은 DB를 통째로 복사한 <strong>브랜치</strong>를 만들 수 있습니다. 지금까지 쓰던 기본 브랜치는 운영용으로 남기고, 개발용 브랜치를 새로 만들어 내 컴퓨터는 그쪽을 보게 바꿉니다.</p>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>DB 브랜치</strong>: 특정 시점의 DB를 복사한 별도 DB입니다. 복사본에서 무엇을 하든 원본에는 영향이 없습니다. Git 브랜치와 비슷한 개념이에요.</div>
+        <h3>① dev 브랜치 만들고 내 컴퓨터 연결 바꾸기</h3>
+        <ol>
+          <li>Neon 대시보드 → 왼쪽 <strong>Branches</strong> → <strong>New branch</strong></li>
+          <li>Name: <code>dev</code>, Parent branch: 기본 브랜치(<code>production</code> 또는 <code>main</code>) → 만들기</li>
+          <li>만든 <code>dev</code> 브랜치 화면에서 <strong>Connect</strong> → 주소 복사</li>
+          <li><code>.env.local</code>의 <code>DATABASE_URL=</code> 값을 <strong>dev 브랜치 주소로 교체</strong>하고 개발 서버를 껐다 켭니다</li>
+        </ol>
+        <p>dev 브랜치는 기본 브랜치를 복사한 것이라 테스트 계정과 링크가 그대로 들어 있습니다. <a href="http://localhost:3000/dashboard">localhost:3000/dashboard</a>에 로그인이 그대로 되는지 확인하세요.</p>
+
+        <h3>② 운영 DB의 테스트 데이터 지우기</h3>
+        <p>운영 DB는 실제 사용자만 쓰도록 깨끗하게 비웁니다. Neon → <strong>SQL Editor</strong>에서 위쪽 브랜치 선택이 <strong>기본 브랜치(production/main)</strong>인지 꼭 확인한 뒤 실행합니다.</p>
+        <figure class="code">
+          <figcaption><span class="label">Neon SQL Editor (기본 브랜치에서)</span></figcaption>
+          <pre><code>DELETE FROM "user";</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 user만 지웠는데 링크도 지워지나요?</span>네. 2주차 설계에서 session, account, link의 <code>user_id</code>에 <code>onDelete: "cascade"</code>를 걸었습니다. "주인이 사라지면 딸린 줄도 함께 삭제"라는 뜻이라, 사용자를 지우면 그 사람의 세션·비밀번호·링크가 한꺼번에 지워집니다.</div>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <ul>
+            <li>Neon Tables에서 브랜치를 <strong>기본 브랜치</strong>로 두면 user, link 표가 비어 있다 (표 자체는 5개 그대로 있음)</li>
+            <li>브랜치를 <strong>dev</strong>로 바꾸면 테스트 데이터가 그대로 있다</li>
+            <li>내 컴퓨터의 <code>localhost:3000/api/health</code>가 여전히 <code>ok: true</code></li>
+          </ul>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s3-branch"><span>Neon dev 브랜치 만들고 .env.local 교체</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s3-clean"><span>운영(기본) 브랜치의 테스트 데이터 삭제</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>Vercel로 배포하기</summary>
+      <div class="step-body">
+        <h3>① 운영용 비밀키 새로 만들기</h3>
+        <p>운영 서비스는 개발용과 <strong>다른</strong> 비밀키를 씁니다. 개발용 키가 새더라도 운영 서비스는 안전하게 하려는 것입니다.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"</code></pre>
+        </figure>
+        <h3>② 프로젝트 가져오기와 환경 변수</h3>
+        <ol>
+          <li><a href="https://vercel.com/new">vercel.com/new</a> → <strong>Import Git Repository</strong>에서 <code>my-links</code> 옆 <strong>Import</strong> (목록에 없으면 GitHub 접근 권한 설정에서 저장소를 허용)</li>
+          <li>Framework Preset이 <strong>Next.js</strong>로 자동 선택된 것 확인</li>
+          <li><strong>Environment Variables</strong>를 펼쳐 3개를 넣습니다
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Key</th><th>Value</th></tr></thead>
+                <tbody>
+                  <tr><td><code>DATABASE_URL</code></td><td>Neon <strong>기본 브랜치(production/main)</strong>의 Connect 주소 — dev 주소가 아님!</td></tr>
+                  <tr><td><code>BETTER_AUTH_SECRET</code></td><td>①에서 새로 만든 문자열</td></tr>
+                  <tr><td><code>BETTER_AUTH_URL</code></td><td><code>https://my-links.vercel.app</code> (일단 이렇게 넣고 ③에서 확인)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li><strong>Deploy</strong> 클릭 → 1~3분 기다리기</li>
+        </ol>
+        <h3>③ 실제 주소 확인하고 맞추기</h3>
+        <p>배포가 끝나면 프로젝트 화면의 <strong>Domains</strong>에 실제 주소가 보입니다. 이름이 이미 쓰이고 있으면 <code>my-links-abc123.vercel.app</code>처럼 뒤에 글자가 붙을 수 있어요.</p>
+        <ul>
+          <li>주소가 <code>BETTER_AUTH_URL</code>에 넣은 값과 <strong>다르면</strong>: Settings → Environment Variables에서 <code>BETTER_AUTH_URL</code>을 실제 주소(<code>https://</code>로 시작, 끝에 <code>/</code> 없이)로 고치고 → Deployments 탭 → 맨 위 배포의 <strong>⋯</strong> → <strong>Redeploy</strong></li>
+        </ul>
+        <div class="box term"><span class="box-title">📖 빌드 로그 읽기</span>Deployments → 배포 하나 클릭 → <strong>Building</strong> 로그에서 <code>[migrate] 운영 DB 마이그레이션 완료</code>를 찾아보세요. 1단계에서 만든 스크립트가 운영 DB 구조를 확인하고 맞춘 흔적입니다.</div>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <ol>
+            <li><code>https://내주소.vercel.app/api/health</code> → <code>{"ok":true,...}</code></li>
+            <li><strong>휴대폰</strong>(와이파이 끄고 데이터로)에서 내 주소 → 회원가입 → 링크 3개 추가 → 공개 페이지 확인</li>
+            <li>Neon에서 기본 브랜치의 user 표에 방금 가입한 1줄이 생겼고, dev 브랜치에는 없다</li>
+          </ol>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>빌드가 <code>DATABASE_URL 환경 변수가 없습니다</code>로 실패해요</summary><p>Settings → Environment Variables에 <code>DATABASE_URL</code>이 있는지, 적용 환경에 <strong>Production</strong>이 체크되어 있는지 확인하고 Redeploy 하세요.</p></details>
+          <details><summary>가입/로그인 버튼을 누르면 에러가 나거나 로그인이 유지되지 않아요</summary><p>거의 항상 <code>BETTER_AUTH_URL</code>이 실제 주소와 다른 경우입니다. 주소창의 주소와 글자 하나까지 같은지(<code>https</code>, 끝의 <code>/</code> 없음) 확인하고 Redeploy 하세요. 환경 변수는 다시 배포해야 반영됩니다.</p></details>
+          <details><summary>/api/health가 <code>ok: false</code></summary><p><code>DATABASE_URL</code> 값을 복사할 때 앞뒤 공백이나 줄바꿈이 들어갔는지 확인하세요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s4-deploy"><span>Vercel에 환경 변수 3개 넣고 배포</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s4-url"><span>실제 주소와 BETTER_AUTH_URL 일치 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s4-phone"><span>휴대폰으로 가입 → 링크 3개 → 공개 페이지 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>운영 루프: 로그 보기, 두 DB 확인, 개선 배포</summary>
+      <div class="step-body">
+        <h3>① 로그 보기</h3>
+        <p>서비스에서 문제가 생기면 가장 먼저 보는 곳이 <strong>로그</strong>입니다. 서버에서 일어난 일이 시간순으로 기록되어 있어요.</p>
+        <ol>
+          <li>Vercel 프로젝트 → <strong>Logs</strong> 탭</li>
+          <li>휴대폰으로 <code>/없는이름</code> 같은 주소에 접속 → 로그에 그 요청이 <code>404</code>와 함께 찍히는 것을 찾아보세요</li>
+          <li>코드에서 <code>console.error(...)</code>로 남긴 메시지(예: "DB 연결 실패")는 여기에 빨간 줄로 나타납니다</li>
+        </ol>
+        <div class="box why"><span class="box-title">💡 서비스 상태를 확인하는 순서</span><ol><li><code>/api/health</code> → DB가 살아 있나?</li><li>Vercel Logs → 빨간 에러 줄이 있나? 언제부터?</li><li>Deployments → 문제가 시작된 시각에 새 배포가 있었나? (있다면 그 배포의 변경이 원인일 가능성이 큼)</li></ol></div>
+
+        <h3>② 두 DB가 정말 분리되었는지 확인</h3>
+        <p>내 컴퓨터(<code>localhost</code>)에서 링크를 하나 추가해 보세요. 운영 주소의 공개 페이지에는 나타나지 <strong>않아야</strong> 합니다. 반대로 운영에서 가입한 계정으로는 <code>localhost</code>에 로그인할 수 없습니다.</p>
+
+        <h3>③ 고치고 다시 배포하기 (개선 사이클)</h3>
+        <p>이제 코드를 고쳐서 push만 하면 Vercel이 알아서 새 버전을 배포합니다. 작은 것 하나를 바꿔 보세요. 예: 첫 화면(<code>app/page.js</code>)의 소개 문장.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "첫 화면 소개 문구 수정"
+git push</code></pre>
+        </figure>
+        <p>Vercel Deployments 탭에 새 배포가 생기고, 1~2분 뒤 운영 주소에 반영됩니다.</p>
+        <div class="box term"><span class="box-title">📖 나중에 표 구조를 바꾸고 싶다면</span>
+          <ol>
+            <li><code>db/schema.js</code> 수정</li>
+            <li><code>npx drizzle-kit generate --name 변경내용</code> → <code>npm run db:migrate</code> (dev DB에 먼저 적용해 확인)</li>
+            <li>commit + push → Vercel 빌드에서 <code>migrate.mjs</code>가 운영 DB에 같은 변경을 적용</li>
+          </ol>
+          <p>이렇게 하면 운영 DB를 손으로 건드릴 일이 없습니다. (2단계 이후 교재에서 실제로 해봅니다)</p>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s5-logs"><span>Vercel Logs에서 내 요청 찾아보기</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s5-split"><span>개발/운영 DB가 분리된 것 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s5-redeploy"><span>작은 수정 1개를 push해서 자동 배포 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>지인 1명에게 실제로 써보게 하기</summary>
+      <div class="step-body">
+        <p>내가 만든 서비스를 <strong>나 말고 다른 사람</strong>이 처음 쓰는 순간, 생각지 못한 문제가 반드시 보입니다. 이게 운영에서 가장 값진 정보입니다.</p>
+        <h3>① 부탁하기</h3>
+        <figure class="code">
+          <figcaption><span class="label">메시지 예시 (복사해서 수정)</span></figcaption>
+          <pre><code>안녕! 내가 처음으로 만든 웹 서비스가 있는데 10분만 써봐 줄 수 있어?
+여러 링크(유튜브, 인스타, 블로그 등)를 한 페이지에 모아주는 서비스야.
+
+1. https://내주소.vercel.app 에서 가입
+2. 네 SNS 링크 2~3개 등록
+3. 네 공개 페이지 주소를 인스타 프로필에 며칠만 붙여줘 🙏
+
+쓰다가 헷갈리거나 이상했던 점을 그대로 말해주면 정말 큰 도움이 돼!</code></pre>
+        </figure>
+        <h3>② 관찰하고 질문하기</h3>
+        <ul>
+          <li>가능하면 옆에서(또는 화면 공유로) <strong>말없이</strong> 지켜보세요. 사용자가 멈칫하는 곳이 개선할 곳입니다.</li>
+          <li>끝나고 물어볼 것: "가장 헷갈렸던 곳은?", "없어서 아쉬웠던 기능은?", "친구에게 추천한다면 뭐라고 설명할래?"</li>
+        </ul>
+        <h3>③ 하나만 골라 개선</h3>
+        <p>받은 피드백 중 <strong>1주차 범위(포함 칸) 안에서</strong> 고칠 수 있는 것 딱 하나를 골라 고치고, 5단계 ③처럼 배포합니다. 범위 밖의 요청(예: 테마 꾸미기)은 기획 문서의 "다음에 할 것" 목록에 적어 두세요.</p>
+        <div class="retro card">
+          <label for="w4-feedback">받은 피드백 정리</label>
+          <textarea id="w4-feedback" data-note="w4-feedback"></textarea>
+          <label for="w4-fix">고친 것 1가지</label>
+          <textarea id="w4-fix" data-note="w4-fix"></textarea>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s6-ask"><span>지인 1명에게 사용 부탁하고 관찰하기</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s6-fix"><span>피드백 1개 반영해서 다시 배포</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="done">1단계 완료 기준 점검</h2>
+    <p>모두 체크되면 1단계 완주입니다. 하나라도 안 되면 해당 주차로 돌아가 확인하세요.</p>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="dod-url"><span>실제 URL로 배포되어 외부(휴대폰 데이터)에서 접속된다</span></label></li>
+      <li><label><input type="checkbox" data-task="dod-flow"><span>회원가입 → 로그인 → 링크 3개 등록 → 공개 페이지에서 정상 노출</span></label></li>
+      <li><label><input type="checkbox" data-task="dod-limit"><span>4번째 링크 추가가 막힌다 (두 탭 실험으로 서버에서도 막히는 것 확인)</span></label></li>
+      <li><label><input type="checkbox" data-task="dod-owner"><span>다른 사람의 링크를 수정/삭제할 수 없다</span></label></li>
+      <li><label><input type="checkbox" data-task="dod-friend"><span>지인 1명이 실제로 자기 SNS 프로필에 이 링크를 써봤다</span></label></li>
+    </ul>
+
+    <h2 id="retro">4주차 회고 + 1단계 전체 회고</h2>
+    <div class="retro card">
+      <label for="w4-note-1">이번 주에 한 것</label>
+      <textarea id="w4-note-1" data-note="w4-did"></textarea>
+      <label for="w4-note-2">1단계 전체에서 가장 크게 배운 것</label>
+      <textarea id="w4-note-2" data-note="w4-learned"></textarea>
+      <label for="w4-note-3">다음 단계에서는 다르게 하고 싶은 것</label>
+      <textarea id="w4-note-3" data-note="w4-next"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="w4-retro"><span>4주차 회고 + 1단계 회고 쓰기</span></label></li>
+    </ul>
+
+    <div class="box why"><span class="box-title">🎉 다음 단계 예고: Buy Me a Coffee 클론</span>1단계에서 만든 로그인 구조를 그대로 가져가서, 이번에는 <strong>결제</strong>를 붙입니다. "결제 승인은 왜 반드시 서버에서 해야 하는가"가 핵심 주제예요. 이번 주에 익힌 "서버는 아무도 믿지 않는다"가 그대로 이어집니다.</div>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week3.html"><small>이전</small>← 3주차 · 링크 관리</a>
+      <a class="card next" href="index.html"><small>처음으로</small>시작 페이지 ↺</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-25 · 코드(1단계)는 실행 검증 완료 · Vercel·Neon 화면 안내는 작성 시점 기준이며 화면 구성은 바뀔 수 있습니다</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

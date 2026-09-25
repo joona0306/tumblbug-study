@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Linktree 클론 교재</title>
+  <meta name="description" content="완전 초심자가 따라 하며 만드는 Linktree 클론 — 1단계 교재 시작 페이지">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="index">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🔗 Linktree 클론 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index" aria-current="page">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주차 · 기획 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주차 · 로그인 <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주차 · 링크 관리 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주차 · 배포·운영 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">1단계 · 4주 과정</span>
+    <h1>Linktree 클론 만들기</h1>
+    <p class="lead">
+      SNS 프로필에는 링크를 하나만 넣을 수 있습니다. 여러 링크를 한 페이지에 모아 보여주는 서비스를
+      처음부터 직접 만들고, 인터넷에 배포하고, 실제 사람에게 써보게 하는 것까지 한 바퀴 완주합니다.
+    </p>
+
+    <h2 id="preview">완성하면 이런 모습이에요</h2>
+    <p>화면은 딱 3개입니다. 작고 단순하지만, 실제 서비스가 갖춰야 할 뼈대(회원가입, 데이터 저장, 권한, 배포)가 모두 들어 있습니다.</p>
+    <div class="preview-grid" aria-label="완성본 화면 3개 미리보기">
+      <div class="preview">
+        <div class="preview-bar">/signup · /login</div>
+        <div class="preview-body">
+          <div class="pv-title">회원가입</div>
+          <div class="muted">이메일</div><div class="pv-input"></div>
+          <div class="muted">사용자 이름</div><div class="pv-input"></div>
+          <div class="muted">비밀번호</div><div class="pv-input"></div>
+          <div class="pv-button">가입하기</div>
+        </div>
+      </div>
+      <div class="preview">
+        <div class="preview-bar">/dashboard (나만 보는 화면)</div>
+        <div class="preview-body">
+          <div class="pv-title">내 링크 관리 <span class="muted" style="float:right;font-weight:400">로그아웃</span></div>
+          <div class="muted" style="font-size:0.75rem">2 / 3개 사용 중</div>
+          <div class="pv-row"><span>내 유튜브</span><span class="muted">수정 · 삭제</span></div>
+          <div class="pv-row"><span>내 인스타</span><span class="muted">수정 · 삭제</span></div>
+          <div class="pv-button" style="margin-top:10px">링크 추가</div>
+        </div>
+      </div>
+      <div class="preview">
+        <div class="preview-bar">/andrew (누구나 보는 화면)</div>
+        <div class="preview-body" style="text-align:center">
+          <div class="pv-title">@andrew</div>
+          <div class="pv-pill">내 유튜브</div>
+          <div class="pv-pill">내 인스타</div>
+          <div class="pv-pill">내 블로그</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="how-to-use">이 교재 사용법</h2>
+    <ul>
+      <li><strong>위에서 아래로, 순서대로</strong> 따라 하세요. 각 단계는 앞 단계가 끝났다는 가정 아래 쓰였습니다.</li>
+      <li>할 일마다 <strong>체크박스</strong>가 있습니다. 체크하면 이 브라우저에 저장되어 새로고침해도 유지되고, 맨 위 진행률 바가 채워집니다.</li>
+      <li>상단 탭에서 <strong>지금 할 차례인 주차</strong>는 파란 테두리로 표시됩니다.</li>
+      <li>코드 블록 오른쪽 위의 <strong>복사</strong> 버튼을 누르면 코드가 그대로 복사됩니다. 코드 위의 회색 줄은 그 코드를 넣을 <strong>파일 경로</strong>입니다.</li>
+    </ul>
+    <p>본문 곳곳에 네 가지 안내 상자가 나옵니다.</p>
+    <div class="box why"><span class="box-title">💡 왜 이렇게 하나요?</span>코드를 그냥 따라 치지 않도록, 그 단계를 하는 이유를 짧게 설명합니다.</div>
+    <div class="box term"><span class="box-title">📖 용어 풀이</span>처음 나오는 개발 용어를 한두 문장으로 풀어줍니다.</div>
+    <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>각 단계 끝에서 스스로 점검하는 방법입니다. 이걸 통과해야 다음 단계로 갑니다.</div>
+    <div class="box help"><span class="box-title">🆘 막혔을 때</span>초심자가 자주 겪는 문제와 해결법입니다. 그래도 안 되면 정답 코드와 비교하세요.</div>
+
+    <h3 id="answer-code">막혔을 때 비교할 "정답 코드"</h3>
+    <p>
+      이 교재의 모든 코드는 작성자가 실제로 실행해서 동작을 확인한 코드입니다. 각 단계가 끝난 시점의 전체 코드를
+      GitHub에 <strong>체크포인트</strong>로 남겨 두었습니다. 단계마다 있는 <em>"정답 코드 보기"</em> 링크를 누르면
+      그 시점의 코드 전체를 볼 수 있어요. 내 코드와 한 줄씩 비교하면 대부분의 문제를 찾을 수 있습니다.
+    </p>
+
+    <h2 id="big-picture">큰 그림: 우리가 만들 서비스는 어떻게 움직이나</h2>
+    <p>코드를 쓰기 전에, 완성된 서비스 안에서 데이터가 어떻게 오가는지 먼저 봅시다. 앞으로 나오는 모든 코드는 이 그림의 어느 한 칸에 들어갑니다.</p>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 820 320" role="img" aria-labelledby="arch-title arch-desc">
+        <title id="arch-title">클라이언트-서버-데이터베이스 흐름도</title>
+        <desc id="arch-desc">브라우저가 Next.js 서버에 요청을 보내면, 서버가 Drizzle을 통해 Neon 데이터베이스에 질문하고, 결과로 화면을 만들어 브라우저에 돌려준다.</desc>
+        <defs>
+          <marker id="arch-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="d-arrowhead" d="M0,0 L10,5 L0,10 z"/>
+          </marker>
+        </defs>
+
+        <!-- 브라우저 -->
+        <rect class="d-box d-client" x="10" y="95" width="150" height="130" rx="12"/>
+        <text class="d-title" x="85" y="130" text-anchor="middle">브라우저</text>
+        <text class="d-small" x="85" y="152" text-anchor="middle">(클라이언트)</text>
+        <text class="d-text" x="85" y="182" text-anchor="middle">사용자가 보는 화면</text>
+        <text class="d-text" x="85" y="202" text-anchor="middle">클릭 · 입력</text>
+
+        <!-- 서버 묶음 -->
+        <rect class="d-box d-server" x="250" y="20" width="330" height="280" rx="14" stroke-dasharray="6 4"/>
+        <text class="d-title" x="265" y="46">Next.js 서버</text>
+        <text class="d-small" x="370" y="46">(인터넷에서는 Vercel이 실행)</text>
+
+        <rect class="d-box d-server" x="268" y="66" width="190" height="52" rx="8"/>
+        <text class="d-text" x="363" y="88" text-anchor="middle" font-weight="700">페이지</text>
+        <text class="d-small" x="363" y="107" text-anchor="middle">화면(HTML)을 만든다</text>
+
+        <rect class="d-box d-server" x="268" y="136" width="190" height="52" rx="8"/>
+        <text class="d-text" x="363" y="158" text-anchor="middle" font-weight="700">서버 액션</text>
+        <text class="d-small" x="363" y="177" text-anchor="middle">링크 추가·수정·삭제</text>
+
+        <rect class="d-box d-server" x="268" y="206" width="190" height="52" rx="8"/>
+        <text class="d-text" x="363" y="228" text-anchor="middle" font-weight="700">Better Auth</text>
+        <text class="d-small" x="363" y="247" text-anchor="middle">회원가입·로그인</text>
+
+        <rect class="d-box d-ext" x="478" y="66" width="86" height="192" rx="8"/>
+        <text class="d-text" x="521" y="150" text-anchor="middle" font-weight="700">Drizzle</text>
+        <text class="d-small" x="521" y="170" text-anchor="middle">DB 번역기</text>
+        <text class="d-small" x="521" y="186" text-anchor="middle">(ORM)</text>
+
+        <!-- 데이터베이스 (원통) -->
+        <path class="d-box d-db" d="M660,90 v140 a75,18 0 0 0 150,0 v-140"/>
+        <ellipse class="d-box d-db" cx="735" cy="90" rx="75" ry="18"/>
+        <text class="d-title" x="735" y="140" text-anchor="middle">Neon</text>
+        <text class="d-small" x="735" y="160" text-anchor="middle">(Postgres 데이터베이스)</text>
+        <text class="d-mono" x="735" y="195" text-anchor="middle">user · session</text>
+        <text class="d-mono" x="735" y="213" text-anchor="middle">account · link</text>
+
+        <!-- 화살표: 브라우저 ↔ 서버 -->
+        <line class="d-line" x1="162" y1="135" x2="248" y2="135" marker-end="url(#arch-arrow)"/>
+        <text class="d-text" x="205" y="124" text-anchor="middle" font-weight="700">① 요청</text>
+        <line class="d-line" x1="248" y1="190" x2="162" y2="190" marker-end="url(#arch-arrow)"/>
+        <text class="d-text" x="205" y="210" text-anchor="middle" font-weight="700">④ 응답</text>
+
+        <!-- 화살표: 서버 ↔ DB -->
+        <line class="d-line" x1="566" y1="135" x2="658" y2="135" marker-end="url(#arch-arrow)"/>
+        <text class="d-text" x="612" y="124" text-anchor="middle" font-weight="700">② 질문</text>
+        <line class="d-line" x1="658" y1="190" x2="566" y2="190" marker-end="url(#arch-arrow)"/>
+        <text class="d-text" x="612" y="210" text-anchor="middle" font-weight="700">③ 결과</text>
+      </svg>
+      <figcaption>① 브라우저가 "대시보드 보여줘" 요청 → ② 서버가 DB에 "이 사람 링크 목록 줘" 질문 → ③ DB가 결과 전달 → ④ 서버가 완성된 화면을 돌려줌</figcaption>
+    </figure>
+
+    <div class="box term">
+      <span class="box-title">📖 용어 풀이</span>
+      <ul>
+        <li><strong>클라이언트(Client)</strong>: 서비스를 "사용하는 쪽". 여기서는 사용자의 웹 브라우저(크롬 등)입니다.</li>
+        <li><strong>서버(Server)</strong>: 요청을 받아 일을 처리하고 결과를 돌려주는 "일하는 쪽" 컴퓨터입니다. 우리가 짠 Next.js 코드가 여기서 실행됩니다.</li>
+        <li><strong>데이터베이스(DB)</strong>: 회원 정보, 링크 같은 데이터를 표(테이블) 형태로 오래 보관하는 창고입니다. 우리는 Neon이라는 서비스가 빌려주는 Postgres DB를 씁니다.</li>
+        <li><strong>API</strong>: 프로그램끼리 "이렇게 요청하면 이렇게 답해줄게"라고 정해둔 약속(창구)입니다. 예: <code>/api/health</code>로 요청하면 서버가 DB 상태를 알려줌.</li>
+        <li><strong>ORM(Drizzle)</strong>: 자바스크립트 코드를 DB가 알아듣는 언어(SQL)로 바꿔주는 번역기입니다.</li>
+      </ul>
+    </div>
+
+    <div class="box why">
+      <span class="box-title">💡 왜 이 도구들을 쓰나요?</span>
+      <p>Next.js 하나로 화면과 서버 코드를 모두 자바스크립트로 쓸 수 있어 배울 언어가 하나뿐입니다. DB는 Neon, 로그인은 Better Auth를 쓰는데, 둘 다 "우리 DB 안에 무엇이 저장되는지"를 눈으로 볼 수 있어서 로그인이 실제로 어떻게 동작하는지 이해하기 좋습니다.</p>
+    </div>
+
+    <h2 id="goals">이번 단계에서 배우는 것</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>주차</th><th>할 일</th><th>배우는 개념</th></tr></thead>
+        <tbody>
+          <tr><td>1주차</td><td>경쟁 서비스 분석, 기능 목록, 와이어프레임 3장</td><td>문제 정의, 범위 정하기(스코프), 화면 설계</td></tr>
+          <tr><td>2주차</td><td>프로젝트 생성, DB 연결, 테이블 설계, 회원가입·로그인</td><td>환경 변수, 테이블과 관계, 마이그레이션, 해싱·세션·쿠키</td></tr>
+          <tr><td>3주차</td><td>링크 추가·수정·삭제, 공개 페이지, 로그아웃</td><td>CRUD, 서버에서 권한 검사, 동적 주소</td></tr>
+          <tr><td>4주차</td><td>배포, 운영 루프, 지인 테스트, 회고</td><td>배포, 개발/운영 DB 분리, 로그 보기, 피드백 반영</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="before-start">시작하기 전: 준비물 체크리스트</h2>
+    <p>
+      이 교재는 <a href="../../00-foundations/tutorial/index.html">0단계(기초)</a>를 마쳤다고 가정합니다.
+      터미널 명령어 실행, HTML/CSS/JS 기초, Git 커밋이 아직 낯설다면 0단계부터 보고 오세요.
+      아래 준비물은 0단계에서 이미 했다면 확인만 하고 체크하면 됩니다.
+    </p>
+
+    <details class="step" id="prep-tools" open>
+      <summary><span class="step-num">1</span>개발 도구 설치 확인</summary>
+      <div class="step-body">
+        <p>VSCode를 열고 <kbd>Ctrl</kbd> + <kbd>`</kbd>(백틱, 숫자 1 왼쪽 키)로 터미널을 연 다음, 오른쪽 위 <strong>∨</strong> 버튼에서 <strong>Git Bash</strong>를 선택하세요. 이 교재의 모든 명령어는 Git Bash 기준입니다.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>node -v
+npm -v
+git --version</code></pre>
+        </figure>
+        <div class="box check">
+          <span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li><code>node -v</code> 결과가 <code>v20.9.0</code> 이상이어야 합니다. (작성자 검증 환경: <code>v22.14.0</code>) 낮다면 <a href="https://nodejs.org/ko">nodejs.org</a>에서 <strong>LTS</strong> 버전을 설치하세요.</li>
+            <li><code>npm -v</code>, <code>git --version</code> 모두 숫자(버전)가 나오면 됩니다.</li>
+          </ul>
+        </div>
+        <p>Git에 내 이름과 이메일을 한 번 등록해 둡니다. 코드를 저장(커밋)할 때 "누가 저장했는지" 기록하는 용도예요.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git config --global user.name "내 이름"
+git config --global user.email "GitHub에-가입한-이메일@example.com"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="idx-node"><span>Node.js 20.9 이상 설치 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="idx-git"><span>Git 설치 + 이름/이메일 등록</span></label></li>
+          <li><label><input type="checkbox" data-task="idx-vscode"><span>VSCode에서 Git Bash 터미널 열기</span></label></li>
+        </ul>
+        <div class="box help">
+          <span class="box-title">🆘 막혔을 때</span>
+          <details><summary><code>node: command not found</code>가 나와요</summary><p>Node.js를 설치한 뒤 VSCode를 <strong>완전히 껐다가</strong> 다시 켜야 새 명령어를 인식합니다.</p></details>
+          <details><summary>터미널 목록에 Git Bash가 없어요</summary><p><a href="https://git-scm.com/download/win">git-scm.com</a>에서 Git을 설치하면 Git Bash가 함께 설치됩니다. 설치 후 VSCode를 다시 켜세요.</p></details>
+        </div>
+      </div>
+    </details>
+
+    <details class="step" id="prep-accounts">
+      <summary><span class="step-num">2</span>서비스 계정 3개 만들기</summary>
+      <div class="step-body">
+        <p>모두 무료입니다. GitHub를 먼저 만들고, 나머지 둘은 <strong>"GitHub로 계속하기"</strong>로 가입하면 비밀번호를 따로 외울 필요가 없습니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>서비스</th><th>하는 일</th><th>가입 주소</th></tr></thead>
+            <tbody>
+              <tr><td>GitHub</td><td>내 코드를 인터넷에 보관하는 곳</td><td><a href="https://github.com/signup">github.com</a></td></tr>
+              <tr><td>Neon</td><td>데이터베이스(Postgres)를 무료로 빌려줌</td><td><a href="https://neon.tech">neon.tech</a></td></tr>
+              <tr><td>Vercel</td><td>내 코드를 인터넷 주소로 실행(배포)해줌 — <strong>Hobby(무료)</strong> 선택</td><td><a href="https://vercel.com/signup">vercel.com</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box why"><span class="box-title">💡 왜 지금 만드나요?</span>2주차 첫날 Neon, 4주차에 GitHub와 Vercel을 씁니다. 가입 과정(이메일 인증 등)에서 막히면 흐름이 끊기니 미리 해둡니다. Neon 프로젝트는 아직 만들지 마세요 — 2주차에 설정과 함께 만듭니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="idx-github"><span>GitHub 계정 만들기</span></label></li>
+          <li><label><input type="checkbox" data-task="idx-neon"><span>Neon 계정 만들기 (GitHub로 가입)</span></label></li>
+          <li><label><input type="checkbox" data-task="idx-vercel"><span>Vercel 계정 만들기 (GitHub로 가입, Hobby 플랜)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="step" id="prep-folder">
+      <summary><span class="step-num">3</span>작업 폴더 정하기</summary>
+      <div class="step-body">
+        <p>이번 과정의 코드를 담을 폴더를 하나 정합니다. 예시에서는 문서 폴더 아래 <code>dev</code>라는 폴더를 씁니다. <strong>경로에 한글이나 띄어쓰기가 없는 곳</strong>을 추천합니다.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>mkdir -p ~/dev
+cd ~/dev
+pwd</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>pwd</code>(지금 위치 출력) 결과가 <code>/c/Users/내이름/dev</code>처럼 나오면 됩니다. 2주차 첫 명령어는 이 폴더에서 실행합니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="idx-folder"><span>작업 폴더(~/dev) 만들고 이동해보기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="weeks">주차별로 이동하기</h2>
+    <div class="card-grid">
+      <a class="card week-card" href="week1.html" data-week-card="week1">
+        <span class="now-badge">지금 할 차례</span>
+        <span class="week-label">1주차</span>
+        <strong>기획</strong>
+        <span class="muted">경쟁 서비스 분석, 기능 목록, 와이어프레임 (코드 없음)</span>
+        <div class="mini-track"><div class="mini-fill"></div></div>
+        <span class="mini-text"></span>
+      </a>
+      <a class="card week-card" href="week2.html" data-week-card="week2">
+        <span class="now-badge">지금 할 차례</span>
+        <span class="week-label">2주차</span>
+        <strong>프로젝트 생성과 로그인</strong>
+        <span class="muted">Next.js, Neon DB, 테이블, 회원가입·로그인</span>
+        <div class="mini-track"><div class="mini-fill"></div></div>
+        <span class="mini-text"></span>
+      </a>
+      <a class="card week-card" href="week3.html" data-week-card="week3">
+        <span class="now-badge">지금 할 차례</span>
+        <span class="week-label">3주차</span>
+        <strong>링크 관리와 공개 페이지</strong>
+        <span class="muted">추가·수정·삭제, 3개 제한, /사용자이름 페이지</span>
+        <div class="mini-track"><div class="mini-fill"></div></div>
+        <span class="mini-text"></span>
+      </a>
+      <a class="card week-card" href="week4.html" data-week-card="week4">
+        <span class="now-badge">지금 할 차례</span>
+        <span class="week-label">4주차</span>
+        <strong>배포와 운영</strong>
+        <span class="muted">Vercel 배포, 로그 보기, 지인 테스트, 회고</span>
+        <div class="mini-track"><div class="mini-fill"></div></div>
+        <span class="mini-text"></span>
+      </a>
+    </div>
+
+    <h2 id="done-criteria">이 단계를 끝냈다는 기준</h2>
+    <p>4주차 마지막에 아래를 모두 만족하면 1단계 완료입니다. (체크는 4주차 페이지에서 합니다)</p>
+    <ul>
+      <li>실제 URL로 배포되어 다른 사람의 휴대폰에서도 접속된다</li>
+      <li>회원가입 → 로그인 → 링크 3개 등록 → 공개 페이지에 정상 표시</li>
+      <li>4번째 링크 추가가 화면뿐 아니라 서버에서도 막힌다</li>
+      <li>다른 사람의 링크는 수정·삭제할 수 없다</li>
+      <li>지인 1명이 실제로 자기 SNS 프로필에 이 링크를 써본다</li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <span></span>
+      <a class="card next" href="week1.html"><small>다음</small>1주차 · 기획 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-25 · Node.js 22.14 · Next.js 16.3.6 · React 19.2.8 · Drizzle ORM 0.45.3 · drizzle-kit 0.31.11 · Better Auth 1.7.6 · @neondatabase/serverless 1.1.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>
