@@ -19,6 +19,14 @@ export const auth = betterAuth({
     minPasswordLength: 8,
   },
 
+  // user 표에 우리 서비스에 필요한 칸을 추가한다.
+  user: {
+    additionalFields: {
+      // 판매자 연락 방법 (예: 카카오톡 오픈채팅 링크). 가입할 때는 받지 않고, 내 판매 상품 화면에서 수정한다.
+      contact: { type: "string", required: false, input: false },
+    },
+  },
+
   plugins: [
     // user 표에 username 칸을 추가해주는 플러그인
     username({
