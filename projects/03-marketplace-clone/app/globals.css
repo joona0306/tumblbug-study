@@ -282,3 +282,20 @@ label.checkbox {
   align-items: center;
   gap: 6px;
 }
+
+/* 상세 페이지 연락 방법 */
+.contact {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.contact h2 {
+  font-size: 1rem;
+  margin: 0 0 4px;
+}
+
+.contact p {
+  margin: 0;
+}

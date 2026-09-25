@@ -32,6 +32,7 @@ async function findProduct(params: PageProps["params"]) {
       createdAt: product.createdAt,
       sellerId: product.userId,
       sellerName: user.username,
+      sellerContact: user.contact, // 개인정보. 아래에서 로그인한 사람에게만 그린다
     })
     .from(product)
     .innerJoin(user, eq(product.userId, user.id))
@@ -73,6 +74,25 @@ export default async function ProductPage({ params }: PageProps) {
         <span className={`badge ${item.status}`}>{STATUS_LABELS[item.status]}</span>
       </p>
       {item.description && <p className="description">{item.description}</p>}
+
+      <section className="contact">
+        <h2>판매자 연락 방법</h2>
+        {/* 서버 컴포넌트는 화면에 그린 것만 브라우저로 보낸다. 로그인하지 않았으면 연락 방법은 아예 전달되지 않는다 */}
+        {!me ? (
+          <p className="muted">
+            <Link href="/login">로그인</Link>하면 판매자 연락 방법을 볼 수 있어요.
+          </p>
+        ) : item.sellerContact ? (
+          <p className="description">{item.sellerContact}</p>
+        ) : (
+          <p className="muted">판매자가 아직 연락 방법을 적지 않았어요.</p>
+        )}
+        {isOwner && (
+          <p className="muted small">
+            내 연락 방법은 <Link href="/dashboard">내 판매 상품</Link>에서 바꿀 수 있어요.
+          </p>
+        )}
+      </section>
 
       {isOwner && (
         <div className="row owner-actions">
