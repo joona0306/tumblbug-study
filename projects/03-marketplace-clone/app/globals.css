@@ -148,3 +148,68 @@ button.danger {
   color: var(--danger);
   border: 1px solid var(--danger);
 }
+
+select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+/* 등록 폼의 사진 미리보기 */
+.preview-image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+/* 상품 상세 */
+.product-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.product-detail h1 {
+  margin: 4px 0 8px;
+}
+
+.price {
+  font-size: 1.2rem;
+}
+
+.description {
+  white-space: pre-wrap; /* 설명의 줄바꿈을 그대로 */
+  word-break: break-word;
+}
+
+/* 판매 상태 표시 */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.badge.sold {
+  border-color: var(--muted);
+  color: var(--muted);
+}
