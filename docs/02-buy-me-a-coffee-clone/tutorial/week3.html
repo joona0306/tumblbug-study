@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ko" data-course="coffee">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3주차 후원 내역 · Buy Me a Coffee 교재</title>
+  <meta name="description" content="공개 페이지 후원 내역, 크리에이터 대시보드 합계, 내 서비스 공격해보기">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week3">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">☕ Buy Me a Coffee 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주차 · 기획과 시작 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주차 · 결제 연동 <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3" aria-current="page">3주차 · 후원 내역 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주차 · 배포·운영 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">3주차 · 3단계</span>
+    <h1>후원 내역 보여주기, 그리고 내 서비스 공격해보기</h1>
+    <p class="lead">결제가 되니 이제 "누가 응원했는지"를 보여줄 차례입니다. 주 후반에는 해커가 된 셈 치고 지금까지 만든 방어가 정말 동작하는지 하나씩 두드려 봅니다.</p>
+
+    <div class="box why"><span class="box-title">💡 이번 주의 핵심 한 줄</span><strong>"완료된(paid) 후원만 후원이다."</strong> pending이나 failed 줄을 목록이나 합계에 넣으면, 결제하지 않은 사람이 후원자로 보이거나 받지 않은 돈이 합계에 잡힙니다. 모든 조회에 <code>status = 'paid'</code> 조건이 붙는 이유예요.</div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>공개 페이지에 후원 내역 보여주기</summary>
+      <div class="step-body">
+        <p>DB에서 데이터를 꺼내는 함수를 한 파일에 모읍니다. 새 파일 <code>lib/queries.js</code>를 만듭니다.</p>
+        <figure class="code" data-src="lib/queries.js" data-tag="coffee-week3-step1">
+          <figcaption><span class="label">lib/queries.js</span></figcaption>
+          <pre><code>import { and, desc, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { support } from "@/db/schema";
+
+// 결제가 "완료(paid)"된 후원만 보여준다. 진행 중이거나 실패한 건은 후원이 아니다.
+const isPaid = (creatorId) =&gt; and(eq(support.creatorId, creatorId), eq(support.status, "paid"));
+
+// 공개 페이지용: 최근 후원 목록 (금액·결제 정보는 빼고 이름과 메시지만)
+export async function getRecentSupports(creatorId, limit = 20) {
+  return db
+    .select({
+      id: support.id,
+      supporterName: support.supporterName,
+      message: support.message,
+      paidAt: support.paidAt,
+    })
+    .from(support)
+    .where(isPaid(creatorId))
+    .orderBy(desc(support.paidAt))
+    .limit(limit);
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 공개 페이지에는 금액을 왜 안 보여주나요?</span>누가 얼마를 냈는지는 후원자에게 민감할 수 있어서, 공개 목록에는 이름과 메시지만 보여줍니다. 금액은 크리에이터 본인만 보는 대시보드(2단계)에서 보여요. <strong>어떤 정보를 누구에게 보여줄지</strong> 정하는 것도 설계입니다.</div>
+        <p><code>lib/support.js</code> 맨 아래에 날짜 함수를 추가합니다.</p>
+        <figure class="code" data-src="lib/support.js" data-tag="coffee-week3-step1">
+          <figcaption><span class="label">lib/support.js</span></figcaption>
+          <pre><code>// 후원 규칙을 한곳에 모아둔다. (화면과 서버가 같은 값을 쓰도록)
+
+// 고를 수 있는 후원 금액(원). 이 목록에 없는 금액은 서버가 거절한다.
+export const SUPPORT_AMOUNTS = [3000, 5000, 10000];
+
+export const NAME_MAX_LENGTH = 20;
+export const MESSAGE_MAX_LENGTH = 100;
+
+// 3000 → "3,000원"
+export function formatWon(amount) {
+  return `${amount.toLocaleString("ko-KR")}원`;
+}
+
+// 날짜를 한국 시간 기준 "2026. 9. 26." 모양으로. (서버는 다른 나라 시간대일 수 있어서 시간대를 꼭 정해준다)
+export function formatDate(date) {
+  return new Date(date).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" });
+}</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 왜 시간대를 정하나요?</span>Vercel 서버는 한국이 아닌 곳의 시계(UTC, 한국보다 9시간 늦음)를 씁니다. 한국 시간 새벽 3시에 한 후원이 "어제 날짜"로 보이지 않도록 <code>timeZone: "Asia/Seoul"</code>을 꼭 지정합니다.</div>
+        <p>공개 페이지에 "최근 후원" 카드를 붙입니다.</p>
+        <figure class="code" data-src="app/[username]/page.js" data-tag="coffee-week3-step1">
+          <figcaption><span class="label">app/[username]/page.js</span></figcaption>
+          <pre><code>import { eq } from "drizzle-orm";
+import { notFound } from "next/navigation";
+import { db } from "@/db";
+import { user } from "@/db/schema";
+import { getRecentSupports } from "@/lib/queries";
+import { formatDate } from "@/lib/support";
+import SupportForm from "./support-form";
+
+// 주소창의 /사용자이름 에서 크리에이터를 찾는다. (사용자 이름은 소문자로 저장되어 있다)
+// 공개 페이지이므로 이메일 같은 개인정보는 가져오지 않는다.
+async function findCreator(params) {
+  const { username } = await params;
+  const [found] = await db
+    .select({
+      id: user.id,
+      username: user.username,
+      displayUsername: user.displayUsername,
+      bio: user.bio,
+    })
+    .from(user)
+    .where(eq(user.username, username.toLowerCase()));
+  return found;
+}
+
+export async function generateMetadata({ params }) {
+  const creator = await findCreator(params);
+  return {
+    title: creator ? `${creator.displayUsername ?? creator.username}에게 커피 한 잔 ☕` : "크리에이터를 찾을 수 없음",
+  };
+}
+
+export default async function CreatorPage({ params }) {
+  const creator = await findCreator(params);
+  if (!creator) {
+    notFound();
+  }
+
+  const supports = await getRecentSupports(creator.id);
+
+  return (
+    &lt;div className="stack"&gt;
+      &lt;div className="card profile"&gt;
+        &lt;h1&gt;@{creator.displayUsername ?? creator.username}&lt;/h1&gt;
+        &lt;p className="muted"&gt;{creator.bio || "아직 소개가 없어요."}&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;SupportForm creatorUsername={creator.username} /&gt;
+
+      &lt;div className="card"&gt;
+        &lt;h2&gt;최근 후원&lt;/h2&gt;
+        {supports.length === 0 ? (
+          &lt;p className="muted"&gt;첫 번째 후원자가 되어주세요 ☕&lt;/p&gt;
+        ) : (
+          &lt;ul className="support-list"&gt;
+            {supports.map((item) =&gt; (
+              &lt;li key={item.id}&gt;
+                &lt;div className="row spread"&gt;
+                  &lt;strong&gt;{item.supporterName}&lt;/strong&gt;
+                  &lt;span className="muted small"&gt;{formatDate(item.paidAt)}&lt;/span&gt;
+                &lt;/div&gt;
+                {item.message &amp;&amp; &lt;p&gt;{item.message}&lt;/p&gt;}
+              &lt;/li&gt;
+            ))}
+          &lt;/ul&gt;
+        )}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/globals.css" data-tag="coffee-week3-step1" data-lines="224-244">
+          <figcaption><span class="label">app/globals.css (맨 아래에 추가)</span></figcaption>
+          <pre><code>/* 후원 내역 목록 */
+.support-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.support-list li {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.support-list li:first-child {
+  border-top: none;
+}
+
+.support-list p {
+  margin: 4px 0 0;
+  white-space: pre-wrap; /* 메시지의 줄바꿈을 그대로 보여준다 */
+  word-break: break-word;
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <ul>
+            <li>2주차에 완료한 테스트 결제가 "최근 후원"에 이름·메시지·날짜로 보인다</li>
+            <li>취소하거나 실패한 후원은 보이지 않는다</li>
+            <li>후원이 하나도 없는 크리에이터 페이지에는 "첫 번째 후원자가 되어주세요 ☕"</li>
+          </ul>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "3주차: 후원 내역 표시"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c3-s1-code"><span>lib/queries.js, 날짜 함수, 최근 후원 카드</span></label></li>
+          <li><label><input type="checkbox" data-task="c3-s1-check"><span>paid만 보이는 것 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/coffee-week3-step1/projects/02-buy-me-a-coffee-clone">coffee-week3-step1</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>크리에이터 대시보드: 합계와 받은 후원</summary>
+      <div class="step-body">
+        <p><code>lib/queries.js</code> 맨 아래에 대시보드용 함수 2개를 추가합니다. (맨 위 import에 <code>count</code>, <code>sum</code>도 추가)</p>
+        <figure class="code" data-src="lib/queries.js" data-tag="coffee-week3-step2">
+          <figcaption><span class="label">lib/queries.js</span></figcaption>
+          <pre><code>import { and, count, desc, eq, sum } from "drizzle-orm";
+import { db } from "@/db";
+import { support } from "@/db/schema";
+
+// 결제가 "완료(paid)"된 후원만 보여준다. 진행 중이거나 실패한 건은 후원이 아니다.
+const isPaid = (creatorId) =&gt; and(eq(support.creatorId, creatorId), eq(support.status, "paid"));
+
+// 공개 페이지용: 최근 후원 목록 (금액·결제 정보는 빼고 이름과 메시지만)
+export async function getRecentSupports(creatorId, limit = 20) {
+  return db
+    .select({
+      id: support.id,
+      supporterName: support.supporterName,
+      message: support.message,
+      paidAt: support.paidAt,
+    })
+    .from(support)
+    .where(isPaid(creatorId))
+    .orderBy(desc(support.paidAt))
+    .limit(limit);
+}
+
+// 크리에이터 대시보드용: 받은 후원 합계와 건수
+export async function getSupportSummary(creatorId) {
+  const [row] = await db
+    .select({ total: sum(support.amount), supporters: count() })
+    .from(support)
+    .where(isPaid(creatorId));
+  // sum 은 문자열로 오므로 숫자로 바꾼다. 후원이 하나도 없으면 null → 0
+  return { total: Number(row.total ?? 0), supporters: row.supporters };
+}
+
+// 크리에이터 대시보드용: 최근 받은 후원 (금액 포함)
+export async function getPaidSupportsForCreator(creatorId, limit = 50) {
+  return db
+    .select({
+      id: support.id,
+      supporterName: support.supporterName,
+      amount: support.amount,
+      message: support.message,
+      paidAt: support.paidAt,
+    })
+    .from(support)
+    .where(isPaid(creatorId))
+    .orderBy(desc(support.paidAt))
+    .limit(limit);
+}</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 SQL로 보면</span><code>getSupportSummary</code>는 <code>SELECT sum(amount), count(*) FROM support WHERE creator_id = '나' AND status = 'paid'</code>와 같습니다. DB가 합계를 직접 계산해서 숫자 하나만 돌려주므로, 후원이 1만 건이어도 빠릅니다.</div>
+        <figure class="code" data-src="app/dashboard/page.js" data-tag="coffee-week3-step2">
+          <figcaption><span class="label">app/dashboard/page.js</span></figcaption>
+          <pre><code>import Link from "next/link";
+import { signOut } from "@/app/actions/auth";
+import { getPaidSupportsForCreator, getSupportSummary } from "@/lib/queries";
+import { requireUser } from "@/lib/session";
+import { formatDate, formatWon } from "@/lib/support";
+import BioForm from "./bio-form";
+
+export default async function DashboardPage() {
+  // 로그인하지 않은 사람은 이 줄에서 /login 으로 보내지고, 아래 코드는 실행되지 않는다.
+  const user = await requireUser();
+
+  // "나"에게 온 후원만 가져온다 (user.id 로 거른다)
+  const summary = await getSupportSummary(user.id);
+  const supports = await getPaidSupportsForCreator(user.id);
+
+  return (
+    &lt;div className="stack"&gt;
+      &lt;div className="card"&gt;
+        &lt;div className="row spread"&gt;
+          &lt;h1&gt;크리에이터 대시보드&lt;/h1&gt;
+          &lt;form action={signOut}&gt;
+            &lt;button type="submit" className="secondary"&gt;
+              로그아웃
+            &lt;/button&gt;
+          &lt;/form&gt;
+        &lt;/div&gt;
+        &lt;p className="muted"&gt;
+          내 후원 페이지: &lt;Link href={`/${user.username}`}&gt;/{user.username}&lt;/Link&gt;
+        &lt;/p&gt;
+        &lt;div className="stats"&gt;
+          &lt;div&gt;
+            &lt;span className="muted small"&gt;받은 후원&lt;/span&gt;
+            &lt;strong&gt;{formatWon(summary.total)}&lt;/strong&gt;
+          &lt;/div&gt;
+          &lt;div&gt;
+            &lt;span className="muted small"&gt;후원 건수&lt;/span&gt;
+            &lt;strong&gt;{summary.supporters}건&lt;/strong&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div className="card"&gt;
+        &lt;h2&gt;받은 후원&lt;/h2&gt;
+        {supports.length === 0 ? (
+          &lt;p className="muted"&gt;아직 받은 후원이 없어요. 내 후원 페이지 주소를 SNS에 공유해보세요.&lt;/p&gt;
+        ) : (
+          &lt;ul className="support-list"&gt;
+            {supports.map((item) =&gt; (
+              &lt;li key={item.id}&gt;
+                &lt;div className="row spread"&gt;
+                  &lt;strong&gt;
+                    {item.supporterName} · {formatWon(item.amount)}
+                  &lt;/strong&gt;
+                  &lt;span className="muted small"&gt;{formatDate(item.paidAt)}&lt;/span&gt;
+                &lt;/div&gt;
+                {item.message &amp;&amp; &lt;p&gt;{item.message}&lt;/p&gt;}
+              &lt;/li&gt;
+            ))}
+          &lt;/ul&gt;
+        )}
+      &lt;/div&gt;
+
+      &lt;div className="card"&gt;
+        &lt;h2&gt;프로필&lt;/h2&gt;
+        &lt;BioForm currentBio={user.bio} /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/globals.css" data-tag="coffee-week3-step2" data-lines="246-264">
+          <figcaption><span class="label">app/globals.css (맨 아래에 추가)</span></figcaption>
+          <pre><code>/* 대시보드 숫자 요약 */
+.stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.stats &gt; div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.stats strong {
+  font-size: 1.3rem;
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <ul>
+            <li>대시보드에 "받은 후원 ○○원 / 후원 건수 ○건"이 paid 후원의 합과 같다</li>
+            <li>시크릿 창에서 다른 계정으로 가입해 대시보드를 보면 0원 / 0건 (남의 후원은 안 보임)</li>
+          </ul>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "3주차: 크리에이터 대시보드"</code></pre>
+        </figure>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c3-s2-code"><span>합계·목록 함수와 대시보드 작성</span></label></li>
+          <li><label><input type="checkbox" data-task="c3-s2-check"><span>합계 일치, 다른 계정은 0원 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/coffee-week3-step2/projects/02-buy-me-a-coffee-clone">coffee-week3-step2</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>내 서비스 공격해보기</summary>
+      <div class="step-body">
+        <p>코드는 추가하지 않습니다. 지금까지 만든 방어가 실제로 동작하는지, 나쁜 마음을 먹은 사람처럼 시도해 봅니다. 결과를 표에 체크하세요.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>공격</th><th>해보는 법</th><th>기대하는 결과</th><th>막는 코드</th></tr></thead>
+            <tbody>
+              <tr><td>100원만 내고 3,000원 후원한 척</td><td>2주차 3단계 "금액 위조" 실습</td><td>"결제 금액이 올바르지 않아요", <code>AMOUNT_MISMATCH</code></td><td>성공 페이지의 금액 비교</td></tr>
+              <tr><td>후원 메시지에 코드 심기</td><td>메시지에 <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>를 쓰고 결제 완료</td><td>공개 페이지에 글자 그대로 보이고, 알림창이 뜨지 않는다</td><td>React가 글자를 자동으로 안전하게 바꿔 출력</td></tr>
+              <tr><td>엄청 긴 메시지</td><td><kbd>F12</kbd>로 textarea의 <code>maxlength</code>를 지우고 101자 이상 입력 후 후원하기</td><td>"메시지는 100자 이하로 써주세요.", 결제창이 열리지 않는다</td><td><code>createSupport</code>의 글자 수 검사</td></tr>
+              <tr><td>한 결제로 두 번 후원</td><td>감사 화면에서 계속 새로고침</td><td>후원 건수가 늘지 않는다</td><td>"pending일 때만 paid로" 조건</td></tr>
+              <tr><td>남의 후원 내역 엿보기</td><td>다른 계정으로 로그인해 대시보드</td><td>내 후원만 보인다</td><td>조회 조건 <code>creator_id = 나</code></td></tr>
+              <tr><td>없는 크리에이터에게 후원</td><td>주소를 <code>/nobody_here</code>로</td><td>"페이지를 찾을 수 없어요"</td><td>공개 페이지의 <code>notFound()</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>XSS(크로스 사이트 스크립팅)</strong>: 남이 볼 페이지에 몰래 코드를 심어, 방문자의 브라우저에서 실행시키는 공격. 메시지처럼 <strong>다른 사람이 쓴 글을 보여주는 곳</strong>은 늘 조심해야 합니다. React는 <code>{item.message}</code>처럼 쓰면 <code>&lt;</code>를 <code>&amp;lt;</code>로 바꿔 글자로만 보여줘서 기본적으로 안전해요.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c3-s3-amount"><span>금액 위조 차단 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="c3-s3-xss"><span>script 메시지가 글자로만 보이는 것 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="c3-s3-long"><span>긴 메시지 서버 차단 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="c3-s3-rest"><span>새로고침·남의 대시보드·없는 크리에이터 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">3주차 회고</h2>
+    <div class="retro card">
+      <label for="c3-note-1">이번 주에 한 것</label>
+      <textarea id="c3-note-1" data-note="c3-did"></textarea>
+      <label for="c3-note-2">새로 이해한 것 (예: 어떤 정보를 누구에게 보여줄지 어떻게 정했나?)</label>
+      <textarea id="c3-note-2" data-note="c3-learned"></textarea>
+      <label for="c3-note-3">막혔던 것과 해결 방법</label>
+      <textarea id="c3-note-3" data-note="c3-stuck"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="c3-retro"><span>3주차 회고 3줄 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week2.html"><small>이전</small>← 2주차 · 결제 연동</a>
+      <a class="card next" href="week4.html"><small>다음</small>4주차 · 배포·운영 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-26 · Next.js 16.3.6 · Drizzle ORM 0.45.3</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

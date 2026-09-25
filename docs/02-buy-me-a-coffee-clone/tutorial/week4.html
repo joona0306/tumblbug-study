@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ko" data-course="coffee">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4주차 배포·운영 · Buy Me a Coffee 교재</title>
+  <meta name="description" content="배포, 테스트 결제 10회, 결제 완료율 측정, 실패 추적, 사용성·접근성, 지표 기반 개선">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week4">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">☕ Buy Me a Coffee 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주차 · 기획과 시작 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주차 · 결제 연동 <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주차 · 후원 내역 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4" aria-current="page">4주차 · 배포·운영 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">4주차 · 6단계</span>
+    <h1>배포하고, 결제를 10번 해보고, 실패에서 배우기</h1>
+    <p class="lead">배포 과정은 1단계에서 한 번 해봤으니 빠르게 지나갑니다. 이번 주의 중심은 <strong>결제가 실패하는 이유를 기록하고 모아 보는 운영</strong>입니다.</p>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>배포 준비 (1단계에서 가져온 것 확인)</summary>
+      <div class="step-body">
+        <p>배포 설정은 1단계 코드를 복사할 때 이미 따라왔습니다. 무엇이 준비되어 있는지만 확인하세요.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>파일</th><th>하는 일</th><th>2단계에서 달라진 점</th></tr></thead>
+            <tbody>
+              <tr><td><code>scripts/migrate.mjs</code></td><td>운영 배포 때 DB 구조 자동 반영</td><td>이번에는 기록 3개(<code>init</code>, <code>add_bio</code>, <code>add_support</code>)가 순서대로 적용됨</td></tr>
+              <tr><td><code>vercel.json</code></td><td>서버 위치 싱가포르</td><td>그대로</td></tr>
+              <tr><td><code>app/layout.js</code>의 <code>&lt;Analytics /&gt;</code></td><td>방문 수 측정</td><td>그대로</td></tr>
+              <tr><td><code>/api/health</code></td><td>DB 상태 확인</td><td>그대로</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>그다음은 1단계 4주차와 같은 순서입니다.</p>
+        <ol>
+          <li><strong>GitHub</strong>에 새 저장소 <code>my-coffee</code>를 만들고 push (<a href="../../01-linktree-clone/tutorial/week4.html#step-2">1단계 방법</a>)</li>
+          <li><strong>Neon</strong> <code>my-coffee</code> 프로젝트에 <code>dev</code> 브랜치를 만들고 <code>.env.local</code>을 dev 주소로 교체, 기본 브랜치의 테스트 데이터 정리 (<a href="../../01-linktree-clone/tutorial/week4.html#step-3">1단계 방법</a>). 정리 SQL은 <code>DELETE FROM "user";</code> — support 줄도 함께 지워집니다(cascade)</li>
+        </ol>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c4-s1-github"><span>GitHub에 my-coffee push (.env.local 없는 것 확인)</span></label></li>
+          <li><label><input type="checkbox" data-task="c4-s1-branch"><span>Neon dev 브랜치 분리, 운영 DB 정리</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>Vercel 배포 (환경 변수 5개)</summary>
+      <div class="step-body">
+        <p><a href="https://vercel.com/new">vercel.com/new</a>에서 <code>my-coffee</code>를 Import하고 환경 변수 5개를 넣습니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Key</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td><code>DATABASE_URL</code></td><td>Neon <code>my-coffee</code> <strong>기본 브랜치</strong>의 주소</td></tr>
+              <tr><td><code>BETTER_AUTH_SECRET</code></td><td>새로 만든 운영용 문자열 (개발용과 다르게)</td></tr>
+              <tr><td><code>BETTER_AUTH_URL</code></td><td><code>https://my-coffee.vercel.app</code> (배포 후 실제 주소로 맞추기)</td></tr>
+              <tr><td><code>NEXT_PUBLIC_TOSS_CLIENT_KEY</code></td><td>테스트 클라이언트 키 (<code>test_gck_…</code>)</td></tr>
+              <tr><td><code>TOSS_SECRET_KEY</code></td><td>테스트 시크릿 키 (<code>test_gsk_…</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box why"><span class="box-title">💡 NEXT_PUBLIC_ 값을 바꿨다면 꼭 다시 배포</span><code>NEXT_PUBLIC_</code>로 시작하는 값은 <strong>빌드할 때</strong> 브라우저 코드 안에 글자로 박혀 들어갑니다. Vercel에서 값을 바꿔도 이미 만들어진 코드에는 옛 값이 남아 있어요. 바꾼 뒤에는 Deployments → <strong>Redeploy</strong>를 하세요.</div>
+        <div class="box help"><span class="box-title">🆘 결제 성공 후 localhost로 이동해요</span><p>성공·실패 주소는 코드에서 <code>window.location.origin</code>(지금 접속한 주소)으로 만들기 때문에 운영에서는 자동으로 운영 주소가 됩니다. localhost로 간다면 운영 주소가 아니라 내 컴퓨터에서 결제한 것이니 주소창을 확인하세요.</p></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>빌드 로그에 <code>[migrate] 운영 DB 마이그레이션 완료</code></li>
+            <li>운영 주소에서 가입 → 소개 저장 → 내 후원 페이지에 결제위젯이 보인다</li>
+            <li><strong>휴대폰</strong>으로 내 후원 페이지에 들어가 테스트 결제 1회 → 감사 화면 → 대시보드 합계 반영</li>
+          </ul>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c4-s2-deploy"><span>환경 변수 5개 넣고 배포, BETTER_AUTH_URL 맞추기</span></label></li>
+          <li><label><input type="checkbox" data-task="c4-s2-phone"><span>휴대폰으로 운영 주소에서 테스트 결제 1회</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>테스트 결제 10회 — 성공도, 실패도 일부러</summary>
+      <div class="step-body">
+        <p>결제 기능은 "한 번 됐다"로 끝내면 안 됩니다. 운영 주소에서 아래 시나리오를 모두 해보고 결과를 체크하세요. 실패 시나리오도 일부러 만들어야 실패 처리가 제대로 되는지 알 수 있어요.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>시나리오</th><th>기대 결과 (DB의 status / fail_reason)</th></tr></thead>
+            <tbody>
+              <tr><td>1~3</td><td>3,000 / 5,000 / 10,000원 각각 결제 완료</td><td><code>paid</code> 3건, 대시보드 합계 18,000원 증가</td></tr>
+              <tr><td>4</td><td>이름을 비우고 결제 완료</td><td><code>paid</code>, 공개 페이지에 "익명"</td></tr>
+              <tr><td>5</td><td>줄바꿈이 있는 메시지로 결제 완료</td><td>공개 페이지에 줄바꿈 그대로</td></tr>
+              <tr><td>6~7</td><td>결제창을 열었다가 닫기 (PC 1회, 휴대폰 1회)</td><td><code>failed</code> / <code>USER_CANCEL</code></td></tr>
+              <tr><td>8</td><td>금액 위조 (2주차 3단계 실습을 운영 주소로)</td><td><code>failed</code> / <code>AMOUNT_MISMATCH</code></td></tr>
+              <tr><td>9</td><td>감사 화면에서 새로고침 3번</td><td>후원 건수 그대로</td></tr>
+              <tr><td>10</td><td>결제창을 연 채로 브라우저 탭을 닫아버리기</td><td><code>pending</code>으로 남음 → 4단계 SQL에서 "중간에 사라진 주문"으로 잡힘 (30분 후)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c4-s3-success"><span>성공 시나리오 1~5</span></label></li>
+          <li><label><input type="checkbox" data-task="c4-s3-fail"><span>실패 시나리오 6~8</span></label></li>
+          <li><label><input type="checkbox" data-task="c4-s3-edge"><span>예외 시나리오 9~10</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>측정과 실패 추적 (운영 루프)</summary>
+      <div class="step-body">
+        <h3>① 성공 지표: 결제 완료율</h3>
+        <figure class="code" data-src="sql/success-metric.sql" data-tag="coffee-week4-step1">
+          <figcaption><span class="label">sql/success-metric.sql</span></figcaption>
+          <pre><code>-- 성공 지표: "결제를 시작한 후원 중 끝까지 완료된 비율"
+-- (후원하기 버튼을 누르면 pending 줄이 1개 생긴다 → 완료되면 paid)
+-- Neon → SQL Editor 에서 운영(production) 브랜치를 선택하고 실행한다.
+SELECT
+  count(*) AS 결제_시도,
+  count(*) FILTER (WHERE status = 'paid') AS 결제_완료,
+  round(100.0 * count(*) FILTER (WHERE status = 'paid') / nullif(count(*), 0), 1) AS 완료율_퍼센트
+FROM support;</code></pre>
+        </figure>
+        <h3>② 실패는 왜 났나</h3>
+        <figure class="code" data-src="sql/failed-payments.sql" data-tag="coffee-week4-step1">
+          <figcaption><span class="label">sql/failed-payments.sql</span></figcaption>
+          <pre><code>-- 운영 점검: 결제가 왜 실패했나?
+-- 1) 실패 이유별 건수 (가장 많은 것부터)
+SELECT fail_reason AS 실패_이유, count(*) AS 건수
+FROM support
+WHERE status = 'failed'
+GROUP BY fail_reason
+ORDER BY 건수 DESC;
+
+-- 2) 30분 넘게 pending 인 주문 = 결제창에서 브라우저를 닫는 등 중간에 사라진 것으로 추정
+SELECT count(*) AS 중간에_사라진_주문
+FROM support
+WHERE status = 'pending' AND created_at &lt; now() - interval '30 minutes';</code></pre>
+        </figure>
+        <p>두 파일을 프로젝트의 <code>sql/</code> 폴더에 저장해 두고, Neon SQL Editor(<strong>기본 브랜치</strong>)에 붙여넣어 실행합니다. 실패 SQL은 두 덩어리라 하나씩 실행하세요.</p>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>3단계 시나리오를 다 했다면 대략 이런 결과가 나옵니다: 결제 시도 11건 이상, 완료 5건 이상, 실패 이유에 <code>USER_CANCEL</code> 2건과 <code>AMOUNT_MISMATCH</code> 1건. (작성자 검증 데이터: 시도 8건 / 완료 3건 → 37.5%, 실패 이유 4종 집계)</div>
+        <h3>③ 로그와 함께 보기</h3>
+        <ul>
+          <li>Vercel → <strong>Logs</strong>에서 <code>[결제]</code>로 검색하면, 승인 실패·금액 불일치 때 남긴 로그(<code>orderId</code>, 이유)가 나옵니다. SQL의 <code>order_id</code>와 맞춰 보면 "언제, 어떤 주문이, 왜" 실패했는지 알 수 있어요.</li>
+          <li>개발자센터에 가입해 내 테스트 키를 쓴다면, 개발자센터의 결제 로그에서 토스 쪽 기록도 볼 수 있습니다.</li>
+        </ul>
+        <div class="box why"><span class="box-title">💡 실패 이유를 읽는 법</span><code>USER_CANCEL</code>이 많다 = 결제창까지 갔다가 마음을 바꿨다(결제 과정이 번거로운가?). <code>AMOUNT_MISMATCH</code>가 있다 = 누군가 조작을 시도했거나 코드에 금액 버그가 있다(반드시 확인). "중간에 사라진 주문"이 많다 = 결제창에서 이탈이 많다. 같은 "실패"라도 대응이 다릅니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c4-s4-metric"><span>운영 DB에서 결제 완료율 계산</span></label></li>
+          <li><label><input type="checkbox" data-task="c4-s4-fail"><span>실패 이유 집계 + Vercel 로그에서 [결제] 찾기</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/coffee-week4-step1/projects/02-buy-me-a-coffee-clone">coffee-week4-step1</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>사용성 테스트 + 접근성 점검</summary>
+      <div class="step-body">
+        <p>방법은 <a href="../../01-linktree-clone/tutorial/week4.html#step-7">1단계 4주차 7단계</a>와 같습니다. 이번 과제는 두 역할로 나눕니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>역할</th><th>과제</th></tr></thead>
+            <tbody>
+              <tr><td>후원자 (지인 A)</td><td>1. 이 크리에이터에게 5,000원을 후원하고 응원 메시지를 남겨 주세요 (테스트 결제라 돈은 안 나가요)<br>2. 방금 남긴 메시지가 어디에 보이는지 찾아 주세요</td></tr>
+              <tr><td>크리에이터 (지인 B)</td><td>1. 가입하고 한 줄 소개를 써 주세요<br>2. 내 후원 페이지 주소를 찾아 복사해 주세요<br>3. 지금까지 받은 후원 합계를 알려 주세요</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>접근성: <kbd>Tab</kbd>만으로 금액 고르기(방향키로 바꾸기) → 이름·메시지 → 결제위젯 → 후원하기까지 갈 수 있는지, Lighthouse 접근성 점수가 90점 이상인지 확인하세요. (작성자 검증: 교재 코드 그대로면 후원 페이지·대시보드·실패 페이지 모두 100점)</p>
+        <div class="retro card">
+          <label for="c4-usability">관찰 기록</label>
+          <textarea id="c4-usability" data-note="c4-usability"></textarea>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c4-s5-usability"><span>후원자·크리에이터 역할로 사용성 테스트</span></label></li>
+          <li><label><input type="checkbox" data-task="c4-s5-a11y"><span>키보드로 후원 흐름, Lighthouse 90점 이상</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>지표 기반 개선 1개</summary>
+      <div class="step-body">
+        <p><a href="../../01-linktree-clone/tutorial/week4.html#step-8">1단계에서 배운 개선 사이클</a>(지표 → 관찰 → 가설 → 수정·배포 → 재측정)을 결제 완료율로 한 바퀴 돕니다.</p>
+        <h3>예시로 한 바퀴</h3>
+        <ol>
+          <li><strong>지표</strong>: 결제 완료율 50%, 실패 이유는 대부분 <code>USER_CANCEL</code></li>
+          <li><strong>관찰</strong>: 지인 A가 결제위젯에서 결제수단을 한참 고민하다 창을 닫음. "테스트인데 진짜 돈 나가는 거 아니지?"라고 물음</li>
+          <li><strong>가설</strong>: "후원하기 버튼 바로 위에 '테스트 결제라 실제로 돈이 나가지 않아요' 안내를 두면 USER_CANCEL이 줄 것"</li>
+          <li><strong>수정·배포</strong>: 그 한 줄만 추가해 push</li>
+          <li><strong>재측정</strong>: 며칠 뒤 새 후원들로 완료율과 실패 이유를 다시 계산</li>
+        </ol>
+        <div class="retro card">
+          <label for="c4-before">지표 (개선 전)</label>
+          <textarea id="c4-before" data-note="c4-before"></textarea>
+          <label for="c4-hypothesis">관찰과 가설</label>
+          <textarea id="c4-hypothesis" data-note="c4-hypothesis"></textarea>
+          <label for="c4-after">바꾼 것과 개선 후 숫자</label>
+          <textarea id="c4-after" data-note="c4-after"></textarea>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="c4-s6-cycle"><span>지표 → 가설 → 수정·배포 → 재측정 한 바퀴</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="done">2단계 완료 기준 점검</h2>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="cdod-paid"><span>테스트 결제가 승인 완료되고 DB에 paid로 기록된다</span></label></li>
+      <li><label><input type="checkbox" data-task="cdod-list"><span>공개 페이지에 후원 내역과 메시지가 보인다</span></label></li>
+      <li><label><input type="checkbox" data-task="cdod-fail"><span>취소·실패가 에러 없이 처리되고 이유와 함께 failed로 기록된다</span></label></li>
+      <li><label><input type="checkbox" data-task="cdod-tamper"><span>성공 주소의 금액을 바꿔도 서버가 걸러낸다</span></label></li>
+      <li><label><input type="checkbox" data-task="cdod-ten"><span>테스트 결제 10회 이상, 결제 완료율 계산</span></label></li>
+      <li><label><input type="checkbox" data-task="cdod-a11y"><span>키보드로 후원 가능, Lighthouse 접근성 90점 이상</span></label></li>
+    </ul>
+
+    <h2 id="real-money">부록: 실제로 돈을 받으려면</h2>
+    <p>지금 서비스는 테스트 키라서 돈이 움직이지 않습니다. 실제 결제를 받으려면 코드보다 <strong>코드 밖의 준비</strong>가 훨씬 많아요. 교재 범위 밖이지만 큰 그림만 알아 두세요. (정확한 요건은 시점과 사업 형태에 따라 달라지니 반드시 공식 안내와 전문가에게 확인하세요.)</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>준비물</th><th>왜 필요한가</th></tr></thead>
+        <tbody>
+          <tr><td>사업자등록</td><td>PG사와 계약하려면 보통 사업자가 필요합니다</td></tr>
+          <tr><td>통신판매업 신고</td><td>인터넷으로 돈을 받고 무언가를 제공하는 사업이면 대개 필요합니다</td></tr>
+          <tr><td>PG사 가맹 계약·심사</td><td>토스페이먼츠 등과 계약하고 심사를 통과해야 <strong>라이브 키</strong>가 발급됩니다. 이때 테스트 키를 라이브 키로 바꿉니다</td></tr>
+          <tr><td>이용약관 · 개인정보처리방침 · 환불 정책</td><td>결제하는 사람에게 규칙과 개인정보 처리 방법을 알려야 합니다</td></tr>
+          <tr><td>후원(기부)의 성격 검토</td><td>대가 없는 금전 모집은 법적으로 다르게 취급될 수 있어, 서비스 형태에 맞는 검토가 필요합니다</td></tr>
+          <tr><td>정산·세금</td><td>받은 돈을 크리에이터에게 나눠 주려면 정산 구조와 세금 처리가 필요합니다 (이번 범위의 "제외" 항목)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="retro">4주차 회고 + 2단계 전체 회고</h2>
+    <div class="retro card">
+      <label for="c4-note-1">이번 주에 한 것</label>
+      <textarea id="c4-note-1" data-note="c4-did"></textarea>
+      <label for="c4-note-2">2단계 전체에서 가장 크게 배운 것</label>
+      <textarea id="c4-note-2" data-note="c4-learned"></textarea>
+      <label for="c4-note-3">3단계(당근마켓 미니)에서 다르게 하고 싶은 것</label>
+      <textarea id="c4-note-3" data-note="c4-next"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="c4-retro"><span>4주차 회고 + 2단계 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week3.html"><small>이전</small>← 3주차 · 후원 내역</a>
+      <a class="card next" href="index.html"><small>처음으로</small>시작 페이지 ↺</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-26 · 코드 실행 검증 완료 (결제 승인 성공 경로는 사람의 테스트 결제로 확인) · Vercel·Neon·토스 화면 안내는 작성 시점 기준</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>
