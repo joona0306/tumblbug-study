@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { support, user } from "@/db/schema";
 import { MESSAGE_MAX_LENGTH, NAME_MAX_LENGTH, SUPPORT_AMOUNTS } from "@/lib/support";
@@ -50,4 +50,13 @@ export async function createSupport({ creatorUsername, amount, supporterName, me
     orderName: `${creator.displayUsername ?? creator.username}에게 커피 후원`,
     supporterName: name,
   };
+}
+
+// 결제창을 닫거나(취소) 결제를 시작하지 못했을 때 부른다.
+// 진행 중(pending)이던 주문만 실패로 바꾸고 이유를 남긴다. (이미 결제된 주문은 건드리지 않는다)
+export async function cancelSupport({ orderId, reason }) {
+  await db
+    .update(support)
+    .set({ status: "failed", failReason: String(reason ?? "CLIENT_ERROR").slice(0, 100) })
+    .where(and(eq(support.orderId, String(orderId)), eq(support.status, "pending")));
 }

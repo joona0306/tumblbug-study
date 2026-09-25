@@ -2,7 +2,7 @@
 
 import { ANONYMOUS, loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import { useEffect, useState } from "react";
-import { createSupport } from "@/app/actions/support";
+import { cancelSupport, createSupport } from "@/app/actions/support";
 import { formatWon, MESSAGE_MAX_LENGTH, NAME_MAX_LENGTH, SUPPORT_AMOUNTS } from "@/lib/support";
 
 // 브라우저에 공개해도 되는 "클라이언트 키" (NEXT_PUBLIC_ 으로 시작하는 환경 변수만 브라우저에서 읽을 수 있다)
@@ -71,7 +71,9 @@ export default function SupportForm({ creatorUsername }) {
         failUrl: `${window.location.origin}/support/fail`,
       });
     } catch (e) {
-      // 결제수단을 고르지 않았거나 약관에 동의하지 않은 경우 등
+      // 구매자가 결제창을 닫았거나, 결제수단·약관을 고르지 않은 경우 등
+      // 만들어 둔 주문을 "실패"로 기록해 둔다 (운영할 때 어디서 포기했는지 보기 위해)
+      await cancelSupport({ orderId: order.orderId, reason: e?.code });
       setError(e?.message ?? "결제를 시작하지 못했어요. 다시 시도해주세요.");
       setPending(false);
     }
