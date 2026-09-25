@@ -5,7 +5,7 @@
   --text: #1a1a1a;
   --muted: #6b6b6b;
   --border: #e2e2e5;
-  --primary: #2f6fed;
+  --primary: #2563eb; /* 1단계의 #2f6fed 는 페이지 배경(#f7f7f8) 위 대비가 4.25 라 조금 어둡게 (4.83) */
   --primary-text: #ffffff;
   --danger: #d33a3a;
 }
