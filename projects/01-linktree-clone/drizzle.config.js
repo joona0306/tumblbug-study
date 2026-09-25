@@ -2,7 +2,8 @@ import { loadEnvConfig } from "@next/env";
 import { defineConfig } from "drizzle-kit";
 
 // drizzle-kit은 Next.js 밖에서 실행되므로, .env.local 을 직접 읽어오게 한다.
-loadEnvConfig(process.cwd());
+// (두 번째 값 true = "개발 모드"로 읽기. 내 컴퓨터에서는 항상 개발용 DB를 쓰도록)
+loadEnvConfig(process.cwd(), true);
 
 export default defineConfig({
   schema: "./db/schema.js", // 테이블 설계도 파일
