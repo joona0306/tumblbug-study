@@ -48,6 +48,16 @@ export async function listProducts(filter: ProductFilter = {}) {
     .limit(LIST_LIMIT);
 }
 
+// 내가 올린 상품 전체 (판매중·거래완료 모두)
+export async function listMyProducts(userId: string) {
+  return db
+    .select(cardColumns)
+    .from(product)
+    .innerJoin(user, eq(product.userId, user.id))
+    .where(eq(product.userId, userId))
+    .orderBy(desc(product.createdAt));
+}
+
 // 목록 한 줄의 타입을 함수의 결과에서 뽑아낸다.
 // Awaited: Promise 를 벗긴 결과 / [number]: 배열의 한 칸
 export type ProductCardData = Awaited<ReturnType<typeof listProducts>>[number];
