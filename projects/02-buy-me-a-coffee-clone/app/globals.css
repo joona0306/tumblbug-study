@@ -148,3 +148,8 @@ button.danger {
   color: var(--danger);
   border: 1px solid var(--danger);
 }
+
+/* 크리에이터 공개 프로필 */
+.profile {
+  text-align: center;
+}

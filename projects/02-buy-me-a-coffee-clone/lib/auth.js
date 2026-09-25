@@ -19,6 +19,14 @@ export const auth = betterAuth({
     minPasswordLength: 8,
   },
 
+  // user 표에 우리 서비스에 필요한 칸을 추가한다.
+  user: {
+    additionalFields: {
+      // 크리에이터 한 줄 소개. 가입할 때는 받지 않고(input: false), 대시보드에서 수정한다.
+      bio: { type: "string", required: false, input: false },
+    },
+  },
+
   plugins: [
     // user 표에 username 칸을 추가해주는 플러그인
     username({
