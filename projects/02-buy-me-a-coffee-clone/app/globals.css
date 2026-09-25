@@ -220,3 +220,25 @@ fieldset.amounts legend {
 .support-card h2 {
   margin: 0;
 }
+
+/* 후원 내역 목록 */
+.support-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.support-list li {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.support-list li:first-child {
+  border-top: none;
+}
+
+.support-list p {
+  margin: 4px 0 0;
+  white-space: pre-wrap; /* 메시지의 줄바꿈을 그대로 보여준다 */
+  word-break: break-word;
+}

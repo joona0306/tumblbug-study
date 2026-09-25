@@ -2,6 +2,8 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { user } from "@/db/schema";
+import { getRecentSupports } from "@/lib/queries";
+import { formatDate } from "@/lib/support";
 import SupportForm from "./support-form";
 
 // 주소창의 /사용자이름 에서 크리에이터를 찾는다. (사용자 이름은 소문자로 저장되어 있다)
@@ -33,6 +35,8 @@ export default async function CreatorPage({ params }) {
     notFound();
   }
 
+  const supports = await getRecentSupports(creator.id);
+
   return (
     <div className="stack">
       <div className="card profile">
@@ -40,6 +44,25 @@ export default async function CreatorPage({ params }) {
         <p className="muted">{creator.bio || "아직 소개가 없어요."}</p>
       </div>
       <SupportForm creatorUsername={creator.username} />
+
+      <div className="card">
+        <h2>최근 후원</h2>
+        {supports.length === 0 ? (
+          <p className="muted">첫 번째 후원자가 되어주세요 ☕</p>
+        ) : (
+          <ul className="support-list">
+            {supports.map((item) => (
+              <li key={item.id}>
+                <div className="row spread">
+                  <strong>{item.supporterName}</strong>
+                  <span className="muted small">{formatDate(item.paidAt)}</span>
+                </div>
+                {item.message && <p>{item.message}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

@@ -10,3 +10,8 @@ export const MESSAGE_MAX_LENGTH = 100;
 export function formatWon(amount) {
   return `${amount.toLocaleString("ko-KR")}원`;
 }
+
+// 날짜를 한국 시간 기준 "2026. 9. 26." 모양으로. (서버는 다른 나라 시간대일 수 있어서 시간대를 꼭 정해준다)
+export function formatDate(date) {
+  return new Date(date).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" });
+}
