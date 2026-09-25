@@ -177,10 +177,10 @@
       <table>
         <thead><tr><th>주차</th><th>할 일</th><th>배우는 개념</th></tr></thead>
         <tbody>
-          <tr><td>1주차</td><td>경쟁 서비스 분석, 기능 목록, 와이어프레임 3장</td><td>문제 정의, 범위 정하기(스코프), 화면 설계</td></tr>
+          <tr><td>1주차</td><td>경쟁 서비스 분석, 기능 목록, 성공 지표, 와이어프레임 3장, 디자인 결정</td><td>문제 정의, 범위 정하기(스코프), 성공 지표, 화면 설계, 디자인 원칙·토큰·대비</td></tr>
           <tr><td>2주차</td><td>프로젝트 생성, DB 연결, 테이블 설계, 회원가입·로그인</td><td>환경 변수, 테이블과 관계, 마이그레이션, 해싱·세션·쿠키</td></tr>
           <tr><td>3주차</td><td>링크 추가·수정·삭제, 공개 페이지, 로그아웃</td><td>CRUD, 서버에서 권한 검사, 동적 주소</td></tr>
-          <tr><td>4주차</td><td>배포, 운영 루프, 지인 테스트, 회고</td><td>배포, 개발/운영 DB 분리, 로그 보기, 피드백 반영</td></tr>
+          <tr><td>4주차</td><td>배포, 사용량 측정, 운영 루프, 사용성 테스트·접근성 점검, 지표 기반 개선</td><td>배포, 개발/운영 DB 분리, 로그 보기, 지표 측정, 관찰→가설→수정→재측정</td></tr>
         </tbody>
       </table>
     </div>
@@ -274,7 +274,7 @@ pwd</code></pre>
         <span class="now-badge">지금 할 차례</span>
         <span class="week-label">1주차</span>
         <strong>기획</strong>
-        <span class="muted">경쟁 서비스 분석, 기능 목록, 와이어프레임 (코드 없음)</span>
+        <span class="muted">경쟁 서비스 분석, 기능·지표, 와이어프레임, 디자인 결정 (코드 없음)</span>
         <div class="mini-track"><div class="mini-fill"></div></div>
         <span class="mini-text"></span>
       </a>
@@ -298,7 +298,7 @@ pwd</code></pre>
         <span class="now-badge">지금 할 차례</span>
         <span class="week-label">4주차</span>
         <strong>배포와 운영</strong>
-        <span class="muted">Vercel 배포, 로그 보기, 지인 테스트, 회고</span>
+        <span class="muted">Vercel 배포, 측정, 사용성 테스트, 지표 기반 개선</span>
         <div class="mini-track"><div class="mini-fill"></div></div>
         <span class="mini-text"></span>
       </a>
@@ -312,6 +312,8 @@ pwd</code></pre>
       <li>4번째 링크 추가가 화면뿐 아니라 서버에서도 막힌다</li>
       <li>다른 사람의 링크는 수정·삭제할 수 없다</li>
       <li>지인 1명이 실제로 자기 SNS 프로필에 이 링크를 써본다</li>
+      <li>성공 지표를 실제 데이터로 계산하고, 그걸 바탕으로 개선을 한 번 해본다</li>
+      <li>키보드만으로도 쓸 수 있고, 접근성 자동 점검(Lighthouse) 90점 이상</li>
     </ul>
 
     <nav class="pager" aria-label="이전/다음 페이지">

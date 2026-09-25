@@ -698,6 +698,7 @@ git commit -m "2주차 3단계: 로그인 설정과 테이블"</code></pre>
           <pre><code>rm app/page.module.css</code></pre>
         </figure>
         <p><code>app/globals.css</code>의 내용을 <strong>전부 지우고</strong> 아래로 바꿉니다. 라이트/다크 모드 색을 변수로 정해두고 가져다 씁니다.</p>
+        <div class="box why"><span class="box-title">💡 1주차 디자인 결정을 여기에 옮기세요</span>맨 위 <code>:root { … }</code>(라이트)와 <code>@media (prefers-color-scheme: dark)</code> 안의 <code>:root { … }</code>(다크)에 있는 색 값이 <a href="week1.html#step-4">1주차 디자인 결정표</a>의 값입니다. 내 색을 골랐다면 이 두 곳의 값만 바꾸면 서비스 전체 색이 바뀝니다. 아래 코드의 다른 부분은 그대로 두세요.</div>
         <figure class="code" data-src="app/globals.css" data-tag="linktree-week2-step4">
           <figcaption><span class="label">app/globals.css</span></figcaption>
           <pre><code>/* 라이트/다크 모드 색상을 변수로 정해두고, 아래에서 가져다 쓴다 */

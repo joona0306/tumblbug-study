@@ -30,8 +30,8 @@
   </header>
 
   <main>
-    <span class="eyebrow">1주차 · 코드 없음</span>
-    <h1>기획: 무엇을, 누구를 위해, 어디까지 만들까</h1>
+    <span class="eyebrow">1주차 · 코드 없음 · 5단계</span>
+    <h1>기획과 디자인: 무엇을, 누구를 위해, 어떻게 보이게 만들까</h1>
     <p class="lead">
       이번 주에는 코드를 한 줄도 쓰지 않습니다. 대신 "무엇을 만들지"를 글과 그림으로 정합니다.
       개발자가 가장 많이 하는 실수는 만들 것을 정하지 않고 바로 코드부터 쓰는 것입니다.
@@ -42,7 +42,7 @@
       <p>집을 지을 때 설계도 없이 벽돌부터 쌓으면, 다 쌓은 뒤에야 "문이 없네?"를 깨닫게 됩니다. 코드는 벽돌이고 기획은 설계도입니다. 설계도는 지우개로 고치면 되지만, 코드를 고치려면 몇 시간이 걸립니다.</p>
     </div>
 
-    <p>이번 주 결과물은 <strong>문서 1개 + 그림 3장</strong>입니다. 작업 폴더에 기획용 폴더를 만들어 모아 두세요.</p>
+    <p>이번 주 결과물은 <strong>기획 문서 1개(문제·범위·지표·디자인 결정) + 와이어프레임 3장</strong>입니다. 작업 폴더에 기획용 폴더를 만들어 모아 두세요.</p>
     <figure class="code cmd">
       <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
       <pre><code>mkdir -p ~/dev/my-links-plan
@@ -130,9 +130,23 @@ SNS 프로필에는 링크를 하나만 넣을 수 있다.
           </ul>
         </div>
         <div class="box why"><span class="box-title">💡 왜 링크를 3개로 제한하나요?</span>실제 서비스들이 "무료는 N개까지"처럼 제한을 두는 방식을 흉내 낸 것입니다. 이 제한을 <em>제대로</em> 구현하려면 "화면에서 막기"와 "서버에서 막기"의 차이를 이해해야 해서, 3주차의 중요한 학습 소재가 됩니다.</div>
+        <h3>③ 성공 지표: "잘 되고 있다"를 숫자로 정하기</h3>
+        <p>만들고 나서 "괜찮은 것 같은데?"로 끝나면 무엇을 고쳐야 할지 알 수 없습니다. 그래서 <strong>만들기 전에</strong> 무엇을 보면 성공인지 정해 둡니다. 좋은 지표는 서비스의 핵심 가치를 사용자가 실제로 누렸는지를 보여줍니다.</p>
+        <figure class="code">
+          <figcaption><span class="label">기획.md 에 이어서 쓰기 (이 교재의 결정)</span></figcaption>
+          <pre><code>## 성공 지표
+
+가입한 사람 중 링크를 1개 이상 등록한 사람의 비율
+
+- 왜: 가입만 하고 링크를 안 만들면 이 서비스의 가치(링크 모음 페이지)를 못 누린 것
+- 언제 확인: 4주차, 지인들이 써본 뒤
+- 목표(추측): 70% 이상</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 "가입자 수"가 아닌가요?</span>가입자 수는 홍보만 하면 올라갑니다. 하지만 가입하고 아무것도 안 했다면 서비스가 쓸모 있었다고 볼 수 없죠. <strong>"핵심 행동을 한 사람의 비율"</strong>이 제품이 제 역할을 하는지 더 잘 보여줍니다. 이 숫자는 4주차에 실제 데이터로 계산하고, 개선할 곳을 찾는 데 씁니다.</div>
         <ul class="checklist">
           <li><label><input type="checkbox" data-task="w1-problem"><span>문제 정의 한 문장 쓰기</span></label></li>
           <li><label><input type="checkbox" data-task="w1-scope"><span>포함/제외 표 작성하기 (제외 칸이 비어 있지 않은지 확인)</span></label></li>
+          <li><label><input type="checkbox" data-task="w1-metric"><span>성공 지표 1개와 목표 숫자 정하기</span></label></li>
         </ul>
       </div>
     </details>
@@ -222,7 +236,68 @@ SNS 프로필에는 링크를 하나만 넣을 수 있다.
     </details>
 
     <details class="step" id="step-4">
-      <summary><span class="step-num">4</span>데이터 구조 초안 잡기</summary>
+      <summary><span class="step-num">4</span>디자인 결정: 색·글꼴·모양 정하기</summary>
+      <div class="step-body">
+        <p>와이어프레임이 "무엇이 어디에"라면, 디자인은 "<strong>어떻게 보여서 사용자가 헷갈리지 않게 할지</strong>"를 정하는 일입니다. 예쁘게 꾸미는 것보다 <strong>일관된 결정</strong>이 먼저예요.</p>
+        <h3>① 기억할 원칙 4가지</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>원칙</th><th>뜻</th><th>우리 서비스에서</th></tr></thead>
+            <tbody>
+              <tr><td><strong>위계</strong></td><td>중요한 것일수록 크고 진하게</td><td>공개 페이지에서 가장 눈에 띄는 건 링크 버튼</td></tr>
+              <tr><td><strong>여백</strong></td><td>관련 있는 것은 가깝게, 다른 것은 멀게</td><td>링크 목록 카드와 "새 링크 추가" 카드를 떨어뜨리기</td></tr>
+              <tr><td><strong>일관성</strong></td><td>같은 역할은 같은 모양</td><td>"실행" 버튼은 모두 파란색, "위험한 버튼(삭제)"은 모두 빨간 테두리</td></tr>
+              <tr><td><strong>대비</strong></td><td>글자와 배경의 밝기 차이가 충분해야 읽힘</td><td>흐린 회색 글씨도 기준(4.5:1) 이상으로</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>② 무드보드: 참고할 화면 고르기</h3>
+        <p>1단계에서 캡처한 경쟁 서비스 화면 중 <strong>좋았던 것 3장</strong>을 골라 <code>my-links-plan</code> 폴더에 모으고, 각각 "왜 좋았는지"를 한 줄씩 적으세요. (예: "버튼이 둥글어서 누르기 쉬워 보임")</p>
+        <h3>③ 디자인 결정표 쓰기</h3>
+        <p>색은 4~6개면 충분합니다. 결정한 값은 2주차에 CSS 변수로 그대로 옮기게 됩니다.</p>
+        <figure class="code">
+          <figcaption><span class="label">기획.md 에 이어서 쓰기 (이 교재의 기본값 — 내 색으로 바꿔도 됨)</span></figcaption>
+          <pre><code>## 디자인 결정
+
+| 역할 | 라이트 모드 | 다크 모드 | CSS 변수 |
+|---|---|---|---|
+| 배경 | #f7f7f8 | #121214 | --bg |
+| 카드 | #ffffff | #1c1c1f | --card |
+| 본문 글자 | #1a1a1a | #f0f0f0 | --text |
+| 흐린 글자 | #6b6b6b | #a0a0a6 | --muted |
+| 테두리 | #e2e2e5 | #2e2e33 | --border |
+| 메인(버튼·링크) | #2f6fed | #5b8cff | --primary |
+| 위험(에러·삭제) | #d33a3a | #ff6b6b | --danger |
+
+- 글꼴: 시스템 글꼴 (기기마다 가장 잘 읽히는 기본 글꼴, 따로 내려받지 않아 빠름)
+- 모서리: 카드 12px, 입력칸·버튼 8px, 공개 페이지 링크는 완전히 둥글게
+- 한 줄 폭: 최대 480px (휴대폰에서 보기 좋은 폭)</code></pre>
+        </figure>
+        <h3>④ 대비 확인하기</h3>
+        <p>색을 바꿨다면 <a href="https://webaim.org/resources/contrastchecker/">WebAIM Contrast Checker</a>에 글자색과 배경색을 넣어 <strong>4.5:1 이상</strong>인지 확인하세요. 이 교재 기본값은 작성자가 계산해 두었습니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>조합</th><th>라이트</th><th>다크</th></tr></thead>
+            <tbody>
+              <tr><td>본문 글자 / 카드</td><td>17.40</td><td>14.92</td></tr>
+              <tr><td>흐린 글자 / 카드</td><td>5.33</td><td>6.54</td></tr>
+              <tr><td>버튼 글자 / 메인 색</td><td><strong>4.55</strong> (턱걸이)</td><td>6.22</td></tr>
+              <tr><td>에러 글자 / 카드</td><td>4.73</td><td>6.13</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box why"><span class="box-title">💡 4.55는 아슬아슬해요</span>흰 글씨 + 파란 버튼 조합은 기준(4.5)을 겨우 넘습니다. 메인 색을 지금보다 <strong>밝은</strong> 파랑이나 노랑·민트처럼 밝은 색으로 바꾸면 흰 글씨가 기준 미달이 됩니다. 그럴 때는 버튼 글자를 검정 계열로 바꾸세요. 눈이 불편한 사람, 햇빛 아래 휴대폰을 보는 사람 모두를 위한 기준입니다.</div>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>디자인 토큰</strong>: 색, 간격, 모서리처럼 디자인 결정을 이름 붙인 값으로 정리한 것. 위 표의 <code>--primary</code> 같은 CSS 변수가 바로 디자인 토큰입니다. 결정을 한 곳에 모아두면 나중에 색을 바꿀 때 한 줄만 고치면 됩니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w1-moodboard"><span>무드보드: 좋았던 화면 3장과 이유 정리</span></label></li>
+          <li><label><input type="checkbox" data-task="w1-design-tokens"><span>디자인 결정표 작성 (색·글꼴·모서리)</span></label></li>
+          <li><label><input type="checkbox" data-task="w1-contrast"><span>내가 고른 색 조합의 대비 4.5:1 이상 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>데이터 구조 초안 잡기</summary>
       <div class="step-body">
         <p>와이어프레임에 보이는 정보는 모두 <strong>어딘가에 저장</strong>되어 있어야 합니다. 화면을 보며 "이 글자는 어디서 오지?"를 적어 봅니다.</p>
         <div class="table-wrap">

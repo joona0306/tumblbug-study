@@ -30,8 +30,8 @@
   </header>
 
   <main>
-    <span class="eyebrow">4주차 · 6단계</span>
-    <h1>배포하고, 운영하고, 한 번 개선하기</h1>
+    <span class="eyebrow">4주차 · 8단계</span>
+    <h1>배포하고, 측정하고, 운영하고, 개선하기</h1>
     <p class="lead">
       지금까지는 내 컴퓨터(<code>localhost</code>)에서만 돌아갔습니다. 이번 주에는 실제 인터넷 주소로 서비스를 열고,
       실제 사람이 쓰게 하고, 문제가 생기면 어디를 봐야 하는지 배웁니다.
@@ -309,7 +309,86 @@ git push -u origin main</code></pre>
 
     <!-- ======================= 5단계 ======================= -->
     <details class="step" id="step-5">
-      <summary><span class="step-num">5</span>운영 루프: 로그 보기, 두 DB 확인, 개선 배포</summary>
+      <summary><span class="step-num">5</span>사용량 측정: 방문 수와 성공 지표</summary>
+      <div class="step-body">
+        <p>1주차에 정한 성공 지표를 실제로 잴 준비를 합니다. 두 가지 도구를 씁니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>무엇을</th><th>어떻게</th><th>알 수 있는 것</th></tr></thead>
+            <tbody>
+              <tr><td>방문 수</td><td>Vercel Analytics (무료)</td><td>몇 명이 어느 페이지를 봤나, 어느 나라·기기에서 왔나</td></tr>
+              <tr><td>성공 지표</td><td>운영 DB에 SQL 한 번 실행</td><td>가입자 중 링크를 1개 이상 등록한 비율</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>① 방문 수 측정 붙이기</h3>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>npm install --save-exact @vercel/analytics@2.0.1</code></pre>
+        </figure>
+        <p><code>app/layout.js</code>에 두 줄(맨 위 import, <code>&lt;Analytics /&gt;</code>)을 추가합니다.</p>
+        <figure class="code" data-src="app/layout.js" data-tag="linktree-week4-step2">
+          <figcaption><span class="label">app/layout.js</span></figcaption>
+          <pre><code>import { Analytics } from "@vercel/analytics/next";
+import "./globals.css";
+
+export const metadata = {
+  title: "My Links",
+  description: "여러 링크를 한 페이지에 모아 보여주는 서비스",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="ko"&gt;
+      &lt;body&gt;
+        &lt;main className="container"&gt;{children}&lt;/main&gt;
+        {/* 방문 기록(페이지뷰)을 Vercel에 보낸다. 내 컴퓨터(개발 모드)에서는 보내지 않는다 */}
+        &lt;Analytics /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+        </figure>
+        <p>commit + push로 배포한 뒤, Vercel 프로젝트 화면의 <strong>Analytics</strong> 탭에서 <strong>Enable</strong>(Web Analytics 켜기)을 누릅니다.</p>
+        <div class="box why"><span class="box-title">💡 개인정보는 괜찮나요?</span>Vercel Web Analytics는 쿠키를 쓰지 않고, 방문자를 개인 단위로 추적하지 않는 방식으로 페이지뷰를 셉니다. 그래서 별도 동의 팝업 없이 쓸 수 있는 편입니다. 서비스를 키우면 개인정보처리방침에 "방문 통계를 수집한다"는 문장은 꼭 넣으세요.</div>
+
+        <h3>② 성공 지표를 SQL로 계산하기</h3>
+        <p>이 SQL은 프로젝트에 파일로 저장해 두고(<code>sql/success-metric.sql</code>), 필요할 때 Neon <strong>SQL Editor</strong>에 붙여넣어 실행합니다. 이때 브랜치가 <strong>운영(production/main)</strong>인지 꼭 확인하세요.</p>
+        <figure class="code" data-src="sql/success-metric.sql" data-tag="linktree-week4-step2">
+          <figcaption><span class="label">sql/success-metric.sql</span></figcaption>
+          <pre><code>-- 성공 지표: "가입한 사람 중 링크를 1개 이상 등록한 사람의 비율"
+-- Neon → SQL Editor 에서 운영(production) 브랜치를 선택하고 실행한다.
+SELECT
+  count(*) AS 가입자_수,
+  count(*) FILTER (
+    WHERE EXISTS (SELECT 1 FROM link WHERE link.user_id = "user".id)
+  ) AS 링크_등록자_수,
+  round(
+    100.0 * count(*) FILTER (
+      WHERE EXISTS (SELECT 1 FROM link WHERE link.user_id = "user".id)
+    ) / nullif(count(*), 0),
+    1
+  ) AS 등록_비율_퍼센트
+FROM "user";</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📖 SQL 읽는 법</span><code>count(*)</code> = 전체 줄 수(가입자 수). <code>FILTER (WHERE EXISTS (…))</code> = "그중 link 표에 내 id로 된 줄이 하나라도 있는 사람만" 세기. <code>nullif(count(*), 0)</code>는 가입자가 0명일 때 0으로 나누는 오류를 막아줍니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>휴대폰으로 운영 주소를 몇 번 열고 몇 분 뒤 Vercel <strong>Analytics</strong> 탭에 방문 수가 잡힌다 (내 컴퓨터의 <code>localhost</code> 방문은 세지 않습니다)</li>
+            <li>SQL을 실행하면 <code>가입자_수 | 링크_등록자_수 | 등록_비율_퍼센트</code> 한 줄이 나온다. (작성자 검증: 가입자 3명 중 2명이 링크 등록 → <code>66.7</code>)</li>
+          </ul>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s5-analytics"><span>Analytics 설치·배포·Enable, 방문 수 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s5-metric"><span>운영 DB에서 성공 지표 SQL 실행</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/linktree-week4-step2/projects/01-linktree-clone">linktree-week4-step2</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>운영 루프: 로그 보기, 두 DB 확인</summary>
       <div class="step-body">
         <h3>① 로그 보기</h3>
         <p>서비스에서 문제가 생기면 가장 먼저 보는 곳이 <strong>로그</strong>입니다. 서버에서 일어난 일이 시간순으로 기록되어 있어요.</p>
@@ -323,15 +402,6 @@ git push -u origin main</code></pre>
         <h3>② 두 DB가 정말 분리되었는지 확인</h3>
         <p>내 컴퓨터(<code>localhost</code>)에서 링크를 하나 추가해 보세요. 운영 주소의 공개 페이지에는 나타나지 <strong>않아야</strong> 합니다. 반대로 운영에서 가입한 계정으로는 <code>localhost</code>에 로그인할 수 없습니다.</p>
 
-        <h3>③ 고치고 다시 배포하기 (개선 사이클)</h3>
-        <p>이제 코드를 고쳐서 push만 하면 Vercel이 알아서 새 버전을 배포합니다. 작은 것 하나를 바꿔 보세요. 예: 첫 화면(<code>app/page.js</code>)의 소개 문장.</p>
-        <figure class="code cmd">
-          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
-          <pre><code>git add .
-git commit -m "첫 화면 소개 문구 수정"
-git push</code></pre>
-        </figure>
-        <p>Vercel Deployments 탭에 새 배포가 생기고, 1~2분 뒤 운영 주소에 반영됩니다.</p>
         <div class="box term"><span class="box-title">📖 나중에 표 구조를 바꾸고 싶다면</span>
           <ol>
             <li><code>db/schema.js</code> 수정</li>
@@ -341,46 +411,130 @@ git push</code></pre>
           <p>이렇게 하면 운영 DB를 손으로 건드릴 일이 없습니다. (2단계 이후 교재에서 실제로 해봅니다)</p>
         </div>
         <ul class="checklist">
-          <li><label><input type="checkbox" data-task="w4-s5-logs"><span>Vercel Logs에서 내 요청 찾아보기</span></label></li>
-          <li><label><input type="checkbox" data-task="w4-s5-split"><span>개발/운영 DB가 분리된 것 확인</span></label></li>
-          <li><label><input type="checkbox" data-task="w4-s5-redeploy"><span>작은 수정 1개를 push해서 자동 배포 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s6-logs"><span>Vercel Logs에서 내 요청 찾아보기</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s6-split"><span>개발/운영 DB가 분리된 것 확인</span></label></li>
         </ul>
       </div>
     </details>
 
-    <!-- ======================= 6단계 ======================= -->
-    <details class="step" id="step-6">
-      <summary><span class="step-num">6</span>지인 1명에게 실제로 써보게 하기</summary>
+    <!-- ======================= 7단계 ======================= -->
+    <details class="step" id="step-7">
+      <summary><span class="step-num">7</span>사용성 테스트 + 접근성 점검</summary>
       <div class="step-body">
-        <p>내가 만든 서비스를 <strong>나 말고 다른 사람</strong>이 처음 쓰는 순간, 생각지 못한 문제가 반드시 보입니다. 이게 운영에서 가장 값진 정보입니다.</p>
+        <p>내가 만든 서비스를 <strong>나 말고 다른 사람</strong>이 처음 쓰는 순간, 생각지 못한 문제가 반드시 보입니다. "써보고 어땠어?"라고 묻는 것보다 <strong>과제를 주고 말없이 지켜보는 것</strong>이 훨씬 많은 것을 알려줍니다.</p>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>사용성 테스트</strong>: 실제 사용자에게 할 일을 주고, 어디서 막히는지 관찰하는 방법. 5명만 해도 큰 문제의 대부분이 드러난다고 알려져 있어요. 이번에는 1~2명으로 연습합니다.</div>
+
         <h3>① 부탁하기</h3>
         <figure class="code">
           <figcaption><span class="label">메시지 예시 (복사해서 수정)</span></figcaption>
-          <pre><code>안녕! 내가 처음으로 만든 웹 서비스가 있는데 10분만 써봐 줄 수 있어?
+          <pre><code>안녕! 내가 처음으로 만든 웹 서비스가 있는데 15분만 도와줄 수 있어?
 여러 링크(유튜브, 인스타, 블로그 등)를 한 페이지에 모아주는 서비스야.
-
-1. https://내주소.vercel.app 에서 가입
-2. 네 SNS 링크 2~3개 등록
-3. 네 공개 페이지 주소를 인스타 프로필에 며칠만 붙여줘 🙏
-
-쓰다가 헷갈리거나 이상했던 점을 그대로 말해주면 정말 큰 도움이 돼!</code></pre>
+화면 공유(또는 옆에서) 하면서 내가 드리는 과제 몇 개를 해보면 돼.
+정답은 없고, 헷갈리는 곳이 보이면 그건 네 잘못이 아니라 내 설계 문제야 🙏</code></pre>
         </figure>
-        <h3>② 관찰하고 질문하기</h3>
-        <ul>
-          <li>가능하면 옆에서(또는 화면 공유로) <strong>말없이</strong> 지켜보세요. 사용자가 멈칫하는 곳이 개선할 곳입니다.</li>
-          <li>끝나고 물어볼 것: "가장 헷갈렸던 곳은?", "없어서 아쉬웠던 기능은?", "친구에게 추천한다면 뭐라고 설명할래?"</li>
-        </ul>
-        <h3>③ 하나만 골라 개선</h3>
-        <p>받은 피드백 중 <strong>1주차 범위(포함 칸) 안에서</strong> 고칠 수 있는 것 딱 하나를 골라 고치고, 5단계 ③처럼 배포합니다. 범위 밖의 요청(예: 테마 꾸미기)은 기획 문서의 "다음에 할 것" 목록에 적어 두세요.</p>
+
+        <h3>② 과제 주고 관찰하기</h3>
+        <p>아래 과제를 <strong>하나씩</strong> 말해주고, 하는 동안 <strong>생각을 소리 내어 말해 달라</strong>고 부탁하세요("지금 이 버튼을 누르려고요"). 도와주고 싶어도 꾹 참고, 기록만 합니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>과제</th><th>성공?</th><th>걸린 시간</th><th>멈칫한 곳 / 한 말</th></tr></thead>
+            <tbody>
+              <tr><td>1. 이 주소로 가서 가입해 주세요</td><td></td><td></td><td></td></tr>
+              <tr><td>2. 네 인스타그램 링크를 추가해 주세요</td><td></td><td></td><td></td></tr>
+              <tr><td>3. 친구에게 보낼 내 페이지 주소를 찾아 복사해 주세요</td><td></td><td></td><td></td></tr>
+              <tr><td>4. 방금 추가한 링크의 제목을 바꿔 주세요</td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>끝나고 물어볼 것: "가장 헷갈렸던 곳은?", "없어서 아쉬웠던 기능은?", "친구에게 설명한다면 뭐라고 할래?" 그리고 <strong>며칠 동안 자기 SNS 프로필에 붙여 써봐 달라</strong>고 부탁하세요.</p>
+
+        <h3>③ 접근성 점검 (내가 직접)</h3>
+        <p>접근성은 눈이 불편하거나, 마우스를 쓰기 어렵거나, 작은 화면을 쓰는 사람도 서비스를 쓸 수 있게 하는 것입니다. 세 가지만 확인합니다.</p>
+        <ol>
+          <li><strong>키보드만으로</strong>: 마우스를 치우고 <kbd>Tab</kbd>(다음), <kbd>Shift</kbd>+<kbd>Tab</kbd>(이전), <kbd>Enter</kbd>(누르기)만으로 가입 → 링크 추가 → 수정 → 삭제를 해보세요. 지금 어디에 있는지 파란 테두리(포커스 표시)가 항상 보여야 합니다.</li>
+          <li><strong>자동 점검(Lighthouse)</strong>: 크롬에서 <kbd>F12</kbd> → <strong>Lighthouse</strong> 탭 → Categories에서 <strong>Accessibility</strong>만 체크 → Analyze. 90점 이상이 목표이고, 빨간 항목이 있으면 설명을 따라 고칩니다. (작성자 검증: 교재 코드 그대로면 로그인·회원가입·대시보드·공개 페이지 모두 100점)</li>
+          <li><strong>크게 보기</strong>: <kbd>Ctrl</kbd>+<kbd>+</kbd>로 200%까지 확대해도 글자가 잘리거나 겹치지 않는지 확인. 1주차에 색을 바꿨다면 대비(4.5:1)도 다시 확인하세요.</li>
+        </ol>
         <div class="retro card">
-          <label for="w4-feedback">받은 피드백 정리</label>
-          <textarea id="w4-feedback" data-note="w4-feedback"></textarea>
-          <label for="w4-fix">고친 것 1가지</label>
-          <textarea id="w4-fix" data-note="w4-fix"></textarea>
+          <label for="w4-usability">관찰 기록 (과제별로 막힌 곳, 들은 말)</label>
+          <textarea id="w4-usability" data-note="w4-usability"></textarea>
+          <label for="w4-a11y">접근성 점검 결과</label>
+          <textarea id="w4-a11y" data-note="w4-a11y"></textarea>
         </div>
         <ul class="checklist">
-          <li><label><input type="checkbox" data-task="w4-s6-ask"><span>지인 1명에게 사용 부탁하고 관찰하기</span></label></li>
-          <li><label><input type="checkbox" data-task="w4-s6-fix"><span>피드백 1개 반영해서 다시 배포</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s7-usability"><span>지인 1명 이상 사용성 테스트 (과제 4개, 관찰 기록)</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s7-keyboard"><span>키보드만으로 가입~삭제까지 해보기</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s7-lighthouse"><span>Lighthouse 접근성 90점 이상 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 8단계 ======================= -->
+    <details class="step" id="step-8">
+      <summary><span class="step-num">8</span>지표 기반으로 개선 1개 하기</summary>
+      <div class="step-body">
+        <p>이제 1단계의 마지막 조각입니다. 감으로 고치지 않고, <strong>숫자로 문제를 찾고 → 관찰로 원인을 짐작하고 → 고친 뒤 → 다시 숫자로 확인</strong>합니다.</p>
+        <figure class="diagram">
+          <svg viewBox="0 0 820 230" role="img" aria-labelledby="loop-title loop-desc">
+            <title id="loop-title">개선 사이클</title>
+            <desc id="loop-desc">지표 확인, 관찰, 가설, 수정과 배포, 다시 측정의 다섯 단계가 순서대로 이어지고, 다시 측정한 뒤 처음으로 돌아가 반복한다.</desc>
+            <defs>
+              <marker id="loop-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path class="d-arrowhead" d="M0,0 L10,5 L0,10 z"/>
+              </marker>
+            </defs>
+            <rect class="d-box d-db" x="10" y="40" width="140" height="80" rx="10"/>
+            <text class="d-text" x="80" y="72" text-anchor="middle" font-weight="700">① 지표 확인</text>
+            <text class="d-small" x="80" y="94" text-anchor="middle">등록 비율 40%?</text>
+            <rect class="d-box d-client" x="175" y="40" width="140" height="80" rx="10"/>
+            <text class="d-text" x="245" y="72" text-anchor="middle" font-weight="700">② 관찰</text>
+            <text class="d-small" x="245" y="94" text-anchor="middle">어디서 멈췄나</text>
+            <rect class="d-box d-ext" x="340" y="40" width="140" height="80" rx="10"/>
+            <text class="d-text" x="410" y="72" text-anchor="middle" font-weight="700">③ 가설</text>
+            <text class="d-small" x="410" y="94" text-anchor="middle">"~하면 오를 것"</text>
+            <rect class="d-box d-server" x="505" y="40" width="140" height="80" rx="10"/>
+            <text class="d-text" x="575" y="72" text-anchor="middle" font-weight="700">④ 수정·배포</text>
+            <text class="d-small" x="575" y="94" text-anchor="middle">git push</text>
+            <rect class="d-box d-db" x="670" y="40" width="140" height="80" rx="10"/>
+            <text class="d-text" x="740" y="72" text-anchor="middle" font-weight="700">⑤ 다시 측정</text>
+            <text class="d-small" x="740" y="94" text-anchor="middle">며칠 뒤 SQL</text>
+            <line class="d-line" x1="150" y1="80" x2="173" y2="80" marker-end="url(#loop-arrow)"/>
+            <line class="d-line" x1="315" y1="80" x2="338" y2="80" marker-end="url(#loop-arrow)"/>
+            <line class="d-line" x1="480" y1="80" x2="503" y2="80" marker-end="url(#loop-arrow)"/>
+            <line class="d-line" x1="645" y1="80" x2="668" y2="80" marker-end="url(#loop-arrow)"/>
+            <path class="d-line d-dash" d="M740,120 V180 H80 V122" marker-end="url(#loop-arrow)"/>
+            <text class="d-small" x="410" y="200" text-anchor="middle">목표에 못 미치면 다시 처음부터 — 한 번에 하나씩만 바꾼다</text>
+          </svg>
+          <figcaption>한 바퀴에 <strong>변경은 하나만</strong>. 두 개를 동시에 바꾸면 어느 것 때문에 숫자가 바뀌었는지 알 수 없다.</figcaption>
+        </figure>
+        <h3>예시로 한 바퀴</h3>
+        <ol>
+          <li><strong>지표</strong>: 가입자 5명 중 2명만 링크 등록 → 40% (목표 70%)</li>
+          <li><strong>관찰</strong>: 사용성 테스트에서 2명이 가입 직후 "이제 뭘 하면 되지?"라며 화면을 위아래로 스크롤함</li>
+          <li><strong>가설</strong>: "링크가 0개일 때 추가 폼이 아래쪽에 있어 눈에 안 띈다. 빈 상태 안내 문구를 '첫 링크를 추가해보세요 ↓'처럼 바꾸고 폼을 위로 올리면 등록 비율이 오를 것"</li>
+          <li><strong>수정·배포</strong>: 그 한 가지만 고쳐서 commit + push</li>
+          <li><strong>다시 측정</strong>: 새로 가입한 사람들로 며칠 뒤 SQL을 다시 실행해 비교</li>
+        </ol>
+        <p>내 서비스의 실제 숫자와 관찰 기록으로 한 바퀴를 돌아보세요. 사람이 적어 숫자가 크게 의미 없더라도, <strong>이 순서로 생각하는 연습</strong>이 목표입니다. 고칠 것은 1주차 범위(포함 칸) 안에서 고르고, 범위 밖 요청(예: 테마 꾸미기)은 기획 문서의 "다음에 할 것"에 적어 두세요.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>git add .
+git commit -m "개선: (가설 한 줄 요약)"
+git push</code></pre>
+        </figure>
+        <p class="code-note">push하면 Vercel Deployments 탭에 새 배포가 생기고, 1~2분 뒤 운영 주소에 반영됩니다.</p>
+        <div class="retro card">
+          <label for="w4-before">① 지표 (개선 전 숫자)</label>
+          <textarea id="w4-before" data-note="w4-before"></textarea>
+          <label for="w4-hypothesis">②③ 관찰과 가설 한 문장</label>
+          <textarea id="w4-hypothesis" data-note="w4-hypothesis"></textarea>
+          <label for="w4-after">④⑤ 바꾼 것과 개선 후 숫자</label>
+          <textarea id="w4-after" data-note="w4-after"></textarea>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w4-s8-hypothesis"><span>지표와 관찰 기록으로 가설 1개 세우기</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s8-deploy"><span>가설대로 한 가지만 고쳐서 배포</span></label></li>
+          <li><label><input type="checkbox" data-task="w4-s8-remeasure"><span>며칠 뒤 지표 다시 측정하고 기록</span></label></li>
         </ul>
       </div>
     </details>
@@ -393,6 +547,8 @@ git push</code></pre>
       <li><label><input type="checkbox" data-task="dod-limit"><span>4번째 링크 추가가 막힌다 (두 탭 실험으로 서버에서도 막히는 것 확인)</span></label></li>
       <li><label><input type="checkbox" data-task="dod-owner"><span>다른 사람의 링크를 수정/삭제할 수 없다</span></label></li>
       <li><label><input type="checkbox" data-task="dod-friend"><span>지인 1명이 실제로 자기 SNS 프로필에 이 링크를 써봤다</span></label></li>
+      <li><label><input type="checkbox" data-task="dod-metric"><span>성공 지표를 운영 DB에서 실제로 계산해 기록했다</span></label></li>
+      <li><label><input type="checkbox" data-task="dod-a11y"><span>키보드만으로 가입~링크 추가가 가능하고, Lighthouse 접근성 90점 이상</span></label></li>
     </ul>
 
     <h2 id="retro">4주차 회고 + 1단계 전체 회고</h2>

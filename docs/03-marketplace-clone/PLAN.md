@@ -42,7 +42,7 @@ product : id, user_id, title, price, category, status, image_url, created_at
 - [ ] 4주차: 배포 / 운영 루프 / 회고 / 텀블벅 기능 목록 미리 정리
 
 ## 운영 루프 (4주차)
-- 사용량 분석 도구(예: Vercel Analytics) 붙이기 — 어떤 페이지를 많이 보는지 숫자로 확인
+- 1단계에서 배운 사용량 측정(Vercel Analytics + SQL 지표)으로 검색·필터가 실제로 쓰이는지 숫자로 확인
 - 가장 많이 쓰이는(또는 안 쓰이는) 기능 1개를 골라 개선 → 다시 배포
 
 ## 완료 기준 (Definition of Done)
