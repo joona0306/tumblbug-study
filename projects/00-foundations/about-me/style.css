@@ -8,6 +8,16 @@
   --primary: #2f6fed;
 }
 
+/* body 에 class="dark" 가 붙으면 변수 값만 바꿔서 색을 한 번에 바꾼다 (script.js 가 붙였다 뗐다 함) */
+body.dark {
+  --bg: #121214;
+  --card: #1c1c1f;
+  --text: #f0f0f0;
+  --muted: #a0a0a6;
+  --border: #2e2e33;
+  --primary: #5b8cff;
+}
+
 /* 2. 페이지 전체: 배경색, 글꼴, 가운데 정렬 */
 body {
   margin: 0;
@@ -61,4 +71,16 @@ h2 {
 /* 마우스를 올렸을 때 */
 .links a:hover {
   border-color: var(--primary);
+}
+
+/* 5. 다크 모드 버튼 */
+button {
+  margin-top: 32px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
 }
