@@ -213,3 +213,46 @@ textarea {
   border-color: var(--muted);
   color: var(--muted);
 }
+
+/* 상품 목록: 카드 2열 격자 */
+.product-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.card-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3; /* 사진 비율이 달라도 카드 높이를 맞춘다 */
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: var(--border);
+}
+
+.card-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* 긴 제목은 한 줄로 자르고 … 표시 */
+}
+
+.card-price {
+  font-weight: 700;
+}
+
+/* 거래완료 상품은 흐리게 */
+.product-card.sold .card-image {
+  opacity: 0.5;
+}
