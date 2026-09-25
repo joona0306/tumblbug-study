@@ -11,12 +11,13 @@
 //     <figcaption><span class="label">app/page.js</span></figcaption>
 //     <pre><code>(이 부분이 자동으로 채워짐)</code></pre>
 //   </figure>
+//   - data-src 에 ../ 를 써서 다른 단계의 정답 코드를 가리킬 수도 있다 (예: ../01-linktree-clone/app/page.js)
 //   - data-lines 는 선택. 파일의 일부 줄만 보여줄 때 사용 (1부터 시작, 양 끝 포함)
 //
 // 또한 모든 HTML의 data-task 를 모아 app.js 의 TASKS 목록을 갱신한다.
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, join, posix } from "node:path";
 
 const [tutorialDir, projectDir] = process.argv.slice(2);
 if (!tutorialDir || !projectDir) {
@@ -27,7 +28,7 @@ if (!tutorialDir || !projectDir) {
 const escapeHtml = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 function readAtTag(tag, file) {
-  const path = `${projectDir.replace(/\\/g, "/").replace(/\/$/, "")}/${file}`;
+  const path = posix.normalize(`${projectDir.replace(/\\/g, "/").replace(/\/$/, "")}/${file}`);
   try {
     return execFileSync("git", ["show", `${tag}:${path}`], { encoding: "utf8" }).replace(/\r\n/g, "\n");
   } catch {

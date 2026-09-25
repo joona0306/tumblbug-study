@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="ko" data-course="foundations">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>0단계 기초 교재</title>
+  <meta name="description" content="완전 초심자를 위한 웹 개발 기초 — 1단계 Linktree 클론을 이해하며 따라가기 위한 준비 과정">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="index">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🧱 0단계 기초 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index" aria-current="page">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주차 · 도구와 HTML·CSS <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주차 · JS와 첫 배포 <span class="tab-count"></span></a>
+        <a href="../../01-linktree-clone/tutorial/index.html">다음: 1단계 →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">0단계 · 2주 과정</span>
+    <h1>웹 개발 기초: 내 자기소개 페이지를 인터넷에 올리기</h1>
+    <p class="lead">
+      컴퓨터로 인터넷만 쓸 줄 알면 시작할 수 있습니다. 2주 뒤에는 직접 만든 페이지가 실제 인터넷 주소로 열리고,
+      1단계(Linktree 클론)의 코드를 "읽고 이해하며" 따라갈 준비가 됩니다.
+    </p>
+
+    <h2 id="preview">2주 뒤 완성하는 것</h2>
+    <p>나를 소개하고 내 SNS 링크를 모아둔 한 페이지. 사실 1단계에서 만들 서비스의 "손으로 만든 버전"입니다. 1단계에서는 이걸 <strong>누구나 가입해서 자기 페이지를 만들 수 있는 서비스</strong>로 키웁니다.</p>
+    <div class="preview-grid" aria-label="완성본 미리보기">
+      <div class="preview">
+        <div class="preview-bar">about-me.vercel.app</div>
+        <div class="preview-body">
+          <div class="muted" style="font-size:0.75rem">좋은 저녁이에요 🌙</div>
+          <div class="pv-title">안녕하세요, 저는 김코딩입니다 👋</div>
+          <div class="muted" style="font-size:0.75rem">제품 개발을 처음부터 배우고 있어요.</div>
+          <div class="pv-pill">GitHub</div>
+          <div class="pv-pill">유튜브</div>
+          <div class="pv-pill">인스타그램</div>
+        </div>
+      </div>
+      <div class="preview">
+        <div class="preview-bar">터미널</div>
+        <div class="preview-body" style="font-family:ui-monospace,Consolas,monospace;font-size:0.75rem">
+          $ node practice.mjs<br>
+          1. 김코딩 1<br>
+          2. 안녕하세요, 김코딩님!<br>
+          …<br>
+          7. 잘못된 주소라서 에러가 났어요
+        </div>
+      </div>
+    </div>
+
+    <h2 id="how-to-use">이 교재 사용법</h2>
+    <ul>
+      <li>위에서 아래로 순서대로 따라 하세요. 할 일마다 있는 <strong>체크박스</strong>는 이 브라우저에 저장되고, 맨 위 진행률 바가 채워집니다.</li>
+      <li>코드 블록 오른쪽 위 <strong>복사</strong> 버튼으로 코드를 복사할 수 있습니다. 코드 위의 회색 줄은 그 코드를 넣을 <strong>파일 이름</strong>입니다.</li>
+      <li>안내 상자는 네 종류입니다: <strong>💡 왜?</strong>(이유) · <strong>📖 용어 풀이</strong> · <strong>✅ 확인하는 법</strong>(통과해야 다음으로) · <strong>🆘 막혔을 때</strong></li>
+      <li>이 교재의 모든 코드는 작성자가 직접 실행해 확인했습니다. 막히면 <a href="https://github.com/joona0306/tumblbug-study/tree/main/projects/00-foundations">정답 코드</a>와 비교하세요.</li>
+    </ul>
+
+    <h2 id="big-picture">큰 그림: 웹페이지는 어떻게 내 화면에 나타날까</h2>
+    <figure class="diagram">
+      <svg viewBox="0 0 820 300" role="img" aria-labelledby="web-title web-desc">
+        <title id="web-title">브라우저가 웹페이지를 받아오는 흐름도</title>
+        <desc id="web-desc">사용자가 주소를 입력하면 브라우저가 서버에 요청을 보내고, 서버는 HTML, CSS, JavaScript 파일을 돌려준다. 브라우저는 이 파일로 화면을 그린다. 1단계부터는 서버 뒤에 데이터베이스가 붙는다.</desc>
+        <defs>
+          <marker id="web-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="d-arrowhead" d="M0,0 L10,5 L0,10 z"/>
+          </marker>
+        </defs>
+        <!-- 사람 + 브라우저 -->
+        <rect class="d-box d-client" x="10" y="40" width="200" height="180" rx="12"/>
+        <text class="d-title" x="110" y="70" text-anchor="middle">브라우저</text>
+        <text class="d-small" x="110" y="90" text-anchor="middle">(크롬, 사파리 …)</text>
+        <rect class="d-muted-box" x="30" y="105" width="160" height="28" rx="6"/>
+        <text class="d-mono" x="110" y="124" text-anchor="middle">about-me.vercel.app</text>
+        <text class="d-small" x="110" y="155" text-anchor="middle">① 주소를 입력하면</text>
+        <text class="d-small" x="110" y="200" text-anchor="middle">④ 받은 파일로 화면을 그림</text>
+
+        <!-- 서버 -->
+        <rect class="d-box d-server" x="330" y="40" width="200" height="180" rx="12"/>
+        <text class="d-title" x="430" y="70" text-anchor="middle">서버</text>
+        <text class="d-small" x="430" y="90" text-anchor="middle">(24시간 켜진 컴퓨터)</text>
+        <rect class="d-box d-client" x="350" y="105" width="160" height="28" rx="6" stroke-width="1.2"/>
+        <text class="d-mono" x="430" y="124" text-anchor="middle">index.html · 뼈대</text>
+        <rect class="d-box d-ext" x="350" y="140" width="160" height="28" rx="6" stroke-width="1.2"/>
+        <text class="d-mono" x="430" y="159" text-anchor="middle">style.css · 옷</text>
+        <rect class="d-box d-db" x="350" y="175" width="160" height="28" rx="6" stroke-width="1.2"/>
+        <text class="d-mono" x="430" y="194" text-anchor="middle">script.js · 행동</text>
+
+        <!-- DB (나중에) -->
+        <path class="d-muted-box" d="M650,80 v110 a70,16 0 0 0 140,0 v-110" stroke-dasharray="5 4"/>
+        <ellipse class="d-muted-box" cx="720" cy="80" rx="70" ry="16" stroke-dasharray="5 4"/>
+        <text class="d-text" x="720" y="135" text-anchor="middle" font-weight="700">데이터베이스</text>
+        <text class="d-small" x="720" y="155" text-anchor="middle">1단계부터 등장</text>
+        <text class="d-small" x="720" y="172" text-anchor="middle">(회원, 링크 저장)</text>
+
+        <line class="d-line" x1="212" y1="100" x2="328" y2="100" marker-end="url(#web-arrow)"/>
+        <text class="d-text" x="270" y="90" text-anchor="middle" font-weight="700">② 요청</text>
+        <line class="d-line" x1="328" y1="170" x2="212" y2="170" marker-end="url(#web-arrow)"/>
+        <text class="d-text" x="270" y="190" text-anchor="middle" font-weight="700">③ 응답</text>
+        <line class="d-line d-dash" x1="532" y1="135" x2="648" y2="135" marker-end="url(#web-arrow)"/>
+
+        <text class="d-small" x="410" y="270" text-anchor="middle">0단계에서는 서버가 "파일을 그대로 건네주기"만 합니다. 1단계부터는 서버가 DB에 물어보고 화면을 만들어 줍니다.</text>
+      </svg>
+      <figcaption>① 주소 입력 → ② 브라우저가 서버에 "이 페이지 주세요" 요청 → ③ 서버가 HTML·CSS·JS 파일을 응답 → ④ 브라우저가 화면을 그림</figcaption>
+    </figure>
+
+    <h2 id="plan">2주 계획</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>주차</th><th>할 일</th><th>결과물</th></tr></thead>
+        <tbody>
+          <tr><td>1주차</td><td>도구 설치, 웹 동작 원리, 터미널, HTML, CSS</td><td>내 컴퓨터에서 열리는 자기소개 페이지</td></tr>
+          <tr><td>2주차</td><td>JavaScript 핵심, JSX 읽는 법, Git·GitHub, Vercel 배포</td><td>인터넷 주소로 열리는 자기소개 페이지 + 1단계 준비 완료</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="done-criteria">이 단계를 끝냈다는 기준</h2>
+    <ul>
+      <li>직접 만든 자기소개 페이지가 실제 URL로 접속된다 (휴대폰에서도)</li>
+      <li>그 코드가 GitHub 저장소에 올라가 있다</li>
+      <li>"클라이언트-서버-데이터베이스"를 내 말로 한 문단 설명할 수 있다</li>
+    </ul>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="f-idx-read"><span>교재 사용법과 큰 그림 읽기</span></label></li>
+      <li><label><input type="checkbox" data-task="f-idx-goal"><span>2주 계획과 완료 기준 확인하기</span></label></li>
+    </ul>
+
+    <div class="card-grid">
+      <a class="card week-card" href="week1.html" data-week-card="week1">
+        <span class="now-badge">지금 할 차례</span>
+        <span class="week-label">1주차</span>
+        <strong>도구와 HTML·CSS</strong>
+        <span class="muted">설치, 웹 원리, 터미널, 자기소개 페이지 만들기</span>
+        <div class="mini-track"><div class="mini-fill"></div></div>
+        <span class="mini-text"></span>
+      </a>
+      <a class="card week-card" href="week2.html" data-week-card="week2">
+        <span class="now-badge">지금 할 차례</span>
+        <span class="week-label">2주차</span>
+        <strong>JavaScript와 첫 배포</strong>
+        <span class="muted">JS 문법, 버튼 동작, Git·GitHub, Vercel</span>
+        <div class="mini-track"><div class="mini-fill"></div></div>
+        <span class="mini-text"></span>
+      </a>
+    </div>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <span></span>
+      <a class="card next" href="week1.html"><small>다음</small>1주차 · 도구와 HTML·CSS →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-25 · Node.js 22.14 · Chrome 최신 버전</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

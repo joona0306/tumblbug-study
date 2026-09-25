@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ko" data-course="foundations">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2주차 JS와 첫 배포 · 0단계 기초 교재</title>
+  <meta name="description" content="JavaScript 핵심 문법, 버튼 동작 만들기, JSX 읽는 법, Git·GitHub, Vercel 첫 배포">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week2">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🧱 0단계 기초 교재</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주차 · 도구와 HTML·CSS <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2" aria-current="page">2주차 · JS와 첫 배포 <span class="tab-count"></span></a>
+        <a href="../../01-linktree-clone/tutorial/index.html">다음: 1단계 →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">2주차 · 6단계</span>
+    <h1>JavaScript로 움직이게 하고, 인터넷에 올리기</h1>
+    <p class="lead">이번 주에는 1단계 코드에 계속 나오는 JavaScript 문법을 익히고, 자기소개 페이지를 실제 인터넷 주소로 공개합니다.</p>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>JavaScript 핵심 문법 (터미널에서 실행)</summary>
+      <div class="step-body">
+        <p>화면 없이 문법만 연습하려고 Node.js로 실행합니다. 새 폴더를 만들어 VSCode로 여세요.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>mkdir -p ~/dev/js-practice
+cd ~/dev/js-practice
+code .</code></pre>
+        </figure>
+        <p>먼저 다른 파일에서 가져다 쓸 함수를 담은 <code>utils.mjs</code>를 만듭니다.</p>
+        <figure class="code" data-src="js-practice/utils.mjs" data-tag="foundations-js-practice">
+          <figcaption><span class="label">utils.mjs</span></figcaption>
+          <pre><code>// 다른 파일에서 가져다 쓸 수 있도록 "내보내는(export)" 함수들
+
+// 이름을 받아서 인사말 문장을 돌려준다
+export function makeGreeting(name) {
+  return `안녕하세요, ${name}님!`;
+}
+
+// 0.5초 뒤에 링크 목록을 돌려준다.
+// (인터넷으로 DB에 물어보는 것처럼 "시간이 걸리는 일"을 흉내 낸 것)
+export function fetchFakeLinks() {
+  return new Promise((resolve) =&gt; {
+    setTimeout(() =&gt; {
+      resolve([
+        { title: "유튜브", url: "https://youtube.com" },
+        { title: "인스타", url: "https://instagram.com" },
+      ]);
+    }, 500);
+  });
+}</code></pre>
+        </figure>
+        <p>그리고 연습 파일 <code>practice.mjs</code>를 만듭니다. 번호마다 주석(<code>//</code> 뒤의 설명)을 먼저 읽어보세요.</p>
+        <figure class="code" data-src="js-practice/practice.mjs" data-tag="foundations-js-practice">
+          <figcaption><span class="label">practice.mjs</span></figcaption>
+          <pre><code>// 실행: 터미널에서 node practice.mjs
+// 다른 파일(utils.mjs)에서 내보낸 함수를 "가져오기(import)"
+import { fetchFakeLinks, makeGreeting } from "./utils.mjs";
+
+// 1. 변수: const 는 바뀌지 않는 값, let 은 바뀔 수 있는 값
+const name = "김코딩";
+let count = 0;
+count = count + 1;
+console.log("1.", name, count);
+
+// 2. 함수 호출 + 템플릿 문자열(백틱 ` 안에 ${변수})
+console.log("2.", makeGreeting(name));
+
+// 3. 객체: 여러 정보를 이름표(키)를 붙여 한 덩어리로 묶기
+const user = { username: "kimcoding", email: "kim@example.com" };
+console.log("3.", user.username);
+
+// 4. 배열과 map: 목록의 항목 하나하나를 바꿔서 새 목록 만들기
+const titles = ["유튜브", "인스타", "블로그"];
+const labels = titles.map((title, index) =&gt; `${index + 1}번째 링크: ${title}`);
+console.log("4.", labels);
+
+// 5. if / else: 조건에 따라 다른 일 하기
+const MAX_LINKS = 3;
+if (titles.length &gt;= MAX_LINKS) {
+  console.log("5. 링크가 꽉 찼어요");
+} else {
+  console.log("5. 링크를 더 추가할 수 있어요");
+}
+
+// 6. async / await: 시간이 걸리는 일이 끝날 때까지 기다렸다가 결과 받기
+async function main() {
+  console.log("6. 링크를 불러오는 중...");
+  const links = await fetchFakeLinks();
+  console.log("6. 불러온 링크 개수:", links.length);
+
+  // 7. try / catch: 에러가 나도 프로그램이 멈추지 않게 붙잡기
+  try {
+    new URL("주소가 아님");
+  } catch (error) {
+    console.log("7. 잘못된 주소라서 에러가 났어요:", error.code);
+  }
+}
+
+main();</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>node practice.mjs</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <p>아래처럼 1~7이 순서대로 나오면 성공입니다. 6번 두 줄 사이에 0.5초 멈추는 것도 눈여겨보세요 — <code>await</code>가 기다린 시간입니다.</p>
+          <figure class="code"><figcaption><span class="label">실행 결과</span></figcaption><pre><code>1. 김코딩 1
+2. 안녕하세요, 김코딩님!
+3. kimcoding
+4. [ '1번째 링크: 유튜브', '2번째 링크: 인스타', '3번째 링크: 블로그' ]
+5. 링크가 꽉 찼어요
+6. 링크를 불러오는 중...
+6. 불러온 링크 개수: 2
+7. 잘못된 주소라서 에러가 났어요: ERR_INVALID_URL</code></pre></figure>
+        </div>
+        <p>이 7가지는 모두 1단계 코드에 그대로 나옵니다.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>문법</th><th>1단계에서 이렇게 쓰여요</th></tr></thead>
+            <tbody>
+              <tr><td><code>import</code> / <code>export</code></td><td>거의 모든 파일 첫 줄. <code>import { db } from "@/db";</code> — DB 연결을 다른 파일에서 가져오기</td></tr>
+              <tr><td>템플릿 문자열 <code>`${ }`</code></td><td>공개 페이지 주소 만들기 <code>`/${user.username}`</code></td></tr>
+              <tr><td>객체</td><td>로그인한 사용자 정보 <code>user.username</code>, <code>user.id</code></td></tr>
+              <tr><td>배열 <code>map</code></td><td>링크 목록을 화면의 버튼 목록으로 바꾸기 (아래 3단계에서 봄)</td></tr>
+              <tr><td><code>if</code></td><td>"링크가 3개 이상이면 추가를 막는다"</td></tr>
+              <tr><td><code>async</code> / <code>await</code></td><td>DB에 물어보고 답을 기다리기 <code>await db.select()…</code></td></tr>
+              <tr><td><code>try</code> / <code>catch</code></td><td>가입 실패(중복 이메일 등)를 붙잡아 한국어 에러 메시지로 바꾸기, 잘못된 주소 거르기</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>.mjs 확장자</strong>: Node.js에게 "이 파일은 <code>import</code>/<code>export</code>를 쓰는 최신 방식 자바스크립트야"라고 알려주는 표시입니다. 1단계의 Next.js는 이걸 알아서 처리해줘서 그냥 <code>.js</code>를 씁니다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary><code>SyntaxError: Cannot use import statement outside a module</code></summary><p>파일 확장자가 <code>.js</code>로 되어 있습니다. <code>utils.mjs</code>, <code>practice.mjs</code>로 바꾸세요.</p></details>
+          <details><summary><code>Cannot find module './utils.mjs'</code></summary><p>두 파일이 같은 폴더에 있는지, 그 폴더에서 <code>node practice.mjs</code>를 실행했는지(<code>pwd</code>로 확인) 보세요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="f2-js-run"><span>practice.mjs 실행해서 1~7 출력 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="f2-js-edit"><span>값을 바꿔보기 (예: titles 를 2개로 줄이면 5번이 어떻게 바뀌나?)</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/foundations-js-practice/projects/00-foundations/js-practice">foundations-js-practice</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>브라우저의 JavaScript: 버튼이 동작하게 만들기</summary>
+      <div class="step-body">
+        <p>자기소개 페이지(<code>~/dev/about-me</code>)로 돌아갑니다. 시간대별 인사말과 다크 모드 버튼을 붙여볼게요.</p>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span>
+          <ul>
+            <li><strong>DOM</strong>: 브라우저가 HTML을 읽어서 만든 "조작 가능한 요소 나무". JavaScript는 DOM을 통해 화면을 바꿉니다. <code>document.querySelector("#greeting")</code> = "id가 greeting인 요소 찾아줘"</li>
+            <li><strong>이벤트</strong>: 클릭, 입력 같은 사용자 행동. <code>addEventListener("click", 함수)</code> = "클릭되면 이 함수 실행해줘"</li>
+          </ul>
+        </div>
+        <p>같은 폴더에 <code>script.js</code>를 만듭니다.</p>
+        <figure class="code" data-src="about-me/script.js" data-tag="foundations-js">
+          <figcaption><span class="label">script.js</span></figcaption>
+          <pre><code>// 1. 지금 시각에 맞는 인사말 보여주기
+const hour = new Date().getHours(); // 0 ~ 23
+
+let greeting;
+if (hour &lt; 12) {
+  greeting = "좋은 아침이에요 ☀️";
+} else if (hour &lt; 18) {
+  greeting = "좋은 오후예요 🌤️";
+} else {
+  greeting = "좋은 저녁이에요 🌙";
+}
+
+// HTML에서 id="greeting" 인 요소를 찾아 글자를 바꾼다
+document.querySelector("#greeting").textContent = greeting;
+
+// 2. 버튼을 누르면 다크 모드 켜고 끄기
+const button = document.querySelector("#theme-button");
+
+button.addEventListener("click", () =&gt; {
+  // body 에 "dark" 클래스가 없으면 붙이고, 있으면 뗀다
+  document.body.classList.toggle("dark");
+
+  const isDark = document.body.classList.contains("dark");
+  button.textContent = isDark ? "☀️ 라이트 모드로" : "🌙 다크 모드로";
+});</code></pre>
+        </figure>
+        <p><code>index.html</code>에 ① <code>&lt;script&gt;</code> 연결, ② 인사말 자리(<code>id="greeting"</code>), ③ 버튼(<code>id="theme-button"</code>)을 추가합니다.</p>
+        <figure class="code" data-src="about-me/index.html" data-tag="foundations-js">
+          <figcaption><span class="label">index.html</span></figcaption>
+          <pre><code>&lt;!doctype html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;김코딩의 자기소개&lt;/title&gt;
+  &lt;link rel="stylesheet" href="style.css"&gt;
+  &lt;script src="script.js" defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;main&gt;
+    &lt;p id="greeting" class="muted"&gt;&lt;/p&gt;
+    &lt;h1&gt;안녕하세요, 저는 김코딩입니다 👋&lt;/h1&gt;
+    &lt;p class="muted"&gt;제품 개발을 처음부터 배우고 있어요. 6개월 뒤 크라우드펀딩 서비스를 직접 만드는 게 목표입니다.&lt;/p&gt;
+
+    &lt;h2&gt;요즘 배우는 것&lt;/h2&gt;
+    &lt;ul&gt;
+      &lt;li&gt;터미널 명령어&lt;/li&gt;
+      &lt;li&gt;HTML, CSS, JavaScript&lt;/li&gt;
+      &lt;li&gt;Git과 GitHub&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;h2&gt;링크&lt;/h2&gt;
+    &lt;ul class="links"&gt;
+      &lt;li&gt;&lt;a href="https://github.com" target="_blank" rel="noopener noreferrer"&gt;GitHub&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="https://youtube.com" target="_blank" rel="noopener noreferrer"&gt;유튜브&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="https://instagram.com" target="_blank" rel="noopener noreferrer"&gt;인스타그램&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;button id="theme-button" type="button"&gt;🌙 다크 모드로&lt;/button&gt;
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </figure>
+        <p><code>style.css</code>에 다크 모드 색과 버튼 모양을 추가합니다. <code>body.dark { … }</code> 블록(맨 위 <code>:root</code> 바로 아래)과 맨 끝의 <code>button { … }</code> 블록이 새로 생겼어요.</p>
+        <figure class="code" data-src="about-me/style.css" data-tag="foundations-js">
+          <figcaption><span class="label">style.css</span></figcaption>
+          <pre><code>/* 1. 색상을 변수로 정해두기: 나중에 한 곳만 바꾸면 전체 색이 바뀐다 */
+:root {
+  --bg: #f7f7f8;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #e2e2e5;
+  --primary: #2f6fed;
+}
+
+/* body 에 class="dark" 가 붙으면 변수 값만 바꿔서 색을 한 번에 바꾼다 (script.js 가 붙였다 뗐다 함) */
+body.dark {
+  --bg: #121214;
+  --card: #1c1c1f;
+  --text: #f0f0f0;
+  --muted: #a0a0a6;
+  --border: #2e2e33;
+  --primary: #5b8cff;
+}
+
+/* 2. 페이지 전체: 배경색, 글꼴, 가운데 정렬 */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 480px; /* 너무 넓어지지 않게 */
+  margin: 0 auto; /* 좌우 여백을 똑같이 → 가운데 정렬 */
+  padding: 48px 16px;
+}
+
+h1 {
+  font-size: 1.6rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin-top: 32px;
+}
+
+/* 3. class="muted" 가 붙은 요소만 흐린 글씨로 */
+.muted {
+  color: var(--muted);
+}
+
+/* 4. 링크 목록을 Linktree 처럼 둥근 버튼 모양으로 */
+.links {
+  list-style: none; /* 앞의 점(•) 없애기 */
+  padding: 0;
+  display: flex;
+  flex-direction: column; /* 위에서 아래로 쌓기 */
+  gap: 12px; /* 버튼 사이 간격 */
+}
+
+.links a {
+  display: block;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px; /* 아주 크게 → 양 끝이 완전히 둥글게 */
+  color: var(--text);
+  text-align: center;
+  font-weight: 600;
+  text-decoration: none; /* 밑줄 없애기 */
+}
+
+/* 마우스를 올렸을 때 */
+.links a:hover {
+  border-color: var(--primary);
+}
+
+/* 5. 다크 모드 버튼 */
+button {
+  margin-top: 32px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 변수로 색을 정해둔 덕분</span>다크 모드에서 바뀌는 건 변수 값 6개뿐입니다. 1주차에 색을 <code>var(--bg)</code>처럼 변수로 써둔 덕분에, 요소마다 색을 다시 지정할 필요가 없어요. 1단계 교재 코드도 같은 방식입니다.</div>
+        <div class="box term"><span class="box-title">📖 <code>defer</code>는 뭔가요?</span><code>&lt;script src="script.js" defer&gt;</code>의 <code>defer</code>는 "HTML을 다 읽은 다음에 실행해"라는 뜻입니다. 없으면 버튼이 아직 만들어지기 전에 스크립트가 버튼을 찾으려다 실패합니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>새로고침하면 맨 위에 지금 시각에 맞는 인사말(아침/오후/저녁)이 보인다</li>
+            <li>"🌙 다크 모드로" 클릭 → 배경이 어두워지고 버튼 글자가 "☀️ 라이트 모드로"로 바뀐다. 다시 누르면 원래대로</li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>버튼을 눌러도 아무 일도 안 일어나요</summary><p><kbd>F12</kbd> → <strong>Console</strong> 탭에 빨간 에러가 있는지 보세요. <code>Cannot read properties of null</code>이면 HTML의 <code>id</code>와 script.js의 <code>"#theme-button"</code> 철자가 다른 경우가 대부분입니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="f2-dom"><span>인사말과 다크 모드 버튼 동작 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="f2-console"><span>개발자 도구 Console 탭 열어보기</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/foundations-js/projects/00-foundations/about-me">foundations-js</a></p>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>JSX 읽는 법 (1단계 미리보기)</summary>
+      <div class="step-body">
+        <p>1단계에서 쓰는 Next.js(React)는 화면을 <strong>JSX</strong>로 만듭니다. JSX는 "JavaScript 안에 쓰는 HTML"이에요. 아래는 1단계에서 실제로 만들 <strong>공개 페이지</strong> 코드의 일부입니다. 내 자기소개 페이지의 링크 목록과 비교해 보세요.</p>
+        <figure class="code" data-src="../01-linktree-clone/app/[username]/page.js" data-tag="linktree-week3-step3" data-lines="36-54">
+          <figcaption><span class="label">1단계 app/[username]/page.js 의 일부 (지금 따라 칠 필요 없음)</span></figcaption>
+          <pre><code>  return (
+    &lt;div className="public-page"&gt;
+      &lt;h1&gt;@{owner.displayUsername ?? owner.username}&lt;/h1&gt;
+      {links.length === 0 ? (
+        &lt;p className="muted"&gt;아직 등록된 링크가 없어요.&lt;/p&gt;
+      ) : (
+        &lt;ul className="public-links"&gt;
+          {links.map((item) =&gt; (
+            &lt;li key={item.id}&gt;
+              {/* 새 탭에서 열기. noopener: 열린 사이트가 이 페이지를 조작하지 못하게 막는다 */}
+              &lt;a href={item.url} target="_blank" rel="noopener noreferrer" className="public-link"&gt;
+                {item.title}
+              &lt;/a&gt;
+            &lt;/li&gt;
+          ))}
+        &lt;/ul&gt;
+      )}
+    &lt;/div&gt;
+  );</code></pre>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>HTML (0단계)</th><th>JSX (1단계)</th><th>뜻</th></tr></thead>
+            <tbody>
+              <tr><td><code>class="links"</code></td><td><code>className="public-links"</code></td><td>JavaScript에서 <code>class</code>는 다른 뜻의 예약어라 이름만 바뀜</td></tr>
+              <tr><td>링크를 손으로 3줄 씀</td><td><code>{links.map((item) =&gt; ( … ))}</code></td><td>DB에서 가져온 링크 개수만큼 자동으로 반복 (1단계 <code>map</code>)</td></tr>
+              <tr><td><code>&lt;a href="https://…"&gt;</code></td><td><code>&lt;a href={item.url}&gt;</code></td><td><code>{ }</code> 안에는 JavaScript 값을 넣을 수 있음</td></tr>
+              <tr><td>(없음)</td><td><code>{조건 ? (A) : (B)}</code></td><td>조건이 참이면 A, 아니면 B를 보여줌 (링크가 0개면 안내 문구)</td></tr>
+              <tr><td>(없음)</td><td><code>key={item.id}</code></td><td>반복되는 항목마다 붙이는 고유 번호. React가 어느 항목이 바뀌었는지 알아보는 데 씀</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box why"><span class="box-title">💡 지금은 "읽을 수 있으면" 충분합니다</span>이 코드를 외우거나 따라 칠 필요는 없어요. 1단계에서 이 모양을 처음 봤을 때 "아, 이건 목록을 반복하는 거구나" 정도로 읽히면 성공입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="f2-jsx"><span>JSX 코드와 표를 비교하며 읽어보기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>Git으로 저장 기록 남기기</summary>
+      <div class="step-body">
+        <p><strong>Git</strong>은 코드의 "저장 기록"을 남기는 도구입니다. 게임의 세이브 포인트처럼, 언제든 예전 상태로 돌아가거나 무엇이 바뀌었는지 볼 수 있어요.</p>
+        <figure class="diagram">
+          <svg viewBox="0 0 820 220" role="img" aria-labelledby="git-title git-desc">
+            <title id="git-title">Git 저장 흐름도</title>
+            <desc id="git-desc">작업 폴더에서 파일을 고치고 git add로 저장할 파일을 고른 뒤, git commit으로 내 컴퓨터의 저장 기록에 남기고, git push로 GitHub에 올린다.</desc>
+            <defs>
+              <marker id="git-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path class="d-arrowhead" d="M0,0 L10,5 L0,10 z"/>
+              </marker>
+            </defs>
+            <rect class="d-box d-client" x="10" y="50" width="160" height="100" rx="10"/>
+            <text class="d-title" x="90" y="88" text-anchor="middle">작업 폴더</text>
+            <text class="d-small" x="90" y="110" text-anchor="middle">파일을 고치는 곳</text>
+            <rect class="d-box d-ext" x="225" y="50" width="160" height="100" rx="10"/>
+            <text class="d-title" x="305" y="88" text-anchor="middle">저장 대기</text>
+            <text class="d-small" x="305" y="110" text-anchor="middle">(스테이징)</text>
+            <rect class="d-box d-server" x="440" y="50" width="160" height="100" rx="10"/>
+            <text class="d-title" x="520" y="88" text-anchor="middle">내 저장 기록</text>
+            <text class="d-small" x="520" y="110" text-anchor="middle">(내 컴퓨터의 저장소)</text>
+            <rect class="d-box d-db" x="655" y="50" width="155" height="100" rx="10"/>
+            <text class="d-title" x="732" y="88" text-anchor="middle">GitHub</text>
+            <text class="d-small" x="732" y="110" text-anchor="middle">(인터넷 저장소)</text>
+            <line class="d-line" x1="170" y1="100" x2="223" y2="100" marker-end="url(#git-arrow)"/>
+            <line class="d-line" x1="385" y1="100" x2="438" y2="100" marker-end="url(#git-arrow)"/>
+            <line class="d-line" x1="600" y1="100" x2="653" y2="100" marker-end="url(#git-arrow)"/>
+            <text class="d-mono" x="197" y="180" text-anchor="middle">git add</text>
+            <text class="d-mono" x="412" y="180" text-anchor="middle">git commit</text>
+            <text class="d-mono" x="627" y="180" text-anchor="middle">git push</text>
+            <text class="d-small" x="197" y="200" text-anchor="middle">"이거 저장할래"</text>
+            <text class="d-small" x="412" y="200" text-anchor="middle">"세이브!" + 메모</text>
+            <text class="d-small" x="627" y="200" text-anchor="middle">"인터넷에 백업"</text>
+          </svg>
+          <figcaption>고치고 → 고른 다음 → 저장(커밋)하고 → 올린다(푸시). 커밋은 내 컴퓨터에만 남고, 푸시해야 GitHub에 올라간다.</figcaption>
+        </figure>
+        <p><code>about-me</code> 폴더에서 저장소를 만들고 첫 커밋을 합니다.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash)</span></figcaption>
+          <pre><code>cd ~/dev/about-me
+git init
+git status
+git add .
+git commit -m "자기소개 페이지 완성"
+git log --oneline</code></pre>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>명령어</th><th>뜻</th></tr></thead>
+            <tbody>
+              <tr><td><code>git init</code></td><td>이 폴더를 Git 저장소로 만들기 (처음 한 번만)</td></tr>
+              <tr><td><code>git status</code></td><td>지금 무엇이 바뀌었는지 보기 — 헷갈리면 언제든 치세요</td></tr>
+              <tr><td><code>git add .</code></td><td>바뀐 파일 전부를 저장 대기로 (<code>.</code> = 전부)</td></tr>
+              <tr><td><code>git commit -m "메모"</code></td><td>저장! 메모에는 "무엇을 했는지"를 짧게</td></tr>
+              <tr><td><code>git log --oneline</code></td><td>저장 기록 목록 보기</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box term"><span class="box-title">📖 .gitignore 미리보기</span>Git에 올리면 안 되는 파일(비밀번호가 든 설정 파일 등)은 <code>.gitignore</code>라는 파일에 적어 제외합니다. 지금은 필요 없지만, 1단계에서 DB 비밀번호를 담은 <code>.env.local</code>을 이 방법으로 숨깁니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>git log --oneline</code>에 <code>자기소개 페이지 완성</code>이 한 줄 보이고, <code>git status</code>가 <code>nothing to commit, working tree clean</code>이라고 하면 성공입니다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary><code>Please tell me who you are</code></summary><p>1주차 1단계의 <code>git config --global user.name</code> / <code>user.email</code>을 안 했습니다. 실행 후 다시 커밋하세요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="f2-git-init"><span>git init → add → commit 해보기</span></label></li>
+          <li><label><input type="checkbox" data-task="f2-git-log"><span>git log, git status로 결과 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>GitHub에 올리기</summary>
+      <div class="step-body">
+        <ol>
+          <li><a href="https://github.com/signup">github.com</a>에 가입합니다 (1주차에 등록한 이메일로)</li>
+          <li><a href="https://github.com/new">github.com/new</a>에서 새 저장소: 이름 <code>about-me</code>, <strong>Public</strong>, README 등 추가 옵션은 모두 체크하지 않음 → Create repository</li>
+          <li>화면에 나오는 주소(<code>https://github.com/내아이디/about-me.git</code>)를 복사</li>
+        </ol>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash) — 주소는 내 것으로</span></figcaption>
+          <pre><code>git remote add origin https://github.com/내아이디/about-me.git
+git branch -M main
+git push -u origin main</code></pre>
+        </figure>
+        <p class="code-note">처음 push하면 브라우저 창이 열리며 GitHub 로그인을 요청합니다. 로그인하고 허용하세요.</p>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>GitHub의 <code>about-me</code> 저장소 페이지를 새로고침하면 <code>index.html</code>, <code>style.css</code>, <code>script.js</code>가 보입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="f2-github"><span>GitHub 가입, about-me 저장소에 push</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>Vercel로 첫 배포 + 1단계 준비</summary>
+      <div class="step-body">
+        <p>이제 인터넷 주소를 붙입니다. <strong>Vercel</strong>은 GitHub 저장소를 연결하기만 하면 자동으로 사이트를 열어주는 서비스입니다.</p>
+        <ol>
+          <li><a href="https://vercel.com/signup">vercel.com</a> → <strong>Continue with GitHub</strong>로 가입, 플랜은 <strong>Hobby</strong>(무료)</li>
+          <li><a href="https://vercel.com/new">vercel.com/new</a> → <code>about-me</code> 옆 <strong>Import</strong></li>
+          <li>Framework Preset은 <strong>Other</strong> 그대로 (빌드가 필요 없는 순수 HTML이라서) → <strong>Deploy</strong></li>
+          <li>잠시 뒤 축하 화면과 함께 <code>https://about-me-….vercel.app</code> 주소가 생깁니다</li>
+        </ol>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>배포</strong>: 내 컴퓨터에만 있던 파일을 24시간 켜진 서버에 올려 누구나 주소로 접속하게 만드는 것. 시작 페이지 흐름도의 "서버" 역할을 Vercel이 해줍니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li><strong>휴대폰</strong>(와이파이 끄고 데이터로)에서 내 주소가 열린다 — 이제 전 세계 누구나 볼 수 있습니다 🎉</li>
+            <li>자동 배포 확인: <code>index.html</code>의 소개 문장을 조금 고친 뒤 아래 명령어 → 1~2분 뒤 새로고침하면 인터넷 페이지에도 반영된다</li>
+          </ul>
+          <figure class="code cmd"><figcaption><span class="label">터미널 (Git Bash)</span></figcaption><pre><code>git add .
+git commit -m "소개 문구 수정"
+git push</code></pre></figure>
+        </div>
+        <h3>1단계 준비: Neon 계정</h3>
+        <p>1단계에서 데이터베이스로 쓸 <a href="https://neon.tech">Neon</a>에도 <strong>GitHub로 가입</strong>만 해두세요. 프로젝트는 1단계 2주차에서 설정과 함께 만듭니다.</p>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="f2-vercel"><span>Vercel 가입하고 about-me 배포</span></label></li>
+          <li><label><input type="checkbox" data-task="f2-phone"><span>휴대폰에서 내 주소 열기</span></label></li>
+          <li><label><input type="checkbox" data-task="f2-redeploy"><span>수정 → push → 자동 반영 확인</span></label></li>
+          <li><label><input type="checkbox" data-task="f2-neon"><span>Neon 계정 만들기 (GitHub로 가입)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="done">0단계 완료 기준 점검</h2>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="f-dod-url"><span>직접 만든 자기소개 페이지가 실제 URL로 접속된다 (휴대폰에서도)</span></label></li>
+      <li><label><input type="checkbox" data-task="f-dod-github"><span>그 코드가 GitHub 저장소에 올라가 있다</span></label></li>
+      <li><label><input type="checkbox" data-task="f-dod-explain"><span>"클라이언트-서버-데이터베이스"를 내 말로 한 문단 설명할 수 있다</span></label></li>
+    </ul>
+
+    <h2 id="retro">2주차 회고</h2>
+    <div class="retro card">
+      <label for="f2-note-1">이번 주에 한 것</label>
+      <textarea id="f2-note-1" data-note="f2-did"></textarea>
+      <label for="f2-note-2">새로 이해한 것</label>
+      <textarea id="f2-note-2" data-note="f2-learned"></textarea>
+      <label for="f2-note-3">막혔던 것과 해결 방법</label>
+      <textarea id="f2-note-3" data-note="f2-stuck"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="f2-retro"><span>2주차 회고 3줄 쓰기</span></label></li>
+    </ul>
+
+    <div class="box why"><span class="box-title">🎉 다음: 1단계 Linktree 클론</span>손으로 만든 이 페이지를 <strong>누구나 가입해서 자기 페이지를 만들 수 있는 서비스</strong>로 키웁니다. 회원가입, 데이터베이스, 로그인이 새로 등장해요.</div>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week1.html"><small>이전</small>← 1주차 · 도구와 HTML·CSS</a>
+      <a class="card next" href="../../01-linktree-clone/tutorial/index.html"><small>다음 단계</small>1단계 · Linktree 클론 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-25 · Node.js 22.14 · 코드는 실행 검증 완료 · GitHub·Vercel 화면 안내는 작성 시점 기준</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>
