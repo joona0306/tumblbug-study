@@ -1,6 +1,7 @@
 "use server";
 
 import { APIError } from "better-auth/api";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
@@ -55,4 +56,10 @@ export async function signIn(prevState, formData) {
   }
 
   redirect("/dashboard");
+}
+
+// 로그아웃: DB의 세션을 지우고 브라우저의 로그인 쿠키도 삭제한 뒤 첫 화면으로 보낸다.
+export async function signOut() {
+  await auth.api.signOut({ headers: await headers() });
+  redirect("/");
 }

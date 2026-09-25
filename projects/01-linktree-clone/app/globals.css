@@ -128,6 +128,15 @@ h2 {
   align-items: center;
 }
 
+/* 양 끝으로 벌려 놓기 (예: 제목은 왼쪽, 로그아웃 버튼은 오른쪽) */
+.row.spread {
+  justify-content: space-between;
+}
+
+.row.spread h1 {
+  margin: 0;
+}
+
 button.secondary {
   background: transparent;
   color: var(--text);

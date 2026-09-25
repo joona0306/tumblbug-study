@@ -1,5 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import Link from "next/link";
+import { signOut } from "@/app/actions/auth";
 import { db } from "@/db";
 import { link } from "@/db/schema";
 import { MAX_LINKS } from "@/lib/links";
@@ -21,7 +22,14 @@ export default async function DashboardPage() {
   return (
     <div className="stack">
       <div className="card">
-        <h1>내 링크 관리</h1>
+        <div className="row spread">
+          <h1>내 링크 관리</h1>
+          <form action={signOut}>
+            <button type="submit" className="secondary">
+              로그아웃
+            </button>
+          </form>
+        </div>
         <p className="muted">
           공개 페이지: <Link href={`/${user.username}`}>/{user.username}</Link>
         </p>
