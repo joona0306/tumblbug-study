@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>폼 연습</title>
+</head>
+<body>
+  <h1>회원가입 (연습용)</h1>
+
+  <!-- form: 입력칸들을 묶는 상자. 버튼을 누르면 안의 값들이 한꺼번에 "제출"된다 -->
+  <form>
+    <!-- label: 입력칸의 이름표. label 안에 input 을 넣으면 글자를 눌러도 입력칸이 선택된다 -->
+    <label>
+      이메일
+      <!-- type="email": 이메일 모양이 아니면 제출을 막는다 / required: 비어 있으면 제출을 막는다 -->
+      <input name="email" type="email" required>
+    </label>
+
+    <label>
+      비밀번호 (8자 이상)
+      <!-- type="password": 입력한 글자를 ●●● 로 가린다 / minlength: 최소 글자 수 -->
+      <input name="password" type="password" required minlength="8">
+    </label>
+
+    <!-- type="submit": 누르면 폼을 제출하는 버튼 -->
+    <button type="submit">가입하기</button>
+  </form>
+</body>
+</html>
