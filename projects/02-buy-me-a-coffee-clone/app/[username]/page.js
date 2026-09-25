@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { user } from "@/db/schema";
+import SupportForm from "./support-form";
 
 // 주소창의 /사용자이름 에서 크리에이터를 찾는다. (사용자 이름은 소문자로 저장되어 있다)
 // 공개 페이지이므로 이메일 같은 개인정보는 가져오지 않는다.
@@ -38,6 +39,7 @@ export default async function CreatorPage({ params }) {
         <h1>@{creator.displayUsername ?? creator.username}</h1>
         <p className="muted">{creator.bio || "아직 소개가 없어요."}</p>
       </div>
+      <SupportForm creatorUsername={creator.username} />
     </div>
   );
 }

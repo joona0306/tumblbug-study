@@ -153,3 +153,70 @@ button.danger {
 .profile {
   text-align: center;
 }
+
+textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+/* 후원 금액 선택: 라디오 버튼을 알약 모양 버튼처럼 */
+fieldset.amounts {
+  border: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+fieldset.amounts legend {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.amount {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.amount.selected {
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  font-weight: 700;
+}
+
+/* 원래의 동그란 라디오 버튼은 숨기되, 키보드 선택은 그대로 되게 한다 */
+.amount input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.amount:has(input:focus-visible) {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* 후원 카드 안의 요소들 사이 간격 */
+.support-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.support-card h2 {
+  margin: 0;
+}
