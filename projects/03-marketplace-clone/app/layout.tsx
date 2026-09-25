@@ -1,12 +1,14 @@
 import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "동네 마켓",
   description: "동네 중고거래 서비스",
 };
 
-export default function RootLayout({ children }) {
+// children: 이 레이아웃 안에 들어갈 각 페이지의 내용. React가 그릴 수 있는 무엇이든(ReactNode) 올 수 있다.
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
       <body>

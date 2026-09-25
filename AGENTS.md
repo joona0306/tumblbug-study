@@ -55,6 +55,7 @@ tumblbug-study/
 - 교재는 순수 HTML/CSS/JS로 만들어 브라우저에서 바로 열리게 할 것 (빌드 도구 불필요)
 - 외부 라이브러리를 최소화할 것 (오프라인에서도 열리도록)
 - 코드 예시는 검증된 정답 코드에서 가져올 것. 스택: Next.js + Neon(Postgres) + Drizzle ORM + Better Auth (`README.md` 참고)
+- 1~2단계는 JavaScript, **3단계부터 TypeScript**(strict)
 - 패키지 버전은 설치 명령어에서 고정할 것
 - 진행 상황 체크박스는 브라우저에 저장되어 새로고침해도 유지되게 할 것
 
