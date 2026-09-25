@@ -22,6 +22,13 @@ export function isCategory(value: string): value is Category {
   return (CATEGORIES as readonly string[]).includes(value);
 }
 
+// 문자열이 정해진 판매 상태 중 하나인지 검사한다.
+// 주의: "value in STATUS_LABELS" 로 쓰면 "toString" 처럼 모든 객체가 물려받는 이름도 통과한다.
+// Object.hasOwn 은 이 객체에 직접 적은 키(selling, sold)만 인정한다.
+export function isProductStatus(value: string): value is ProductStatus {
+  return Object.hasOwn(STATUS_LABELS, value);
+}
+
 // 12000 → "12,000원", 0 → "나눔 🧡"
 export function formatPrice(price: number): string {
   return price === 0 ? "나눔 🧡" : `${price.toLocaleString("ko-KR")}원`;

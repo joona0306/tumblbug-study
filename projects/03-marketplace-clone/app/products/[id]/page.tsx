@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { changeStatus } from "@/app/actions/products";
 import { db } from "@/db";
 import { product, user } from "@/db/schema";
 import { formatPrice, STATUS_LABELS } from "@/lib/product";
@@ -78,6 +79,14 @@ export default async function ProductPage({ params }: PageProps) {
           <Link href={`/products/${item.id}/edit`} className="button">
             수정
           </Link>
+          {/* 지금 상태의 반대로 바꾸는 버튼 하나 */}
+          <form action={changeStatus}>
+            <input type="hidden" name="id" value={item.id} />
+            <input type="hidden" name="status" value={item.status === "selling" ? "sold" : "selling"} />
+            <button type="submit" className="secondary">
+              {item.status === "selling" ? "거래완료로 변경" : "판매중으로 되돌리기"}
+            </button>
+          </form>
           <DeleteButton productId={item.id} />
         </div>
       )}

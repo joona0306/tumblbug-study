@@ -10,6 +10,7 @@ import {
   type Category,
   DESCRIPTION_MAX_LENGTH,
   isCategory,
+  isProductStatus,
   PRICE_MAX,
   TITLE_MAX_LENGTH,
 } from "@/lib/product";
@@ -197,4 +198,25 @@ export async function deleteProduct(formData: FormData) {
 
   revalidatePath("/");
   redirect("/dashboard");
+}
+
+// 판매 상태 변경 (판매중 ↔ 거래완료)
+export async function changeStatus(formData: FormData) {
+  const me = await requireUser();
+  const id = Number(formData.get("id"));
+  const status = String(formData.get("status") ?? "");
+
+  // 브라우저가 보낸 값이므로 정해진 두 값 중 하나인지 확인한다 (DB 는 아무 글자나 받아준다)
+  if (!isProductStatus(status)) {
+    return;
+  }
+
+  // 내 상품일 때만 바뀐다
+  await db
+    .update(product)
+    .set({ status })
+    .where(and(eq(product.id, id), eq(product.userId, me.id)));
+
+  revalidatePath("/");
+  revalidatePath(`/products/${id}`);
 }
