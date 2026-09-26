@@ -52,3 +52,12 @@
 .errorText {
   color: var(--color-danger);
 }
+
+/* 여러 줄 입력칸 (소개) */
+.textarea {
+  height: auto;
+  min-height: 160px;
+  padding-block: var(--spacing-md);
+  line-height: 1.6;
+  resize: vertical;
+}
