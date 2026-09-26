@@ -47,7 +47,8 @@ export type Env = z.infer<typeof envSchema>;
 export function parseEnv(values: Record<string, string | undefined>): Env {
   // Vercel 미리보기 배포는 주소가 배포마다 달라서 BETTER_AUTH_URL 을 미리 적어 둘 수 없다 (14주차)
   // → 비어 있으면 Vercel 이 알려 주는 이 배포의 주소(VERCEL_URL, "https://" 없이 옴)를 쓴다
-  const authUrl = values.BETTER_AUTH_URL || (values.VERCEL_URL ? `https://${values.VERCEL_URL}` : undefined);
+  // 끝의 "/" 는 뗀다 (https://moa.vercel.app/ → https://moa.vercel.app) — 로그인 주소 뒤에 경로를 붙일 때 "//" 가 되지 않게
+  const authUrl = (values.BETTER_AUTH_URL || (values.VERCEL_URL ? `https://${values.VERCEL_URL}` : undefined))?.replace(/\/+$/, "");
   const result = envSchema.safeParse({ ...values, BETTER_AUTH_URL: authUrl });
   if (!result.success) {
     throw new Error(`환경 변수가 올바르지 않습니다:\n${z.prettifyError(result.error)}`);
