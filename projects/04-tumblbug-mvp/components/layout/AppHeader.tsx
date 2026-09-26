@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Plus, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Plus, Shield, User } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { HeaderLikes } from "@/components/like/HeaderLikes";
@@ -22,6 +22,13 @@ export async function AppHeader() {
           {user ? (
             <>
               <HeaderLikes />
+              {/* 관리자에게만 보이는 링크 (보이지 않게 하는 것은 편의일 뿐 — 진짜 막는 것은 /admin 페이지의 requireAdmin) */}
+              {user.role === "admin" && (
+                <Link href="/admin" className={styles.link}>
+                  <Shield size={18} aria-hidden="true" />
+                  <span className={styles.label}>관리자</span>
+                </Link>
+              )}
               <Link href="/studio" className={styles.link}>
                 <LayoutDashboard size={18} aria-hidden="true" />
                 <span className={styles.label}>스튜디오</span>
