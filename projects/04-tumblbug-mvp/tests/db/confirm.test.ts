@@ -1,77 +1,9 @@
-import { eq, inArray } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
-import * as schema from "@/db/schema";
-import { funding, paymentEvent, project, reward, user } from "@/db/schema";
 import { confirmFunding } from "@/lib/funding/confirm";
-import type { TossClient, TossResult } from "@/lib/payments/toss";
+import { cleanup, db, eventsOf, fakeToss, fundingOf, okAnswer, pendingFunding, pool, setup, soldQtyOf } from "./payment-helpers";
 
-// 결제 승인 테스트. confirmFunding 이 트랜잭션을 여러 번 쓰므로 "끝나면 되돌리기" 대신
-// 진짜로 저장하고 테스트마다 지운다 (transaction.test.ts 와 같은 방식)
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 12 });
-const db = drizzle({ client: pool, schema });
-const created = { users: [] as string[], projects: [] as number[], orders: [] as string[] };
-
-// 가짜 토스: 진짜 토스를 부르지 않고, 부른 횟수를 세고, 정해 둔 답을 돌려준다
-function fakeToss(answer: (paymentKey: string, orderId: string, amount: number) => TossResult | Promise<TossResult> = okAnswer) {
-  const calls: string[] = [];
-  const client: TossClient = {
-    confirm: async ({ paymentKey, orderId, amount }) => {
-      calls.push(orderId);
-      return answer(paymentKey, orderId, amount);
-    },
-    getPayment: async () => ({ ok: false, code: "NOT_USED", message: "" }),
-  };
-  return { client, calls };
-}
-function okAnswer(paymentKey: string, orderId: string, amount: number): TossResult {
-  return { ok: true, payment: { paymentKey, orderId, status: "DONE", totalAmount: amount } };
-}
-
-let seq = 0;
-async function setup(limitQty: number | null, soldQty = 0) {
-  const id = `confirm-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  await db.insert(user).values([
-    { id: `${id}-c`, name: "창작자", email: `${id}-c@example.com` },
-    { id: `${id}-s`, name: "후원자", email: `${id}-s@example.com` },
-  ]);
-  created.users.push(`${id}-c`, `${id}-s`);
-  const [{ id: projectId }] = await db
-    .insert(project)
-    .values({ creatorId: `${id}-c`, title: "승인 테스트", summary: "s", category: "living", goalAmount: 100_000, deadline: "2099-12-31", imageUrl: "https://example.com/a.jpg" })
-    .returning({ id: project.id });
-  created.projects.push(projectId);
-  const [{ id: rewardId }] = await db
-    .insert(reward)
-    .values({ projectId, title: "한정 리워드", price: 10_000, limitQty, soldQty, deliveryMonth: "2099-01-01" })
-    .returning({ id: reward.id });
-  return { supporterId: `${id}-s`, projectId, rewardId };
-}
-
-// 결제 대기 후원 하나 (startFunding 이 만드는 것과 같은 모양)
-async function pendingFunding(s: Awaited<ReturnType<typeof setup>>, quantity = 1) {
-  seq += 1;
-  const orderId = `confirm-order-${Date.now()}-${seq}`;
-  created.orders.push(orderId);
-  await db.insert(funding).values({ projectId: s.projectId, supporterId: s.supporterId, rewardId: s.rewardId, quantity, amount: 10_000 * quantity, orderId });
-  return { orderId, paymentKey: `pk-${orderId}`, amount: 10_000 * quantity, supporterId: s.supporterId };
-}
-
-const fundingOf = async (orderId: string) => (await db.select().from(funding).where(eq(funding.orderId, orderId)))[0];
-const soldQtyOf = async (rewardId: number) => (await db.select({ n: reward.soldQty }).from(reward).where(eq(reward.id, rewardId)))[0].n;
-
-afterEach(async () => {
-  if (created.orders.length) await db.delete(paymentEvent).where(inArray(paymentEvent.orderId, created.orders));
-  if (created.projects.length) {
-    await db.delete(funding).where(inArray(funding.projectId, created.projects));
-    await db.delete(project).where(inArray(project.id, created.projects));
-  }
-  if (created.users.length) await db.delete(user).where(inArray(user.id, created.users));
-  created.users = [];
-  created.projects = [];
-  created.orders = [];
-});
+// 결제 승인 테스트 (토스는 가짜 도구로 바꿔 끼운다 — payment-helpers.ts)
+afterEach(cleanup);
 afterAll(() => pool.end());
 
 describe("결제 승인 confirmFunding", () => {
@@ -86,8 +18,7 @@ describe("결제 승인 confirmFunding", () => {
     expect(f.paymentKey).toBe(order.paymentKey);
     expect(f.paidAt).not.toBeNull();
     expect(await soldQtyOf(s.rewardId)).toBe(2);
-    const events = await db.select().from(paymentEvent).where(eq(paymentEvent.orderId, order.orderId));
-    expect(events.map((e) => e.status)).toEqual(["DONE"]);
+    expect((await eventsOf(order.orderId)).map((e) => e.status)).toEqual(["DONE"]);
   });
 
   it("새로고침으로 다시 와도 토스를 다시 부르지 않고 같은 결과", async () => {
@@ -121,7 +52,7 @@ describe("결제 승인 confirmFunding", () => {
   it("토스가 거절하면 후원 실패 + 차감했던 재고를 되돌린다", async () => {
     const s = await setup(10);
     const order = await pendingFunding(s, 2);
-    const toss = fakeToss(() => ({ ok: false, code: "REJECT_CARD_COMPANY", message: "카드사에서 거절했어요" }));
+    const toss = fakeToss({ confirm: () => ({ ok: false, code: "REJECT_CARD_COMPANY", message: "카드사에서 거절했어요" }) });
     expect(await confirmFunding(db, toss.client, order)).toMatchObject({ status: "failed", reason: "REJECT_CARD_COMPANY", message: "카드사에서 거절했어요" });
     expect(await soldQtyOf(s.rewardId)).toBe(0);
     expect((await fundingOf(order.orderId)).status).toBe("failed");
@@ -130,8 +61,10 @@ describe("결제 승인 confirmFunding", () => {
   it("토스 응답을 못 받으면 '처리 중'으로 두고 재고도 잡아 둔다 (웹훅이 마무리)", async () => {
     const s = await setup(10);
     const order = await pendingFunding(s);
-    const toss = fakeToss(() => {
-      throw new Error("timeout");
+    const toss = fakeToss({
+      confirm: () => {
+        throw new Error("timeout");
+      },
     });
     expect(await confirmFunding(db, toss.client, order)).toEqual({ status: "processing" });
     const f = await fundingOf(order.orderId);
@@ -143,9 +76,11 @@ describe("결제 승인 confirmFunding", () => {
   it("같은 주문이 동시에 두 번 와도 토스 승인은 한 번만", async () => {
     const s = await setup(10);
     const order = await pendingFunding(s);
-    const toss = fakeToss(async (...args) => {
-      await new Promise((r) => setTimeout(r, 200)); // 승인에 시간이 걸리는 동안 두 번째 요청이 온다
-      return okAnswer(...args);
+    const toss = fakeToss({
+      confirm: async (...args) => {
+        await new Promise((r) => setTimeout(r, 200)); // 승인에 시간이 걸리는 동안 두 번째 요청이 온다
+        return okAnswer(...args);
+      },
     });
     const results = await Promise.all([confirmFunding(db, toss.client, order), confirmFunding(db, toss.client, order)]);
     expect(results.map((r) => r.status).sort()).toEqual(["paid", "processing"]);
