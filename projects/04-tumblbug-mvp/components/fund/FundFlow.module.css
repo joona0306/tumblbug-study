@@ -154,3 +154,11 @@
   color: var(--color-success);
   font-size: 14px;
 }
+
+/* 토스 결제위젯이 그려지는 칸 (위젯 안쪽 여백이 있어 바깥 여백은 조금만) */
+.widget {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}

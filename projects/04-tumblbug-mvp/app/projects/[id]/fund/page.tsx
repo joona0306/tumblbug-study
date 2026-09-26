@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FundFlow } from "@/components/fund/FundFlow";
 import { db } from "@/db";
+import { serverEnv } from "@/lib/env";
 import type { Step } from "@/lib/funding/rules";
 import { isEnded } from "@/lib/project-status";
 import { getProjectDetail } from "@/lib/queries/listing";
@@ -38,6 +39,7 @@ export default async function FundPage({ params, searchParams }: Props) {
           project={{ id: project.id, title: project.title, imageUrl: project.imageUrl, creatorName: project.creatorName }}
           rewards={project.rewards}
           step={(["1", "2", "3"].includes(step ?? "") ? Number(step) : 1) as Step}
+          tossClientKey={serverEnv().NEXT_PUBLIC_TOSS_CLIENT_KEY ?? null}
         />
       )}
     </main>

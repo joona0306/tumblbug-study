@@ -25,6 +25,17 @@ export const envSchema = z.object({
     emptyToUndefined,
     z.url({ error: "NEXT_PUBLIC_SENTRY_DSN은 주소 형식이어야 합니다 (예: https://…@….ingest.sentry.io/…)" }).optional(),
   ),
+
+  // 토스페이먼츠 결제위젯 키 (11주차). 비워 두면 결제 버튼이 꺼진 채로 동작한다 (CI처럼 키가 없는 곳).
+  // 이 교재는 테스트 결제만 한다 → 실수로 라이브 키(live_)를 넣으면 시작할 때 막는다
+  NEXT_PUBLIC_TOSS_CLIENT_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().startsWith("test_", { error: "NEXT_PUBLIC_TOSS_CLIENT_KEY는 test_ 로 시작하는 테스트 키만 넣어 주세요" }).optional(),
+  ),
+  TOSS_SECRET_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().startsWith("test_", { error: "TOSS_SECRET_KEY는 test_ 로 시작하는 테스트 키만 넣어 주세요" }).optional(),
+  ),
 });
 
 export type Env = z.infer<typeof envSchema>;

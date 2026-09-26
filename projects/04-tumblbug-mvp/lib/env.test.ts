@@ -37,6 +37,12 @@ describe("parseEnv", () => {
     expect(() => parseEnv({ ...required, NEXT_PUBLIC_SENTRY_DSN: "sentry-dsn-here" })).toThrow(/주소 형식/);
   });
 
+  it("토스 키는 테스트 키(test_)만 받는다 — 라이브 키를 넣으면 멈춘다", () => {
+    expect(parseEnv({ ...required, TOSS_SECRET_KEY: "test_gsk_example" }).TOSS_SECRET_KEY).toBe("test_gsk_example");
+    expect(() => parseEnv({ ...required, TOSS_SECRET_KEY: "live_gsk_example" })).toThrow(/테스트 키만/);
+    expect(() => parseEnv({ ...required, NEXT_PUBLIC_TOSS_CLIENT_KEY: "live_gck_example" })).toThrow(/테스트 키만/);
+  });
+
   it("NODE_ENV에 정해진 값 말고 다른 값이 오면 멈춘다", () => {
     expect(() => parseEnv({ ...required, NODE_ENV: "staging" })).toThrow();
   });

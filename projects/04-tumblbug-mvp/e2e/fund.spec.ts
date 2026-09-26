@@ -5,6 +5,7 @@ import { login } from "./helpers";
 // 10주차 흐름 테스트: 여러 단계 후원 (① 리워드 → ② 배송지 → ③ 확인)
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
 const SUPPORTER = "supporter_kim@seed.moa.test";
+const hasToss = Boolean(process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY);
 
 async function projectIdByTitle(title: string): Promise<number> {
   const { rows } = await pool.query<{ id: number }>("select id from project where title = $1 order by id desc limit 1", [title]);
@@ -58,9 +59,8 @@ test("리워드·수량 → 배송지 → 확인까지 가고, 새로고침해�
   await page.reload();
   await expect(main.getByRole("group", { name: "후원 내용", exact: true })).toContainText("머그 2개 세트 × 2");
 
-  // 결제하기 → 서버가 다시 계산한 금액이 같다 (결제창 연결은 11주차)
-  await main.getByRole("button", { name: "118,000원 결제하기" }).click();
-  await expect(main.getByRole("status")).toContainText("서버 확인 완료: 118,000원");
+  // 결제위젯이 준비되면 결제 버튼이 켜진다 (토스 키가 없는 CI에서는 "결제 준비 안 됨")
+  await expect(main.getByRole("button", { name: hasToss ? "118,000원 결제하기" : "결제 준비 안 됨" })).toBeVisible({ timeout: 20_000 });
 
   // 뒤로 가면 배송지가 채워진 채로
   await page.goBack();

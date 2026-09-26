@@ -17,5 +17,5 @@ export function proxy(request: NextRequest) {
 
 // 이 주소들에서만 실행된다 (나머지 페이지·이미지·CSS 요청에는 끼어들지 않는다)
 export const config = {
-  matcher: ["/projects/new", "/projects/:id/edit", "/projects/:id/fund", "/studio/:path*", "/me/:path*", "/admin/:path*"],
+  matcher: ["/projects/new", "/projects/:id/edit", "/projects/:id/fund/:path*", "/studio/:path*", "/me/:path*", "/admin/:path*"],
 };

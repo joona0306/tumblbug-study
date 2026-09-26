@@ -21,7 +21,7 @@ function useIsClient() {
 }
 
 // 여러 단계 후원 (Figma M04·M05·M06). 단계는 주소(?step=)에, 고른 내용은 Zustand 스토어에.
-export function FundFlow({ project, rewards, step }: { project: FundProject; rewards: FundReward[]; step: Step }) {
+export function FundFlow({ project, rewards, step, tossClientKey }: { project: FundProject; rewards: FundReward[]; step: Step; tossClientKey: string | null }) {
   const router = useRouter();
   const isClient = useIsClient();
   const draft = useFundingStore();
@@ -46,7 +46,7 @@ export function FundFlow({ project, rewards, step }: { project: FundProject; rew
       <Steps current={allowed} />
       {allowed === 1 && <RewardStep rewards={rewards} onNext={() => go(allowedStep(2, useFundingStore.getState(), rewards))} />}
       {allowed === 2 && <ShippingStep onPrev={() => go(1)} onNext={() => go(3)} />}
-      {allowed === 3 && <ConfirmStep project={project} rewards={rewards} onEdit={go} />}
+      {allowed === 3 && <ConfirmStep project={project} rewards={rewards} onEdit={go} tossClientKey={tossClientKey} />}
     </div>
   );
 }
