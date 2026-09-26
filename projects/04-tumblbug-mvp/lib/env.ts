@@ -36,6 +36,9 @@ export const envSchema = z.object({
     emptyToUndefined,
     z.string().startsWith("test_", { error: "TOSS_SECRET_KEY는 test_ 로 시작하는 테스트 키만 넣어 주세요" }).optional(),
   ),
+
+  // 예약 작업 주소(/api/cron/daily)를 부를 때 쓰는 비밀값 (13주차). 비워 두면 예약 작업 주소가 동작하지 않는다
+  CRON_SECRET: z.preprocess(emptyToUndefined, z.string().min(16, { error: "CRON_SECRET은 16자 이상이어야 합니다" }).optional()),
 });
 
 export type Env = z.infer<typeof envSchema>;
