@@ -1,0 +1,42 @@
+# 교재 저장소 전용: 여러 단계 프로젝트가 한 저장소에 있어서, 4단계 폴더가 바뀔 때만 4단계 CI를 돌린다.
+# 독자가 쓰는 파일은 projects/04-tumblbug-mvp/.github/workflows/ci.yml (프로젝트 폴더 = 저장소) 이다.
+name: tumblbug CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["projects/04-tumblbug-mvp/**", ".github/workflows/tumblbug-ci.yml"]
+  pull_request:
+    paths: ["projects/04-tumblbug-mvp/**", ".github/workflows/tumblbug-ci.yml"]
+
+defaults:
+  run:
+    working-directory: projects/04-tumblbug-mvp
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: projects/04-tumblbug-mvp/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: projects/04-tumblbug-mvp/playwright-report
+          retention-days: 7
