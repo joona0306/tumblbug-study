@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from "next/font/google";
+// Figma와 같은 글꼴(Noto Sans KR). npm 패키지로 설치해 우리 서버에서 함께 보낸다.
+// 빌드할 때 구글 서버에 접속하지 않아도 되므로 CI에서도 안정적이다. (한국어 글꼴은 조각 파일이 많아 내려받기가 자주 실패한다)
+import "@fontsource-variable/noto-sans-kr";
 import "./globals.css";
-
-// Figma와 같은 글꼴. 빌드할 때 한 번 내려받아 우리 서버에서 함께 보낸다 (방문자는 구글에 따로 요청하지 않음)
-const notoSansKr = Noto_Sans_KR({
-  weight: ["400", "500", "700"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-sans",
-});
 
 export const metadata: Metadata = {
   title: "모아 — 작은 응원이 모여 창작이 돼요",
@@ -17,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className={notoSansKr.variable}>
+    <html lang="ko">
       <body>{children}</body>
     </html>
   );

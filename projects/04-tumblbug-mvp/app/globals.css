@@ -83,6 +83,9 @@
   --radius-lg: 16px;
   --radius-full: 999px;
 
+  /* ---------- 글꼴 ---------- */
+  --font-sans: "Noto Sans KR Variable", system-ui, sans-serif;
+
   /* ---------- 그림자 (Effect styles) ---------- */
   --shadow-card-hover: 0 4px 16px rgb(0 0 0 / 0.08);
   --shadow-sticky-bar: 0 -2px 12px rgb(0 0 0 / 0.08);
@@ -144,7 +147,7 @@ body {
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
