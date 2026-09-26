@@ -2,12 +2,9 @@
 # 독자가 쓰는 파일은 projects/04-tumblbug-mvp/.github/workflows/ci.yml (프로젝트 폴더 = 저장소) 이다.
 name: tumblbug CI
 
+# 14주차부터: tumblbug-cd.yml 이 먼저 불러서 돌린다 (독자용 ci.yml 과 같음)
 on:
-  push:
-    branches: [main]
-    paths: ["projects/04-tumblbug-mvp/**", ".github/workflows/tumblbug-ci.yml"]
-  pull_request:
-    paths: ["projects/04-tumblbug-mvp/**", ".github/workflows/tumblbug-ci.yml"]
+  workflow_call:
 
 defaults:
   run:

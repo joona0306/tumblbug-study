@@ -1,0 +1,185 @@
+# 교재 저장소 전용 사본: 독자가 쓰는 파일은 projects/04-tumblbug-mvp/.github/workflows/cd.yml 이다.
+# 다른 점 ① 4단계 폴더가 바뀔 때만 돈다 ② 명령은 4단계 폴더에서 ③ Vercel CLI 는 저장소 맨 위에서
+#   (Vercel 프로젝트의 Root Directory = projects/04-tumblbug-mvp 일 때 CLI 는 저장소 맨 위에서 실행해야 한다)
+#
+# CD(지속적 배포) 파이프라인 — GitHub Actions 가 순서를 지휘한다 (14주차)
+#
+#   PR 을 열거나 고치면:  CI → 미리보기 DB 브랜치(Neon) → 마이그레이션 → 미리보기 배포(Vercel) → 연기 테스트 → PR 에 주소 댓글
+#   PR 을 닫으면:        미리보기 DB 브랜치 삭제
+#   main 에 합치면:      CI → (사람 승인) → 운영 DB 마이그레이션 → 운영 배포 → 연기 테스트 → Sentry 릴리스 기록
+#
+# 배포 스위치: 저장소 변수 DEPLOY_ENABLED 가 "true" 일 때만 배포 단계가 돈다 (설정을 다 마치기 전에는 CI 만)
+# 필요한 설정 (docs/deploy.md 에 만드는 방법):
+#   Secrets  : VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID, VERCEL_AUTOMATION_BYPASS_SECRET, NEON_API_KEY, SENTRY_AUTH_TOKEN
+#   Variables: NEON_PROJECT_ID, SENTRY_ORG, SENTRY_PROJECT
+#   Environment "production": Secret DATABASE_URL(운영 DB), Variable PRODUCTION_URL, (가능하면) 승인자 지정
+name: tumblbug CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths: ["projects/04-tumblbug-mvp/**", ".github/workflows/tumblbug-*.yml"]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths: ["projects/04-tumblbug-mvp/**", ".github/workflows/tumblbug-*.yml"]
+
+defaults:
+  run:
+    working-directory: projects/04-tumblbug-mvp
+
+# 같은 PR 에 새 커밋이 오면 이전 미리보기 작업은 취소한다. 운영 배포는 중간에 끊지 않고 차례로 돈다.
+concurrency:
+  group: tumblbug-cd-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Vercel CLI 는 이 세 값으로 "어느 계정의 어느 프로젝트"인지 안다 (vercel link 대신)
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_CLI: vercel@60.1.3
+
+jobs:
+  ci:
+    if: github.event.action != 'closed'
+    uses: ./.github/workflows/tumblbug-ci.yml
+
+  # ---------- PR: 미리보기 ----------
+  preview:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed' && vars.DEPLOY_ENABLED == 'true'
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write # PR 에 댓글을 달기 위해
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: projects/04-tumblbug-mvp/package-lock.json }
+      - run: npm ci
+
+      # PR 마다 DB 를 통째로 복사한 "브랜치"를 만든다 (Neon: 몇 초 만에 복사, 바뀐 부분만 저장해서 싸다)
+      # 부모는 개발 DB(tumblbug_dev) → 예시 데이터로 미리보기를 볼 수 있고, 운영 데이터(개인정보)는 복사되지 않는다
+      - name: 미리보기 DB 브랜치 만들기 (이미 있으면 그대로 사용)
+        id: db
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+          branch_name: preview/pr-${{ github.event.pull_request.number }}
+          database: tumblbug_dev
+          role: neondb_owner
+          ssl: verify-full
+
+      - name: 미리보기 DB 에 마이그레이션
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: ${{ steps.db.outputs.db_url }}
+
+      - name: 미리보기 빌드·배포
+        id: deploy
+        working-directory: ${{ github.workspace }}
+        env:
+          DATABASE_URL: ${{ steps.db.outputs.db_url_pooled }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        run: |
+          npx --yes $VERCEL_CLI pull --yes --environment=preview
+          npx --yes $VERCEL_CLI build
+          # --env: 이 배포에만 넣는 값 — PR 마다 다른 DB 주소, 배포된 커밋 번호
+          url=$(npx --yes $VERCEL_CLI deploy --prebuilt --env DATABASE_URL="$DATABASE_URL" --env APP_VERSION="$GITHUB_SHA")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: 미리보기 주소에 연기 테스트
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test e2e/smoke.spec.ts --project=desktop
+        env:
+          E2E_BASE_URL: ${{ steps.deploy.outputs.url }}
+          EXPECTED_COMMIT: ${{ github.sha }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+      - name: PR 에 미리보기 주소 댓글
+        uses: actions/github-script@v9
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: `🔍 미리보기: ${process.env.URL}\n\n- DB: Neon 브랜치 \`preview/pr-${context.issue.number}\` (개발 DB 복사본, PR 을 닫으면 지워짐)\n- 커밋: \`${context.sha.slice(0, 7)}\` · 연기 테스트 통과`,
+            });
+
+  # PR 을 닫으면(합치든 안 합치든) 미리보기 DB 브랜치를 지운다 — 남겨 두면 무료 사용량을 차지한다
+  cleanup-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+          branch: preview/pr-${{ github.event.pull_request.number }}
+
+  # ---------- main: 운영 ----------
+  production:
+    if: github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true'
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # GitHub Environments: 운영 전용 비밀값을 여기서만 꺼낼 수 있고, 승인자를 정해 두면 사람이 "승인"을 눌러야 시작한다
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: projects/04-tumblbug-mvp/package-lock.json }
+      - run: npm ci
+
+      # 배포보다 마이그레이션이 먼저: 새 코드가 새 칸을 찾을 때 이미 있어야 한다
+      # (그래서 마이그레이션은 "옛 코드도 계속 돌 수 있게" 만든다 — 칸 삭제·이름 바꾸기는 두 번의 배포로 나눈다)
+      - name: 운영 DB 마이그레이션
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: 운영 빌드·배포
+        id: deploy
+        working-directory: ${{ github.workspace }}
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        run: |
+          npx --yes $VERCEL_CLI pull --yes --environment=production
+          npx --yes $VERCEL_CLI build --prod
+          url=$(npx --yes $VERCEL_CLI deploy --prebuilt --prod --env APP_VERSION="$GITHUB_SHA")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # 운영 주소(도메인)에 돌린다: 도메인이 방금 배포한 커밋을 가리키는지까지 확인 (EXPECTED_COMMIT)
+      - name: 운영 주소에 연기 테스트
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test e2e/smoke.spec.ts --project=desktop
+        env:
+          E2E_BASE_URL: ${{ vars.PRODUCTION_URL }}
+          EXPECTED_COMMIT: ${{ github.sha }}
+
+      # Sentry 에 "이 커밋이 운영에 배포됐다"고 기록 → 에러가 어느 배포부터 생겼는지 보인다
+      # (소스맵은 빌드할 때 이미 올라갔다 — next.config.ts 의 withSentryConfig)
+      - name: Sentry 릴리스 기록
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+        with:
+          working_directory: projects/04-tumblbug-mvp
+          environment: production
+          release: ${{ github.sha }}
+          set_commits: skip # 커밋 목록 연결은 Sentry 저장소 연동이 필요해서 건너뛴다
+          ignore_missing: true

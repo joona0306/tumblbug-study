@@ -2,10 +2,10 @@
 # 하나라도 실패하면 PR 화면에 빨간 X가 뜬다 → 합치기 전에 고친다.
 name: CI
 
+# 14주차부터: CI 는 혼자 돌지 않고 cd.yml 이 "먼저 불러서" 돌린다 (workflow_call = 다른 워크플로가 부를 수 있음)
+# → 코드를 올리면 cd.yml 이 CI → 배포 순서를 지휘한다. CI 가 실패하면 배포 단계는 아예 시작하지 않는다.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_call:
 
 jobs:
   check:

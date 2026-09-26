@@ -6,10 +6,13 @@ import { expect, test } from "@playwright/test";
 //  - 프로젝트가 하나도 없는 빈 운영 DB 에서도 통과해야 한다
 // 실행: E2E_BASE_URL=https://배포주소 npx playwright test e2e/smoke.spec.ts --project=desktop
 
-test("상태 확인: 서버가 살아 있고 DB 에 닿는다", async ({ request }) => {
+test("상태 확인: 서버가 살아 있고 DB 에 닿는다 (+ 기대한 커밋이 배포됐나)", async ({ request }) => {
   const res = await request.get("/api/health");
   expect(res.status()).toBe(200);
   expect(await res.json()).toMatchObject({ ok: true, db: "ok" });
+  // CD 가 EXPECTED_COMMIT 을 주면: 운영 주소가 "옛 배포"가 아니라 방금 배포한 커밋을 가리키는지 확인
+  const expected = process.env.EXPECTED_COMMIT?.slice(0, 7);
+  if (expected) expect((await res.json()).commit).toBe(expected);
 });
 
 test("홈과 목록이 열린다 (프로젝트가 없어도)", async ({ page }) => {
