@@ -52,7 +52,7 @@ export async function createProject(_prev: ProjectFormState, formData: FormData)
     .returning({ id: project.id });
 
   revalidatePath("/");
-  // 리워드는 8주차에 수정 화면에서 추가한다
+  // 리워드는 수정 화면 아래에서 추가한다
   redirect(`/projects/${created.id}/edit?created=1`);
 }
 

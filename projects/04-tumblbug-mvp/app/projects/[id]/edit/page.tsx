@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { updateProject } from "@/app/actions/projects";
 import { ProjectForm } from "@/components/project/ProjectForm";
+import { RewardManager } from "@/components/reward/RewardManager";
 import { db } from "@/db";
 import { addDays, kstToday } from "@/lib/dates";
 import { findMyProject, hasPaidFunding } from "@/lib/queries/projects";
@@ -35,7 +36,7 @@ export default async function EditProjectPage({ params, searchParams }: Props) {
       </h1>
       {(created || saved) && (
         <p role="status" style={{ marginBottom: "var(--spacing-xl)", padding: "var(--spacing-md)", borderRadius: "var(--radius-sm)", background: "var(--color-success-subtle)", color: "var(--color-success)" }}>
-          {created ? "프로젝트를 만들었어요. 다음 주차에 리워드를 추가할 수 있어요." : "저장했어요."}
+          {created ? "프로젝트를 만들었어요. 아래에서 리워드를 추가해 주세요." : "저장했어요."}
         </p>
       )}
       <ProjectForm
@@ -55,6 +56,7 @@ export default async function EditProjectPage({ params, searchParams }: Props) {
       >
         <input type="hidden" name="projectId" value={project.id} />
       </ProjectForm>
+      <RewardManager projectId={project.id} />
     </main>
   );
 }
