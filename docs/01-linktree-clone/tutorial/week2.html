@@ -322,6 +322,13 @@ git commit -m "2주차 2단계: Neon DB 연결"</code></pre>
           </svg>
           <figcaption>🔑 = 기본 키(각 줄의 고유 번호), 🔗 = 외래 키(다른 표의 줄을 가리킴). 사용자 1명(1)은 세션·로그인 수단·링크를 여러 개(N) 가질 수 있다.</figcaption>
         </figure>
+        <div class="box why"><span class="box-title">💡 1주차에 그린 개념 ERD와 무엇이 달라졌나요?</span>
+          <ul>
+            <li><strong>표가 늘었어요</strong>: "사용자"의 비밀번호와 로그인 상태는 보안상 따로 보관합니다 → <code>account</code>(비밀번호 해시), <code>session</code>(로그인 기록)</li>
+            <li><strong>관계선이 칸이 됐어요</strong>: 그림의 1 : N 선이 link 표의 <code>user_id</code> 칸(외래 키)으로 바뀌었습니다</li>
+            <li><strong>칸마다 이름과 종류가 붙었어요</strong>: "순서" → <code>position</code>(숫자), "제목" → <code>title</code>(글자)</li>
+          </ul>
+          이렇게 기획 단계의 <strong>개념 ERD</strong>를 개발 단계의 <strong>실제 표(물리 ERD)</strong>로 구체화하는 것이 실무의 흐름입니다.</div>
         <div class="box term"><span class="box-title">📖 용어 풀이</span>
           <ul>
             <li><strong>테이블(표)</strong>: 엑셀 시트처럼 칸(컬럼)과 줄(행)로 된 데이터 묶음. 링크 1개 = link 표의 1줄.</li>
@@ -1139,7 +1146,7 @@ git commit -m "2주차 5단계: 대시보드 보호"</code></pre>
 
   <footer class="page-footer">
     <div class="row">
-      <span>마지막 검증: 2026-09-25 · Node.js 22.14 · Next.js 16.3.6 · Drizzle ORM 0.45.3 · drizzle-kit 0.31.11 · Better Auth 1.7.6 (auth CLI 1.7.6) · @neondatabase/serverless 1.1.0</span>
+      <span>마지막 검증: 2026-09-26 · Node.js 22.14 · Next.js 16.3.6 · Drizzle ORM 0.45.3 · drizzle-kit 0.31.11 · Better Auth 1.7.6 (auth CLI 1.7.6) · @neondatabase/serverless 1.1.0</span>
       <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
     </div>
   </footer>

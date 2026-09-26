@@ -36,6 +36,7 @@
       "w1-design-tokens",
       "w1-contrast",
       "w1-data",
+      "w1-erd",
       "w1-retro"
     ],
     "week2": [
@@ -72,6 +73,9 @@
       "w3-s3-test",
       "w3-s4-code",
       "w3-s4-test",
+      "w3-s5-select",
+      "w3-s5-join",
+      "w3-s5-write",
       "w3-retro"
     ],
     "week4": [

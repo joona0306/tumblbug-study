@@ -959,6 +959,132 @@ git commit -m "3주차 4단계: 로그아웃"</code></pre>
       </div>
     </details>
 
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>SQL 기초 미니 수업: Drizzle 코드는 DB에서 무엇이 되나</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜?</span>지금까지는 Drizzle(자바스크립트로 DB를 다루는 도구)이 DB에 보낼 명령을 대신 만들어 줬습니다. 그 명령의 진짜 이름이 <strong>SQL</strong>입니다. SQL을 직접 한 번 써 보면 "내 코드가 DB에서 무슨 일을 하는지" 보이고, 운영 중 데이터를 확인하거나 지표를 계산할 때(4주차) 바로 쓸 수 있어요. 4단계에서는 이 위에 인덱스·트랜잭션을 배웁니다.</div>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>SQL</strong>: DB에 "이 표에서 이런 줄을 가져와/넣어/고쳐/지워"라고 말하는 언어입니다. 가장 많이 쓰는 네 가지가 <code>SELECT</code>(읽기), <code>INSERT</code>(추가), <code>UPDATE</code>(수정), <code>DELETE</code>(삭제)예요.</div>
+
+        <h3>① 준비: Neon SQL Editor 열기</h3>
+        <ol>
+          <li>Neon 콘솔 → 내 프로젝트 → 왼쪽 메뉴 <strong>SQL Editor</strong></li>
+          <li>위쪽 브랜치 선택에서 <strong>개발용(dev) 브랜치</strong>를 고릅니다 — 운영 DB에서는 실습하지 마세요!</li>
+          <li>아래 SQL을 붙여 넣고, 실행할 부분만 드래그해서 <strong>Run</strong></li>
+        </ol>
+
+        <h3>② 읽기: SELECT</h3>
+        <figure class="code" data-src="sql/sql-basics.sql" data-tag="linktree-week3-step5" data-lines="5-14">
+          <figcaption><span class="label">SQL Editor</span></figcaption>
+          <pre><code>-- ① 읽기: link 표에서 원하는 칸만, 번호 순으로 5줄
+SELECT id, title, url, position
+FROM link
+ORDER BY id
+LIMIT 5;
+
+-- ② 조건: 주소에 youtube 가 들어간 링크만
+SELECT title, url
+FROM link
+WHERE url LIKE '%youtube%';</code></pre>
+        </figure>
+        <p><code>SELECT 칸 FROM 표</code>가 기본 모양이고, <code>WHERE</code>(조건), <code>ORDER BY</code>(정렬), <code>LIMIT</code>(개수)를 뒤에 붙입니다. 대시보드가 내 링크를 가져오는 Drizzle 코드와 나란히 보면 같은 모양이에요.</p>
+        <figure class="code" data-src="app/dashboard/page.js" data-tag="linktree-week3-step5" data-lines="16-20">
+          <figcaption><span class="label">app/dashboard/page.js (이미 만든 코드)</span></figcaption>
+          <pre><code>  const links = await db
+    .select()
+    .from(link)
+    .where(eq(link.userId, user.id))
+    .orderBy(asc(link.position), asc(link.id));</code></pre>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Drizzle</th><th>SQL</th></tr></thead>
+            <tbody>
+              <tr><td><code>.select()</code></td><td><code>SELECT *</code></td></tr>
+              <tr><td><code>.from(link)</code></td><td><code>FROM link</code></td></tr>
+              <tr><td><code>.where(eq(link.userId, user.id))</code></td><td><code>WHERE user_id = '내 id'</code></td></tr>
+              <tr><td><code>.orderBy(asc(link.position), asc(link.id))</code></td><td><code>ORDER BY position, id</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>③ 함정 하나: 따옴표 없는 user</h3>
+        <figure class="code" data-src="sql/sql-basics.sql" data-tag="linktree-week3-step5" data-lines="16-18">
+          <figcaption><span class="label">SQL Editor</span></figcaption>
+          <pre><code>-- ③ 함정: 따옴표 없는 user 는 "지금 DB에 접속한 계정"이라는 뜻이 된다
+SELECT count(*) FROM user;   -- 에러 없이 1 이 나온다 (우리 사용자 표가 아님!)
+SELECT count(*) FROM "user"; -- 진짜 가입자 수</code></pre>
+        </figure>
+        <p>첫 줄은 <strong>에러 없이 1</strong>이 나옵니다. PostgreSQL에서 따옴표 없는 <code>user</code>는 "지금 DB에 접속한 계정"이라는 특별한 뜻이라, 우리 가입자 표가 아니에요. 그래서 우리 코드와 SQL에서는 항상 <code>"user"</code>처럼 큰따옴표로 감쌉니다. (1주차에 <code>order</code> 대신 <code>position</code>을 쓴 것과 같은 이유 — SQL이 이미 쓰는 단어는 피하거나 감싸기)</p>
+
+        <h3>④ 두 표를 합치기: JOIN / 묶어서 세기: GROUP BY</h3>
+        <figure class="code" data-src="sql/sql-basics.sql" data-tag="linktree-week3-step5" data-lines="20-31">
+          <figcaption><span class="label">SQL Editor</span></figcaption>
+          <pre><code>-- ④ 합치기(JOIN): 링크마다 주인의 사용자 이름을 붙여서
+SELECT u.username, l.title, l.position
+FROM link AS l
+JOIN "user" AS u ON u.id = l.user_id
+ORDER BY u.username, l.position;
+
+-- ⑤ 묶어서 세기(GROUP BY): 사용자별 링크 수 (링크가 0개인 사람도 보이도록 LEFT JOIN)
+SELECT u.username, count(l.id) AS link_count
+FROM "user" AS u
+LEFT JOIN link AS l ON l.user_id = u.id
+GROUP BY u.username
+ORDER BY link_count DESC;</code></pre>
+        </figure>
+        <ul>
+          <li><strong>JOIN</strong>: link 표의 <code>user_id</code>와 user 표의 <code>id</code>가 같은 줄끼리 옆으로 붙입니다. 1주차에 그린 ERD의 <strong>1 : N 선</strong>이 바로 이 연결이에요.</li>
+          <li><strong>GROUP BY</strong>: 사용자별로 줄을 묶고 <code>count()</code>로 셉니다. <code>LEFT JOIN</code>은 링크가 0개인 사용자도 빠뜨리지 않게 해요 (그냥 JOIN이면 링크 없는 사람은 결과에서 사라짐).</li>
+        </ul>
+
+        <h3>⑤ 추가·수정·삭제: INSERT / UPDATE / DELETE</h3>
+        <p><code>내_사용자이름</code>을 내 사용자 이름으로 바꾼 뒤, 한 덩어리씩 실행하고 대시보드를 새로고침해 보세요. 링크가 생겼다가, 제목이 바뀌었다가, 사라집니다.</p>
+        <figure class="code" data-src="sql/sql-basics.sql" data-tag="linktree-week3-step5" data-lines="33-49">
+          <figcaption><span class="label">SQL Editor</span></figcaption>
+          <pre><code>-- ⑥ 추가(INSERT): 내 계정에 링크 1개 (내_사용자이름 을 바꿔서 실행)
+INSERT INTO link (user_id, title, url, position)
+SELECT id, 'SQL로 만든 링크', 'https://example.com', 99
+FROM "user"
+WHERE username = '내_사용자이름'
+RETURNING id, title;
+
+-- ⑦ 수정(UPDATE): 방금 만든 링크의 제목 바꾸기 — WHERE 를 절대 빼먹지 말 것!
+UPDATE link
+SET title = 'SQL로 고친 링크'
+WHERE title = 'SQL로 만든 링크'
+RETURNING id, title;
+
+-- ⑧ 삭제(DELETE): 실습한 링크 지우기
+DELETE FROM link
+WHERE title = 'SQL로 고친 링크'
+RETURNING id;</code></pre>
+        </figure>
+        <p>앱의 수정 코드와 비교해 보면, 우리 코드는 <code>WHERE</code>에 <strong>"이 id이면서 + 내 링크인 것"</strong> 두 조건을 겁니다. 남의 링크를 고칠 수 없게 막는 부분이 SQL로는 <code>WHERE id = ? AND user_id = ?</code>예요.</p>
+        <figure class="code" data-src="app/actions/links.js" data-tag="linktree-week3-step5" data-lines="68-72">
+          <figcaption><span class="label">app/actions/links.js (이미 만든 코드)</span></figcaption>
+          <pre><code>  const updated = await db
+    .update(link)
+    .set({ title, url })
+    .where(and(eq(link.id, id), eq(link.userId, user.id)))
+    .returning({ id: link.id });</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">⚠️ WHERE 없는 UPDATE·DELETE는 전부를 바꿉니다</span><code>UPDATE link SET title = '...'</code>처럼 <code>WHERE</code>를 빼면 <strong>모든 링크의 제목</strong>이 바뀌고, <code>DELETE FROM link</code>는 <strong>모든 링크</strong>를 지웁니다. 되돌리기 버튼도 없어요. 그래서 ① 개발용 브랜치에서만 연습하고 ② 먼저 같은 WHERE로 <code>SELECT</code>를 해서 몇 줄이 걸리는지 본 다음 실행하는 습관을 들이세요. (실수했을 때 되살리는 법은 4주차 백업·복구에서)</div>
+        <div class="box check"><span class="box-title">✅ 여기까지 됐는지 확인하는 법</span>
+          <ul>
+            <li>④의 결과에 내 사용자 이름과 링크 개수가 보인다</li>
+            <li>⑥을 실행하면 대시보드에 "SQL로 만든 링크"가 나타나고, ⑧을 실행하면 사라진다</li>
+          </ul>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="w3-s5-select"><span>SELECT·WHERE·ORDER BY로 내 링크 읽기</span></label></li>
+          <li><label><input type="checkbox" data-task="w3-s5-join"><span>JOIN·GROUP BY로 사용자별 링크 수 세기</span></label></li>
+          <li><label><input type="checkbox" data-task="w3-s5-write"><span>INSERT → UPDATE → DELETE 실습 후 대시보드에서 확인</span></label></li>
+        </ul>
+        <p class="muted">🔎 정답 코드: <a href="https://github.com/joona0306/tumblbug-study/tree/linktree-week3-step5/projects/01-linktree-clone">linktree-week3-step5</a></p>
+      </div>
+    </details>
+
     <div class="box help"><span class="box-title">🆘 3주차에 자주 막히는 곳</span>
       <details><summary>링크를 추가했는데 목록에 바로 안 보여요</summary><p>서버 액션 안에서 <code>revalidatePath("/dashboard")</code>를 호출했는지 확인하세요. <code>refreshPages(user.username)</code>가 빠지면 새로고침해야 보입니다.</p></details>
       <details><summary><code>Calling setState synchronously within an effect</code> 경고(lint 에러)</summary><p>수정 성공 후 보기 모드로 돌아가는 코드를 <code>useEffect</code> 안에 넣으면 나오는 경고입니다. 교재 코드처럼 <code>saveLink</code> 함수 안에서 결과를 받은 직후 <code>setEditing(false)</code>를 호출하세요.</p></details>
@@ -986,7 +1112,7 @@ git commit -m "3주차 4단계: 로그아웃"</code></pre>
 
   <footer class="page-footer">
     <div class="row">
-      <span>마지막 검증: 2026-09-25 · Node.js 22.14 · Next.js 16.3.6 · React 19.2.8 · Drizzle ORM 0.45.3 · Better Auth 1.7.6</span>
+      <span>마지막 검증: 2026-09-26 · Node.js 22.14 · Next.js 16.3.6 · React 19.2.8 · Drizzle ORM 0.45.3 · Better Auth 1.7.6</span>
       <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
     </div>
   </footer>

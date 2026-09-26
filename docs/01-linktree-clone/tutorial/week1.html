@@ -297,7 +297,7 @@ SNS 프로필에는 링크를 하나만 넣을 수 있다.
     </details>
 
     <details class="step" id="step-5">
-      <summary><span class="step-num">5</span>데이터 구조 초안 잡기</summary>
+      <summary><span class="step-num">5</span>데이터 구조 초안 + 개념 ERD 그리기</summary>
       <div class="step-body">
         <p>와이어프레임에 보이는 정보는 모두 <strong>어딘가에 저장</strong>되어 있어야 합니다. 화면을 보며 "이 글자는 어디서 오지?"를 적어 봅니다.</p>
         <div class="table-wrap">
@@ -319,10 +319,46 @@ SNS 프로필에는 링크를 하나만 넣을 수 있다.
 
 - 사용자 1명은 링크를 여러 개 가진다 (1 : N)</code></pre>
         </figure>
-        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>1 : N (일대다) 관계</strong>: 한쪽 하나에 다른 쪽 여러 개가 연결되는 관계입니다. 사용자 1명 ↔ 링크 N개. 링크마다 "주인이 누구인지(사용자 번호)"를 적어 두면 이 관계가 만들어집니다. 2주차에서 그림(ERD)으로 다시 봅니다.</div>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>1 : N (일대다) 관계</strong>: 한쪽 하나에 다른 쪽 여러 개가 연결되는 관계입니다. 사용자 1명 ↔ 링크 N개. 링크마다 "주인이 누구인지(사용자 번호)"를 적어 두면 이 관계가 만들어집니다.</div>
         <div class="box why"><span class="box-title">💡 비밀번호는 그대로 저장하나요?</span>아니요! 실제로는 비밀번호를 알아볼 수 없게 바꾼 값(해시)만 저장합니다. 2주차에서 우리 DB 안을 직접 들여다보며 확인합니다. 지금은 "비밀번호가 필요하다"만 적어 두면 됩니다.</div>
+
+        <h3>그림으로 그리기: 개념 ERD</h3>
+        <p>위의 글을 그림으로 바꾼 것이 <strong>ERD</strong>입니다. 기획 단계에서는 "어떤 데이터 덩어리가 있고, 서로 몇 대 몇으로 연결되나"만 그립니다. 칸의 정확한 이름이나 종류(숫자/글자)는 2주차에 정합니다.</p>
+        <div class="box term"><span class="box-title">📖 용어 풀이</span><strong>ERD (Entity Relationship Diagram, 개체-관계 그림)</strong>: 저장할 데이터 덩어리(개체, 예: 사용자·링크)를 네모로, 그 사이의 관계를 선으로 그린 그림입니다. 선 끝의 <strong>1</strong>과 <strong>N</strong>(또는 까마귀 발 모양 ⋔)이 "몇 대 몇"을 나타냅니다.</div>
+        <figure class="diagram">
+          <svg viewBox="0 0 640 220" role="img" aria-labelledby="cerd-title cerd-desc">
+            <title id="cerd-title">개념 ERD: 사용자와 링크</title>
+            <desc id="cerd-desc">왼쪽 사용자 네모와 오른쪽 링크 네모가 선으로 이어져 있고, 사용자 쪽 끝에 1, 링크 쪽 끝에 N과 까마귀 발 모양이 있다. 사용자 한 명이 링크를 여러 개 가진다는 뜻이다.</desc>
+            <rect class="d-box d-client" x="20" y="40" width="200" height="140" rx="10"/>
+            <text class="d-title" x="120" y="72" text-anchor="middle">사용자</text>
+            <text class="d-small" x="40" y="102">이메일</text>
+            <text class="d-small" x="40" y="124">사용자 이름 (공개 주소)</text>
+            <text class="d-small" x="40" y="146">비밀번호</text>
+            <rect class="d-box d-db" x="420" y="40" width="200" height="140" rx="10"/>
+            <text class="d-title" x="520" y="72" text-anchor="middle">링크</text>
+            <text class="d-small" x="440" y="102">제목</text>
+            <text class="d-small" x="440" y="124">주소</text>
+            <text class="d-small" x="440" y="146">순서</text>
+            <path class="d-line" d="M220,110 L420,110"/>
+            <path class="d-line" d="M400,110 L420,94 M400,110 L420,126"/>
+            <text class="d-title" x="236" y="100">1</text>
+            <text class="d-title" x="386" y="100">N</text>
+            <text class="d-small" x="320" y="140" text-anchor="middle">가진다</text>
+          </svg>
+          <figcaption>사용자 1명은 링크를 여러 개(N) 가진다. 링크는 반드시 한 명의 주인이 있다.</figcaption>
+        </figure>
+        <p>그림을 그리는 순서:</p>
+        <ol>
+          <li>기능 목록과 와이어프레임에서 <strong>명사</strong>를 뽑습니다 (사용자, 링크, 버튼, 화면…)</li>
+          <li>그중 <strong>저장해야 하는 것</strong>만 네모로 그립니다. "버튼·화면"은 저장하지 않으니 빼요</li>
+          <li>네모끼리 관계가 있으면 선을 긋고, 양쪽 끝에 몇 개씩인지(1 또는 N) 적습니다. "사용자 한 명은 링크를 <u>몇 개</u>? → 여러 개(N)", "링크 하나의 주인은 <u>몇 명</u>? → 한 명(1)"처럼 두 방향으로 물어보면 됩니다</li>
+          <li>와이어프레임의 글자·숫자가 모두 어느 네모에서 오는지 위의 표로 다시 확인합니다. 안 맞는 게 있으면 그림이나 화면을 고쳐요</li>
+        </ol>
+        <div class="box why"><span class="box-title">💡 왜 기획 단계에서 그리나요?</span>코드를 쓰기 전에 "이 화면에 보여줄 데이터가 정말 저장되어 있나?"를 확인할 수 있기 때문입니다. 예를 들어 공개 페이지에 "방문자 수"를 보여주고 싶다면, 방문을 저장하는 네모가 하나 더 필요하다는 걸 그림에서 바로 알 수 있어요. 기능을 넣을지 뺄지 판단하는 근거가 됩니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>종이(또는 아무 그리기 도구)에 네모 2개와 선 1개가 있고, 선 양쪽에 1과 N이 적혀 있으면 됩니다. 2주차 3단계에서 이 그림이 실제 DB 표로 바뀌는 모습을 비교해 봅니다.</div>
         <ul class="checklist">
           <li><label><input type="checkbox" data-task="w1-data"><span>데이터 구조 초안 작성하기</span></label></li>
+          <li><label><input type="checkbox" data-task="w1-erd"><span>개념 ERD 그리기 (네모 2개 + 1 : N 선)</span></label></li>
         </ul>
       </div>
     </details>
@@ -349,7 +385,7 @@ SNS 프로필에는 링크를 하나만 넣을 수 있다.
 
   <footer class="page-footer">
     <div class="row">
-      <span>마지막 검증: 2026-09-25 · 1주차는 코드가 없는 기획 과정입니다</span>
+      <span>마지막 검증: 2026-09-26 · 1주차는 코드가 없는 기획 과정입니다</span>
       <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
     </div>
   </footer>
