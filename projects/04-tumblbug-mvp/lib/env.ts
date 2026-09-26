@@ -56,6 +56,18 @@ export function parseEnv(values: Record<string, string | undefined>): Env {
   return result.data;
 }
 
+// DB 주소만 검사한다 — 마이그레이션(drizzle-kit)처럼 DB 에만 접속하는 도구용 (14주차)
+// CD 의 마이그레이션 단계에는 DB 주소만 있고 로그인 비밀키 등은 없다 → 앱 전체 검사(parseEnv)를 쓰면 멈춘다
+// 규칙은 같은 envSchema 에서 뽑아 쓴다 (pick) → 두 곳의 규칙이 어긋나지 않는다
+export function parseDatabaseUrl(values: Record<string, string | undefined>): string {
+  const result = envSchema.pick({ DATABASE_URL: true }).safeParse(values);
+  if (!result.success) {
+    throw new Error(`환경 변수가 올바르지 않습니다:
+${z.prettifyError(result.error)}`);
+  }
+  return result.data.DATABASE_URL;
+}
+
 // 서버 코드에서 쓰는 검사된 환경 변수. 처음 쓸 때 한 번만 검사한다.
 let cached: Env | undefined;
 export function serverEnv(): Env {
