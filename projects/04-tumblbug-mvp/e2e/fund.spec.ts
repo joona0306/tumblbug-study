@@ -28,6 +28,7 @@ test("로그인하지 않으면 로그인 화면으로 보낸다", async ({ page
 });
 
 test("리워드·수량 → 배송지 → 확인까지 가고, 새로고침해도 고른 내용이 남는다", async ({ page }) => {
+  test.slow(); // 확인 화면에서 토스 결제위젯(외부 서버)을 불러오느라 오래 걸릴 수 있다 → 제한 시간 3배
   const id = await openFund(page, "산과 들을 담은 수제 머그 2차");
   const main = page.getByRole("main");
 
