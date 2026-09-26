@@ -155,3 +155,15 @@ export const paymentEvent = pgTable("payment_event", {
   payload: jsonb("payload").notNull(),
   receivedAt: timestamp("received_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// 요청 수 제한 기록 (9주차): "이 키(예: IP+API)가 이 시간 칸(1분)에 몇 번 요청했나"
+// 서버리스는 서버가 여러 대로 나뉘어 돌아서 메모리로는 셀 수 없다 → 모두가 보는 DB에 센다
+export const rateLimit = pgTable(
+  "rate_limit",
+  {
+    key: text("key").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.key, t.windowStart] })],
+);
