@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LikeButton } from "@/components/like/LikeButton";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { CATEGORIES } from "@/lib/categories";
@@ -15,6 +16,8 @@ export function ProjectCard({ project, now, compact = false, priority = false }:
   const urgent = urgentLabel(project.deadline, now);
   return (
     <article className={styles.card}>
+      {/* 찜 버튼은 링크 "밖"에 둔다 — 링크 안에 버튼을 넣으면 누를 때 상세로 이동해 버린다 (그리고 HTML 규칙 위반) */}
+      <LikeButton projectId={project.id} title={project.title} />
       <Link href={`/projects/${project.id}`} className={styles.link}>
         <div className={styles.image}>
           <Image src={project.imageUrl} alt="" fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 270px" priority={priority} />

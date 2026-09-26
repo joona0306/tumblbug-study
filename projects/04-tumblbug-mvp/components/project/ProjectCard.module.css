@@ -1,4 +1,5 @@
 .card {
+  position: relative; /* 찜 버튼을 사진 오른쪽 위에 겹쳐 놓기 위해 */
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);

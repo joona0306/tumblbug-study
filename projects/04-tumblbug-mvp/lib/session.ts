@@ -1,12 +1,14 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
 import { auth } from "@/lib/auth";
 
 // 지금 요청을 보낸 사람이 로그인한 사용자라면 그 정보를, 아니면 null
-export async function getCurrentUser() {
+// cache: 한 번의 요청 안에서 여러 곳(레이아웃·헤더·페이지)이 불러도 세션 확인(DB 조회)은 한 번만 한다 (12주차)
+export const getCurrentUser = cache(async () => {
   const session = await auth.api.getSession({ headers: await headers() });
   return session?.user ?? null;
-}
+});
 
 // 로그인이 꼭 필요한 곳. 로그인하지 않았으면 로그인 페이지로 보내고, 로그인 후 돌아올 주소를 붙인다.
 // proxy.ts 가 먼저 막지만(쿠키만 확인), 진짜 확인은 여기서 한다 (쿠키가 있어도 만료·위조일 수 있다)

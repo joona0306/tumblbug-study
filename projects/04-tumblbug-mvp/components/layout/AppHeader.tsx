@@ -1,6 +1,7 @@
 import { LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
+import { HeaderLikes } from "@/components/like/HeaderLikes";
 import { getCurrentUser } from "@/lib/session";
 import { Logo } from "./Logo";
 import styles from "./AppHeader.module.css";
@@ -20,6 +21,7 @@ export async function AppHeader() {
           </Link>
           {user ? (
             <>
+              <HeaderLikes />
               {/* 이름을 누르면 내 후원 내역으로 (11주차) */}
               <Link href="/me/fundings" className={styles.link} title="내 후원 내역">
                 <User size={18} aria-hidden="true" />

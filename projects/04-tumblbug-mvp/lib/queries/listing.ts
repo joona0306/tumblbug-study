@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, type SQL, sql } from "drizzle-orm";
 import type { Db } from "@/db";
-import { funding, project, reward, user } from "@/db/schema";
+import { funding, project, projectLike, reward, user } from "@/db/schema";
 import type { Category } from "@/lib/categories";
 import { type Cursor, encodeCursor } from "@/lib/cursor";
 import type { ProjectStatus } from "@/lib/project-status";
@@ -142,6 +142,8 @@ export async function getProjectDetail(db: Db, projectId: number) {
       raised: sql<number>`coalesce(${s.raised}, 0)`,
       supporters: sql<number>`coalesce(${s.supporters}, 0)`,
       creatorName: user.name,
+      // 찜 개수 (12주차) — 상관 서브쿼리: 이 프로젝트 줄마다 project_like 를 센다 (project_like_project_idx 인덱스 사용)
+      likeCount: sql<number>`(select count(*)::int from ${projectLike} where ${projectLike.projectId} = ${project.id})`,
     })
     .from(project)
     .innerJoin(user, eq(user.id, project.creatorId))

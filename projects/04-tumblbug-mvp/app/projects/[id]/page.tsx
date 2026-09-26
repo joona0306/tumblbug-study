@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LikeButton } from "@/components/like/LikeButton";
 import { RewardCard } from "@/components/reward/RewardCard";
 import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -11,6 +12,7 @@ import { db } from "@/db";
 import { CATEGORIES } from "@/lib/categories";
 import { achievementRate, formatWon } from "@/lib/format";
 import { getProjectStatus, isEnded, remainingLabel } from "@/lib/project-status";
+import { getMyLikeIds } from "@/lib/queries/likes";
 import { getProjectDetail } from "@/lib/queries/listing";
 import { getCurrentUser } from "@/lib/session";
 import styles from "./detail.module.css";
@@ -40,6 +42,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   const ended = isEnded(project.deadline, now);
   const mine = me?.id === project.creatorId;
   const [, month, day] = project.deadline.split("-");
+  const likedAtRender = me ? (await getMyLikeIds(db, me.id)).includes(project.id) : false;
 
   // 후원 버튼 상태: 끝남 / 내 프로젝트 / 후원 가능 (서버도 11주차에 같은 규칙으로 한 번 더 막는다)
   const cta = ended ? (
@@ -54,6 +57,14 @@ export default async function ProjectDetailPage({ params }: Props) {
     <ButtonLink href={`/projects/${project.id}/fund`} fullWidth>
       이 프로젝트 후원하기
     </ButtonLink>
+  );
+
+  // 찜 버튼(하트 + 개수)을 후원 버튼 왼쪽에 (Figma BottomBar)
+  const ctaRow = (
+    <>
+      <LikeButton projectId={project.id} title={project.title} variant="labeled" count={project.likeCount} likedAtRender={likedAtRender} />
+      {cta}
+    </>
   );
 
   return (
@@ -94,7 +105,9 @@ export default async function ProjectDetailPage({ params }: Props) {
             <CalendarDays size={16} aria-hidden="true" />
             {Number(month)}월 {Number(day)}일 23:59 마감 · 후원 즉시 결제 (테스트 모드)
           </p>
-          <div className={styles.ctaDesktop}>{cta}</div>
+          <div className={styles.ctaDesktop}>
+            <div className={styles.ctaRow}>{ctaRow}</div>
+          </div>
 
           <h2 className="text-heading-m" style={{ marginTop: "var(--spacing-lg)" }}>
             리워드
@@ -118,7 +131,9 @@ export default async function ProjectDetailPage({ params }: Props) {
       </div>
 
       {/* 모바일: 스크롤해도 후원 버튼이 항상 보이게 하단에 고정 (Figma BottomBar) */}
-      <div className={styles.bottomBar}>{cta}</div>
+      <div className={styles.bottomBar}>
+        <div className={styles.ctaRow}>{ctaRow}</div>
+      </div>
     </main>
   );
 }

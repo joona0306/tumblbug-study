@@ -71,6 +71,17 @@
   display: none;
 }
 
+/* 찜 버튼 + 후원 버튼 한 줄 (후원 버튼이 남은 폭을 채운다) */
+.ctaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.ctaRow > :last-child {
+  flex: 1;
+}
+
 .bottomBar {
   position: fixed;
   left: 0;
