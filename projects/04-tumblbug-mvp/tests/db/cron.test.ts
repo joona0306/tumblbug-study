@@ -6,6 +6,7 @@ import { addDays, kstToday } from "@/lib/dates";
 import type { TossResult } from "@/lib/payments/toss";
 import { makeProject, makeUser, withRollback } from "./helpers";
 import { cleanup, db, fakeToss, fundingOf, pendingFunding, pool, setup, soldQtyOf } from "./payment-helpers";
+import { uniq } from "./unique";
 
 // 예약 작업 테스트 — ① 상태 확정·③ 청소는 "끝나면 되돌리기", ② 결제 대기 정리는 트랜잭션을 쓰므로 진짜 저장 후 지운다
 afterEach(cleanup);
@@ -92,7 +93,7 @@ describe("② 오래된 결제 대기 정리", () => {
 describe("③ 요청 수 제한 기록 청소", () => {
   it("하루 지난 시간 칸만 지운다", () =>
     withRollback(async (tx) => {
-      const key = `cron-test-${Date.now()}`;
+      const key = uniq("cron-test");
       await tx.insert(rateLimit).values([
         { key, windowStart: sql`now() - interval '2 days'`, count: 3 },
         { key, windowStart: sql`date_trunc('minute', now())`, count: 1 },

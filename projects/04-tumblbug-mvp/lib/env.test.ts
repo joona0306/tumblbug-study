@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseEnv } from "./env";
+import { parseDatabaseUrl, parseEnv } from "./env";
 
 // 꼭 있어야 하는 값만 채운 기본 묶음
 const required = {
@@ -48,7 +48,22 @@ describe("parseEnv", () => {
     expect(parseEnv({ ...required, VERCEL_URL: "moa-abc123.vercel.app", BETTER_AUTH_URL: "https://moa.example.com" }).BETTER_AUTH_URL).toBe("https://moa.example.com");
   });
 
+  it("BETTER_AUTH_URL 끝의 / 는 뗀다 (Vercel 설정에 https://…/ 처럼 넣어도 괜찮게)", () => {
+    expect(parseEnv({ ...required, BETTER_AUTH_URL: "https://moa.vercel.app/" }).BETTER_AUTH_URL).toBe("https://moa.vercel.app");
+  });
+
   it("NODE_ENV에 정해진 값 말고 다른 값이 오면 멈춘다", () => {
     expect(() => parseEnv({ ...required, NODE_ENV: "staging" })).toThrow();
+  });
+});
+
+describe("parseDatabaseUrl (마이그레이션용)", () => {
+  it("DB 주소만 있으면 된다 — 로그인 비밀키가 없어도 멈추지 않는다", () => {
+    expect(parseDatabaseUrl({ DATABASE_URL: required.DATABASE_URL })).toBe(required.DATABASE_URL);
+  });
+
+  it("DB 주소가 없거나 모양이 틀리면 멈춘다 (앱과 같은 규칙)", () => {
+    expect(() => parseDatabaseUrl({})).toThrow(/DATABASE_URL이 없습니다/);
+    expect(() => parseDatabaseUrl({ DATABASE_URL: "mysql://localhost/db" })).toThrow(/postgresql:\/\//);
   });
 });

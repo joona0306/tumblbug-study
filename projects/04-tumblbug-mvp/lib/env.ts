@@ -47,7 +47,8 @@ export type Env = z.infer<typeof envSchema>;
 export function parseEnv(values: Record<string, string | undefined>): Env {
   // Vercel 미리보기 배포는 주소가 배포마다 달라서 BETTER_AUTH_URL 을 미리 적어 둘 수 없다 (14주차)
   // → 비어 있으면 Vercel 이 알려 주는 이 배포의 주소(VERCEL_URL, "https://" 없이 옴)를 쓴다
-  const authUrl = values.BETTER_AUTH_URL || (values.VERCEL_URL ? `https://${values.VERCEL_URL}` : undefined);
+  // 끝의 "/" 는 뗀다 (https://moa.vercel.app/ → https://moa.vercel.app) — 로그인 주소 뒤에 경로를 붙일 때 "//" 가 되지 않게
+  const authUrl = (values.BETTER_AUTH_URL || (values.VERCEL_URL ? `https://${values.VERCEL_URL}` : undefined))?.replace(/\/+$/, "");
   const result = envSchema.safeParse({ ...values, BETTER_AUTH_URL: authUrl });
   if (!result.success) {
     throw new Error(`환경 변수가 올바르지 않습니다:\n${z.prettifyError(result.error)}`);
@@ -55,9 +56,28 @@ export function parseEnv(values: Record<string, string | undefined>): Env {
   return result.data;
 }
 
+// DB 주소만 검사한다 — 마이그레이션(drizzle-kit)처럼 DB 에만 접속하는 도구용 (14주차)
+// CD 의 마이그레이션 단계에는 DB 주소만 있고 로그인 비밀키 등은 없다 → 앱 전체 검사(parseEnv)를 쓰면 멈춘다
+// 규칙은 같은 envSchema 에서 뽑아 쓴다 (pick) → 두 곳의 규칙이 어긋나지 않는다
+export function parseDatabaseUrl(values: Record<string, string | undefined>): string {
+  const result = envSchema.pick({ DATABASE_URL: true }).safeParse(values);
+  if (!result.success) {
+    throw new Error(`환경 변수가 올바르지 않습니다:\n${z.prettifyError(result.error)}`);
+  }
+  return result.data.DATABASE_URL;
+}
+
 // 서버 코드에서 쓰는 검사된 환경 변수. 처음 쓸 때 한 번만 검사한다.
+//
+// 빌드 중에는 검사하지 않는다 (14주차) — next build 는 페이지 정보를 모으려고 서버 코드(DB 연결·로그인 설정)를 한 번 불러오는데,
+// CD 는 GitHub Actions 에서 빌드해서 비밀값(Vercel 의 Secret 타입)이 진짜 값으로 오지 않는다.
+// 비밀값은 빌드가 아니라 "실행할 때" 필요하고, 그때는 Vercel 이 진짜 값을 넣어 준다.
+// 검사는 서버가 켜질 때 instrumentation.ts 의 parseEnv 가 한다 → 값이 틀리면 여전히 배포 직후에 바로 드러난다
+const isBuildPhase = () => process.env.NEXT_PHASE === "phase-production-build";
+
 let cached: Env | undefined;
 export function serverEnv(): Env {
+  if (isBuildPhase()) return process.env as unknown as Env; // 빌드 중: 검사 없이 (값을 실제로 쓰지 않는다)
   cached ??= parseEnv(process.env);
   return cached;
 }

@@ -3,6 +3,7 @@ import { funding, reward } from "@/db/schema";
 import { addDays, kstToday } from "@/lib/dates";
 import { getDailyRaised, getDashboardSummary, getRewardBreakdown, listSupporters } from "@/lib/queries/dashboard";
 import { closePool, makeProject, makeReward, makeUser, type TestDb, withRollback } from "./helpers";
+import { uniq } from "./unique";
 
 afterAll(closePool);
 
@@ -17,8 +18,7 @@ async function setup(db: TestDb) {
   return { a, b, projectId, rewardId };
 }
 
-let seq = 0;
-const order = () => `dash-${Date.now()}-${++seq}`;
+const order = () => uniq("dash");
 
 describe("창작자 대시보드 집계", () => {
   it("요약: 결제 완료만 센다 (후원자는 사람 수, 건수는 후원 수)", () =>

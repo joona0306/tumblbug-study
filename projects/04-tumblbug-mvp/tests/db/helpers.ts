@@ -2,6 +2,7 @@ import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { expect } from "vitest";
 import * as schema from "@/db/schema";
+import { uniq } from "./unique";
 
 // DB 테스트 도우미.
 // 각 테스트를 트랜잭션 안에서 실행하고 끝나면 무조건 되돌린다(ROLLBACK) → 개발 DB에 흔적이 남지 않는다.
@@ -46,10 +47,8 @@ export async function expectRejected(query: Promise<unknown>, code: string, cons
 }
 
 // 테스트용 사용자·프로젝트·리워드를 만든다 (트랜잭션 안이라 끝나면 사라진다)
-let seq = 0;
 export async function makeUser(db: TestDb) {
-  seq += 1;
-  const id = `test-user-${Date.now()}-${seq}`;
+  const id = uniq("test-user");
   await db.insert(schema.user).values({ id, name: "테스트", email: `${id}@example.com` });
   return id;
 }

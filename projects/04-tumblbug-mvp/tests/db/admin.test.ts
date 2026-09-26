@@ -2,6 +2,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { funding } from "@/db/schema";
 import { countFailureReasons, listPaymentFailures } from "@/lib/queries/admin";
 import { closePool, makeProject, makeUser, withRollback } from "./helpers";
+import { uniq } from "./unique";
 
 afterAll(closePool);
 
@@ -12,7 +13,7 @@ describe("관리자 조회", () => {
       const projectId = await makeProject(db, await makeUser(db));
       const old = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000);
       const base = { projectId, supporterId: supporter, amount: 10_000, status: "failed" as const };
-      const tag = `adm-${Date.now()}`;
+      const tag = uniq("adm");
       await db.insert(funding).values([
         { ...base, orderId: `${tag}-1`, failReason: "ZZ_TEST_CANCEL" },
         { ...base, orderId: `${tag}-2`, failReason: "ZZ_TEST_CANCEL" },

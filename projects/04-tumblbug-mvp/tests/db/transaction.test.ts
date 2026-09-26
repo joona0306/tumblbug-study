@@ -5,6 +5,7 @@ import { afterAll, afterEach, describe, expect, it } from "vitest";
 import * as schema from "@/db/schema";
 import { funding, project, reward, user } from "@/db/schema";
 import { takeRewardStock } from "@/lib/reward-stock";
+import { uniq } from "./unique";
 
 // 트랜잭션 테스트는 여러 연결이 실제로 저장(commit)해야 해서 "끝나면 되돌리기"를 쓸 수 없다.
 // 대신 테스트용 데이터를 진짜로 만들고, 테스트가 끝날 때마다 지운다.
@@ -16,7 +17,7 @@ const db = drizzle({ client: pool, schema });
 const created = { users: [] as string[], projects: [] as number[] };
 
 async function setup(limitQty: number | null) {
-  const creatorId = `tx-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const creatorId = uniq("tx-test");
   await db.insert(user).values({ id: creatorId, name: "트랜잭션 테스트", email: `${creatorId}@example.com` });
   created.users.push(creatorId);
   const [{ id: projectId }] = await db

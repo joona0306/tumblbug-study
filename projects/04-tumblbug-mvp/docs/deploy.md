@@ -80,8 +80,15 @@ main 에 합치기 ─▶ CI ─▶ [승인] ─▶ 운영 DB 마이그레이션
 4. **Settings → Deployment Protection → Protection Bypass for Automation → Add** → 만들어진 값 → GitHub 비밀값 `VERCEL_AUTOMATION_BYPASS_SECRET`
    (미리보기 주소는 로그인한 사람만 볼 수 있게 막혀 있다 → 연기 테스트가 이 값을 헤더로 보내 통과한다)
 5. **Settings → General** → **Project ID** 복사 → GitHub 비밀값 `VERCEL_PROJECT_ID`
-6. 계정(팀) **Settings → General → Team ID** (개인 계정이면 Your ID) → GitHub 비밀값 `VERCEL_ORG_ID`
-7. 계정 **Settings → Tokens → Create** (이름 `github-actions`, 범위: 이 계정, 만료: 90일 등) → GitHub 비밀값 `VERCEL_TOKEN`
+6. 팀 **Settings → General → Team ID** (`team_…` 으로 시작) → GitHub 비밀값 `VERCEL_ORG_ID`
+   - 요즘 Vercel 은 개인 무료(Hobby) 계정도 "OO's projects" 라는 **팀** 안에 프로젝트를 만든다 → 계정 설정의 "Your ID"(개인 ID)가 아니라 **팀 ID** 를 넣는다
+   - 개인 ID 를 넣으면 파이프라인이 `Could not retrieve Project Settings` 로 멈춘다
+7. 계정 **Settings → Tokens → Create** (이름 `github-actions`, 만료: 90일 등) → GitHub 비밀값 `VERCEL_TOKEN`
+   - **Scope: 팀 이름(예: `Andrew's projects`) → All Projects** 를 고른다
+   - ⚠️ 프로젝트 하나(예: `tumblbug-study`)만 고르면 안 된다 — Vercel CLI(`vercel pull`)는 프로젝트와 함께 **팀 정보**도 읽는데,
+     프로젝트 하나로 제한한 토큰은 팀 정보를 볼 수 없어 `Could not retrieve Project Settings` 로 멈춘다
+     (API 로 프로젝트만 조회하면 200 이 나와서 원인을 찾기 어렵다 — 14주차에 실제로 겪음)
+   - `Full Account` 는 다른 팀까지 모두 다룰 수 있어 권한이 너무 넓다 → 팀 하나(All Projects)가 알맞다
 8. 운영 주소를 확인해 둔다: **Settings → Domains** 의 `프로젝트이름.vercel.app` → GitHub `production` 환경 변수 `PRODUCTION_URL`
 
 ## 3. Sentry — 릴리스 기록용 값
@@ -132,7 +139,7 @@ update "user" set role = 'admin' where email = '내이메일@example.com';
 
 | 증상 | 원인·해결 |
 |---|---|
-| `Error: Could not retrieve Project Settings` | `VERCEL_ORG_ID`·`VERCEL_PROJECT_ID` 가 바뀌었거나 토큰 범위가 다른 계정 |
+| `Error: Could not retrieve Project Settings` | ① 토큰 Scope 를 프로젝트 하나로 제한함 → 팀 → All Projects 로 새로 만들기 ② `VERCEL_ORG_ID` 에 팀 ID(`team_…`) 대신 개인 ID ③ `VERCEL_PROJECT_ID`(`prj_…`)가 다른 프로젝트. "Vercel 연결 확인" 단계가 404·403 이면 ②·③, 통과하는데 이 오류면 ① |
 | 빌드에서 `DATABASE_URL이 없습니다` | 운영: Vercel Production 환경 변수 확인 / 미리보기: Neon 단계 실패 여부 확인 |
 | 미리보기 연기 테스트가 401·로그인 화면 | `VERCEL_AUTOMATION_BYPASS_SECRET` 이 없거나 틀림 |
 | 로그인이 `Invalid origin` | 운영 `BETTER_AUTH_URL` 이 실제 접속 주소와 다름 / 미리보기에 `BETTER_AUTH_URL` 을 넣어 버림 |
