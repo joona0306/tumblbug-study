@@ -83,7 +83,8 @@ main 에 합치기 ─▶ CI ─▶ [승인] ─▶ 운영 DB 마이그레이션
 6. 팀 **Settings → General → Team ID** (`team_…` 으로 시작) → GitHub 비밀값 `VERCEL_ORG_ID`
    - 요즘 Vercel 은 개인 무료(Hobby) 계정도 "OO's projects" 라는 **팀** 안에 프로젝트를 만든다 → 계정 설정의 "Your ID"(개인 ID)가 아니라 **팀 ID** 를 넣는다
    - 개인 ID 를 넣으면 파이프라인이 `Could not retrieve Project Settings` 로 멈춘다
-7. 계정 **Settings → Tokens → Create** (이름 `github-actions`, **Scope: 프로젝트가 있는 팀**, 만료: 90일 등) → GitHub 비밀값 `VERCEL_TOKEN`
+7. 계정 **Settings → Tokens → Create** (이름 `github-actions`, **Scope: 배포할 프로젝트 하나 — 예: `tumblbug-study`**, 만료: 90일 등) → GitHub 비밀값 `VERCEL_TOKEN`
+   - 권한은 필요한 만큼만: 이 토큰이 새어 나가도 다른 프로젝트는 건드릴 수 없다
 8. 운영 주소를 확인해 둔다: **Settings → Domains** 의 `프로젝트이름.vercel.app` → GitHub `production` 환경 변수 `PRODUCTION_URL`
 
 ## 3. Sentry — 릴리스 기록용 값
@@ -134,7 +135,7 @@ update "user" set role = 'admin' where email = '내이메일@example.com';
 
 | 증상 | 원인·해결 |
 |---|---|
-| `Error: Could not retrieve Project Settings` | `VERCEL_ORG_ID` 에 팀 ID(`team_…`) 대신 개인 ID 를 넣었거나, `VERCEL_PROJECT_ID`(`prj_…`)가 다른 프로젝트, 또는 토큰 Scope 가 다른 팀 |
+| `Error: Could not retrieve Project Settings` | `VERCEL_ORG_ID` 에 팀 ID(`team_…`) 대신 개인 ID 를 넣었거나, `VERCEL_PROJECT_ID`(`prj_…`)가 다른 프로젝트, 또는 토큰 Scope 가 다른 프로젝트 |
 | 빌드에서 `DATABASE_URL이 없습니다` | 운영: Vercel Production 환경 변수 확인 / 미리보기: Neon 단계 실패 여부 확인 |
 | 미리보기 연기 테스트가 401·로그인 화면 | `VERCEL_AUTOMATION_BYPASS_SECRET` 이 없거나 틀림 |
 | 로그인이 `Invalid origin` | 운영 `BETTER_AUTH_URL` 이 실제 접속 주소와 다름 / 미리보기에 `BETTER_AUTH_URL` 을 넣어 버림 |
