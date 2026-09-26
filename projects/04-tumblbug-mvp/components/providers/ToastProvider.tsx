@@ -32,7 +32,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
       {/* aria-live: 화면 낭독기가 새 알림을 읽어 준다 (화면을 보지 못해도 결과를 알 수 있게) */}
-      <div className={styles.region} role="status" aria-live="polite">
+      <div className={styles.region} role="status" aria-live="polite" aria-label="알림">
         {toasts.map((t) => {
           const Icon = t.tone === "error" ? CircleAlert : CircleCheck;
           return (

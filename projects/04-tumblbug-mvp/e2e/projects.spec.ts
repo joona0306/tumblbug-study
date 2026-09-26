@@ -56,12 +56,12 @@ test("사진과 함께 프로젝트를 만들고, 수정해서 저장한다", as
     await page.getByRole("button", { name: "프로젝트 만들기" }).click();
 
     await expect(page).toHaveURL(/\/projects\/\d+\/edit\?created=1/, { timeout: 20_000 }); // 사진 업로드까지 기다린다
-    await expect(page.getByRole("status")).toContainText("프로젝트를 만들었어요");
+    await expect(page.getByRole("main").getByRole("status")).toContainText("프로젝트를 만들었어요");
     await expect(page.getByRole("img", { name: "고른 대표 사진 미리보기" })).toHaveAttribute("src", /public\.blob\.vercel-storage\.com/);
 
     await page.getByRole("textbox", { name: "제목" }).fill(`${title} (수정)`);
     await page.getByRole("button", { name: "저장하기" }).click();
-    await expect(page.getByRole("status")).toHaveText("저장했어요.");
+    await expect(page.getByRole("main").getByRole("status")).toHaveText("저장했어요.");
     await expect(page.getByRole("textbox", { name: "제목" })).toHaveValue(`${title} (수정)`);
   } finally {
     // 뒷정리: 테스트가 중간에 실패해도 만든 프로젝트와 저장소의 사진을 지운다

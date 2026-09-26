@@ -10,7 +10,9 @@ export function HeaderLikes() {
   const { data: likes } = useLikes();
   if (!likes) return null; // 로그인하지 않음
   return (
-    <Link href="/me/likes" className={styles.link} aria-label={`내 찜 ${likes.length}개`}>
+    // prefetch={false}: 운영 빌드의 Link 는 화면에 보이는 순간 다음 페이지를 미리 받아 둔다.
+    // 찜하기 "전"에 받아 둔 /me/likes 를 찜한 "뒤"에 보여 주면 방금 찜한 프로젝트가 빠져 있다 → 누를 때 새로 받게 한다
+    <Link href="/me/likes" prefetch={false} className={styles.link} aria-label={`내 찜 ${likes.length}개`}>
       <Heart size={18} aria-hidden="true" />
       <span data-testid="header-like-count">{likes.length}</span>
     </Link>
