@@ -1,0 +1,2 @@
+CREATE INDEX "funding_project_status_idx" ON "funding" USING btree ("project_id","status");--> statement-breakpoint
+CREATE INDEX "project_status_deadline_idx" ON "project" USING btree ("status","deadline");

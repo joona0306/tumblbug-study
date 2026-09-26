@@ -55,6 +55,8 @@ export const project = pgTable(
   },
   (t) => [
     index("project_creator_idx").on(t.creatorId),
+    // 목록: "모금 중인 것만, 마감 임박순" — 거르는 칸(status)을 앞에, 정렬하는 칸(deadline)을 뒤에 (6주차 6단계)
+    index("project_status_deadline_idx").on(t.status, t.deadline),
     check("project_category_check", sql`${t.category} in (${inList(CATEGORY_VALUES)})`),
     check("project_status_check", sql`${t.status} in (${inList(PROJECT_STATUSES)})`),
     check("project_goal_check", sql`${t.goalAmount} between 10000 and 100000000`),
@@ -118,6 +120,8 @@ export const funding = pgTable(
   },
   (t) => [
     index("funding_supporter_idx").on(t.supporterId),
+    // 모인 금액·후원자 수: "이 프로젝트의 결제 완료 후원" — 가장 자주 쓰는 조건 (6주차 6단계)
+    index("funding_project_status_idx").on(t.projectId, t.status),
     check("funding_status_check", sql`${t.status} in (${inList(FUNDING_STATUSES)})`),
     check("funding_amount_check", sql`${t.amount} between 1000 and 1000000`),
     check("funding_quantity_check", sql`${t.quantity} between 1 and 5`),
