@@ -47,19 +47,36 @@ main 에 합치기 ─▶ CI ─▶ [승인] ─▶ 운영 DB 마이그레이션
    - 뜨는 창에서 넣을 환경을 **직접 체크**한다: **Production**·**Preview** ✅ (Development 는 필요 없다 — 내 컴퓨터는 `.env.local` 에 이미 있다)
    - 확인을 누르면 체크한 환경에 `BLOB_READ_WRITE_TOKEN` 이 추가된다 (토큰 값을 복사해 붙여 넣을 필요는 없다)
    - **Settings → Environment Variables** 에 `BLOB_READ_WRITE_TOKEN` 이 Production·Preview 로 보이면 성공
-3. **Settings → Environment Variables** — 환경마다 넣는다
+3. **Settings → Environment Variables** — 최종 모습은 이렇다
 
-   | 이름 | Production | Preview | 값 |
+   | 이름 | Type | Production | Preview | 값 |
+   |---|---|---|---|---|
+   | `DATABASE_URL` | Secret | ✅ | ❌ **넣지 않는다** | 1-2 의 pooling 켠 운영 주소 (미리보기는 PR 마다 CD 가 넣는다) |
+   | `CRON_SECRET` | Secret | ✅ | ❌ | 새 무작위 값 (예약 작업 보호) |
+   | `BETTER_AUTH_SECRET` | Secret | ✅ | ✅ | 새 무작위 값 — 개발용(`.env.local`)과 **다르게** |
+   | `TOSS_SECRET_KEY` | Secret | ✅ | ✅ | 토스 **테스트** 시크릿 키 (`test_gsk_…`) |
+   | `BETTER_AUTH_URL` | Config | ✅ | ❌ **넣지 않는다** | 운영 주소 `https://프로젝트이름.vercel.app` (미리보기는 배포 주소를 자동으로 쓴다) |
+   | `NEXT_PUBLIC_SENTRY_DSN` | Config | ✅ | ✅ | 5주차 DSN |
+   | `NEXT_PUBLIC_TOSS_CLIENT_KEY` | Config | ✅ | ✅ | 토스 **테스트** 클라이언트 키 (`test_gck_…`) |
+
+   - **Type**: Secret = 저장 후 다시 볼 수 없음 (비밀번호·키·토큰) / Config = 저장 후에도 보임 (비밀이 아닌 값).
+     `NEXT_PUBLIC_` 으로 시작하는 값은 어차피 브라우저로 보내지는 공개 값이라 Config.
+   - 무작위 값 만들기: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+
+   **넣는 방법** — "Add Environment Variable" 창 하나에서는 Type 과 Environments 를 **한 가지로만** 고를 수 있다.
+   그래서 위 표를 Type·환경이 같은 것끼리 묶어 **창을 4번** 연다:
+
+   | 번 | Type | Environments | 넣을 변수 |
    |---|---|---|---|
-   | `DATABASE_URL` | ✅ | ❌ **넣지 않는다** | 1-2 의 pooling 켠 운영 주소 (미리보기는 PR 마다 CD 가 넣는다) |
-   | `BETTER_AUTH_SECRET` | ✅ | ✅ | 새 무작위 값 — 개발용과 **다르게**, 운영·미리보기도 서로 다르게 |
-   | `BETTER_AUTH_URL` | ✅ | ❌ **넣지 않는다** | 운영 주소 `https://프로젝트이름.vercel.app` (미리보기는 배포 주소를 자동으로 쓴다) |
-   | `CRON_SECRET` | ✅ | ❌ | 새 무작위 값 (예약 작업 보호) |
-   | `NEXT_PUBLIC_SENTRY_DSN` | ✅ | ✅ | 5주차 DSN |
-   | `NEXT_PUBLIC_TOSS_CLIENT_KEY` | ✅ | ✅ | 토스 **테스트** 클라이언트 키 (`test_gck_…`) |
-   | `TOSS_SECRET_KEY` | ✅ | ✅ | 토스 **테스트** 시크릿 키 (`test_gsk_…`) |
+   | ① | Secret | Production | `DATABASE_URL`, `CRON_SECRET` |
+   | ② | Secret | Production, Preview | `BETTER_AUTH_SECRET`, `TOSS_SECRET_KEY` |
+   | ③ | Config | Production | `BETTER_AUTH_URL` |
+   | ④ | Config | Production, Preview | `NEXT_PUBLIC_SENTRY_DSN`, `NEXT_PUBLIC_TOSS_CLIENT_KEY` |
 
-   무작위 값 만들기: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+   - 한 창에 변수 여러 개: Key·Value 를 채운 뒤 **+ Add new variable** 로 줄을 늘린다
+   - 환경 여러 개 고르기: **Environments** 드롭다운 → **Environments ›** (한 단계 더 들어간다) → Production·Preview 체크
+   - **Save** 를 눌러야 저장된다. 목록에 7개가 모두 보이고 환경 표시(Production / Production and Preview)가 위 표와 같으면 끝
+   - `Import .env` 로 `.env.local` 을 통째로 불러오지 않는다 — 개발용 값(개발 DB 주소, `localhost` 주소)이 운영에 들어간다
 4. **Settings → Deployment Protection → Protection Bypass for Automation → Add** → 만들어진 값 → GitHub 비밀값 `VERCEL_AUTOMATION_BYPASS_SECRET`
    (미리보기 주소는 로그인한 사람만 볼 수 있게 막혀 있다 → 연기 테스트가 이 값을 헤더로 보내 통과한다)
 5. **Settings → General** → **Project ID** 복사 → GitHub 비밀값 `VERCEL_PROJECT_ID`
