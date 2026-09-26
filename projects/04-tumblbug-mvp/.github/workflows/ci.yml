@@ -58,6 +58,9 @@ jobs:
       - name: 단위·DB 테스트 (Vitest)
         run: npm test
 
+      - name: 예시 데이터 (흐름 테스트용 계정·프로젝트)
+        run: npm run db:seed
+
       - name: 빌드
         run: npm run build
 

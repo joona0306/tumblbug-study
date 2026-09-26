@@ -167,6 +167,7 @@ await db.delete(projectLike).where(inArray(projectLike.userId, seedUsers));
 await db.delete(funding).where(inArray(funding.supporterId, seedUsers));
 await db.delete(project).where(inArray(project.creatorId, seedUsers)); // 리워드는 cascade 로 함께 지워진다
 await db.delete(user).where(like(user.email, `%@${SEED_EMAIL_DOMAIN}`)); // 세션·계정은 cascade
+await db.delete(user).where(like(user.email, "%@e2e.moa.test")); // 흐름 테스트가 만든 계정도 정리
 console.log("[seed] 이전 예시 데이터를 지웠습니다");
 
 // ---------- 2. 로그인 가능한 계정 (Better Auth 가입 기능 사용 → 비밀번호가 안전하게 저장된다) ----------
