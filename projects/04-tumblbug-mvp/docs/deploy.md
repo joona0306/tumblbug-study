@@ -43,7 +43,10 @@ main 에 합치기 ─▶ CI ─▶ [승인] ─▶ 운영 DB 마이그레이션
    - Framework: Next.js (자동)
    - 처음 한 번은 Vercel 이 바로 빌드를 시도하다 실패할 수 있다 (아직 환경 변수가 없어서) — 괜찮다.
      그 뒤로는 `vercel.json` 의 `"git": { "deploymentEnabled": false }` 때문에 Vercel 이 스스로 배포하지 않는다. 배포는 GitHub Actions 만 한다.
-2. **Storage → Blob** → 7주차에 만든 저장소를 이 프로젝트에 **Connect** (Production·Preview 체크) → `BLOB_READ_WRITE_TOKEN` 이 자동으로 들어간다
+2. **Storage → Blob** → 7주차에 만든 저장소를 이 프로젝트에 **Connect**
+   - 뜨는 창에서 넣을 환경을 **직접 체크**한다: **Production**·**Preview** ✅ (Development 는 필요 없다 — 내 컴퓨터는 `.env.local` 에 이미 있다)
+   - 확인을 누르면 체크한 환경에 `BLOB_READ_WRITE_TOKEN` 이 추가된다 (토큰 값을 복사해 붙여 넣을 필요는 없다)
+   - **Settings → Environment Variables** 에 `BLOB_READ_WRITE_TOKEN` 이 Production·Preview 로 보이면 성공
 3. **Settings → Environment Variables** — 환경마다 넣는다
 
    | 이름 | Production | Preview | 값 |
