@@ -1,19 +1,32 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { checkFunding } from "@/app/actions/funding";
 import { Button } from "@/components/ui/Button";
 import { TextAreaField } from "@/components/ui/Field";
 import { formatWon } from "@/lib/format";
+import type { Quote } from "@/lib/funding/quote";
 import { needsShipping, type Step, totalAmount } from "@/lib/funding/rules";
 import { useFundingStore } from "@/lib/funding/store";
 import type { FundProject, FundReward } from "./FundFlow";
 import styles from "./FundFlow.module.css";
 
-// ③ 확인·결제 (Figma M06). 결제 연결은 11주차 — 이번 주에는 "결제하기" 직전까지
+// ③ 확인·결제 (Figma M06). 결제 연결은 11주차 — 이번 주에는 "결제하기"를 누르면 서버 검사까지
 export function ConfirmStep({ project, rewards, onEdit }: { project: FundProject; rewards: FundReward[]; onEdit: (step: Step) => void }) {
   const draft = useFundingStore();
   const reward = rewards.find((r) => r.id === draft.rewardId);
   const total = totalAmount(draft, rewards);
   const shipping = needsShipping(draft, rewards);
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  // 서버에는 "고른 것"만 보낸다 (총액은 보내지 않는다 — 서버가 다시 계산)
+  function pay() {
+    const { projectId, rewardId, quantity, extraAmount, shipping, message } = useFundingStore.getState();
+    startTransition(async () => {
+      setQuote(await checkFunding({ projectId, rewardId, quantity, extraAmount, shipping, message }));
+    });
+  }
 
   return (
     <section className={styles.step} aria-labelledby="confirm-step-title">
@@ -74,11 +87,27 @@ export function ConfirmStep({ project, rewards, onEdit }: { project: FundProject
         후원 즉시 결제되며, 목표를 못 채워도 자동 환불되지 않아요 (MVP 한계).
       </p>
 
+      {quote?.ok && (
+        <p role="status" className={styles.ok}>
+          서버 확인 완료: {formatWon(quote.amount)} — 결제창 연결은 11주차에 해요.
+        </p>
+      )}
+      {quote && !quote.ok && (
+        <div role="alert" className={styles.error}>
+          <p>{quote.error}</p>
+          {quote.step && (
+            <Button variant="ghost" size="m" onClick={() => onEdit(quote.step!)}>
+              {quote.step}단계로 돌아가 고치기
+            </Button>
+          )}
+        </div>
+      )}
+
       <div className={styles.bar}>
         <div className={styles.barInner}>
           <div className={styles.barAction}>
-            <Button fullWidth disabled>
-              {formatWon(total)} 결제하기 (11주차에 연결)
+            <Button fullWidth onClick={pay} disabled={pending}>
+              {pending ? "확인하는 중…" : `${formatWon(total)} 결제하기`}
             </Button>
           </div>
         </div>

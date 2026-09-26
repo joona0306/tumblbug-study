@@ -146,3 +146,11 @@
 .barAction {
   flex: 1;
 }
+
+.ok {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+  font-size: 14px;
+}
