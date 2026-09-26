@@ -6,7 +6,11 @@ import { z } from "zod";
 export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   // Sentry 주소 (6단계). 비워 두면 에러 모니터링을 끈 채로 동작한다.
-  NEXT_PUBLIC_SENTRY_DSN: z.url({ error: "NEXT_PUBLIC_SENTRY_DSN은 https:// 로 시작하는 주소여야 합니다" }).optional(),
+  // .env.local 에 "NEXT_PUBLIC_SENTRY_DSN=" 처럼 빈 값으로 두면 빈 글자("")가 들어오므로 "없음"으로 바꿔서 검사한다.
+  NEXT_PUBLIC_SENTRY_DSN: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.url({ error: "NEXT_PUBLIC_SENTRY_DSN은 주소 형식이어야 합니다 (예: https://…@….ingest.sentry.io/…)" }).optional(),
+  ),
 });
 
 export type Env = z.infer<typeof envSchema>;

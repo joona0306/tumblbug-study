@@ -6,6 +6,10 @@ describe("parseEnv", () => {
     expect(parseEnv({})).toEqual({ NODE_ENV: "development" });
   });
 
+  it(".env.local 에 빈 값으로 둔 것도 '없음'으로 본다", () => {
+    expect(parseEnv({ NEXT_PUBLIC_SENTRY_DSN: "" })).toEqual({ NODE_ENV: "development" });
+  });
+
   it("올바른 Sentry 주소는 통과한다", () => {
     const env = parseEnv({ NODE_ENV: "production", NEXT_PUBLIC_SENTRY_DSN: "https://abc@o1.ingest.sentry.io/1" });
     expect(env.NEXT_PUBLIC_SENTRY_DSN).toBe("https://abc@o1.ingest.sentry.io/1");
