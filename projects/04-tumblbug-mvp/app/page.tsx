@@ -1,15 +1,77 @@
-// 5주차 1단계: 토큰이 제대로 들어갔는지 확인하는 임시 첫 화면.
-// 8주차에 Figma 시안대로 진짜 홈 화면으로 바꾼다.
-export default function Home() {
+import { ChevronRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { ProjectCard } from "@/components/project/ProjectCard";
+import grid from "@/components/project/ProjectGrid.module.css";
+import { Chip } from "@/components/ui/Chip";
+import { db } from "@/db";
+import { CATEGORIES } from "@/lib/categories";
+import { listProjects } from "@/lib/queries/listing";
+import styles from "./home.module.css";
+
+// 대표 배너 사진 (Unsplash License — Annie Spratt)
+const HERO_IMAGE = "https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=1600&q=80&fm=jpg";
+
+// 홈 (Figma M01 / D01): 대표 배너 + 카테고리 + 마감 임박 + 인기
+export default async function Home() {
+  const now = new Date();
+  const [closingSoon, popular] = await Promise.all([
+    listProjects(db, { status: "funding", sort: "deadline", limit: 4 }),
+    listProjects(db, { status: "funding", sort: "popular", limit: 4 }),
+  ]);
+
   return (
-    <main className="container" style={{ paddingBlock: "var(--spacing-3xl)" }}>
-      <p className="text-label" style={{ color: "var(--color-primary)" }}>
-        준비 중
-      </p>
-      <h1 className="text-display">작은 응원이 모여 창작이 돼요</h1>
-      <p className="text-body-m text-muted" style={{ marginTop: "var(--spacing-md)" }}>
-        모아는 창작자의 프로젝트를 후원하는 크라우드펀딩 서비스입니다.
-      </p>
+    <main className={styles.page}>
+      <section className={`container ${styles.heroWrap}`}>
+        <div className={styles.hero}>
+          <Image src={HERO_IMAGE} alt="" fill priority sizes="(max-width: 1120px) 100vw, 1120px" />
+          <div className={styles.heroText}>
+            <h1 className="text-display">작은 공방의 첫 생산을 응원하세요</h1>
+            <p className="text-body-m">작은 응원이 모여 창작이 완성돼요</p>
+          </div>
+        </div>
+      </section>
+
+      <nav className={`container ${styles.categories}`} aria-label="카테고리">
+        <Chip href="/projects" selected>
+          전체
+        </Chip>
+        {Object.entries(CATEGORIES).map(([value, label]) => (
+          <Chip key={value} href={`/projects?category=${value}`}>
+            {label}
+          </Chip>
+        ))}
+      </nav>
+
+      <Section title="마감 임박 프로젝트" href="/projects">
+        <div className={grid.scroller}>
+          {closingSoon.map((p, i) => (
+            <ProjectCard key={p.id} project={p} now={now} priority={i < 2} />
+          ))}
+        </div>
+      </Section>
+
+      <Section title="인기 프로젝트" href="/projects?sort=popular">
+        <div className={grid.grid}>
+          {popular.map((p) => (
+            <ProjectCard key={p.id} project={p} now={now} compact />
+          ))}
+        </div>
+      </Section>
     </main>
+  );
+}
+
+function Section({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {
+  return (
+    <section className={`container ${styles.section}`} aria-label={title}>
+      <div className={styles.sectionHead}>
+        <h2 className="text-heading-m">{title}</h2>
+        <Link href={href} className={styles.more}>
+          전체보기 <ChevronRight size={16} aria-hidden="true" />
+        </Link>
+      </div>
+      {children}
+    </section>
   );
 }

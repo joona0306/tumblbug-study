@@ -1,0 +1,123 @@
+.page {
+  padding-bottom: calc(72px + var(--spacing-2xl)); /* 하단 고정 바에 가리지 않게 */
+}
+
+.layout {
+  display: grid;
+  gap: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+}
+
+.image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-muted);
+}
+
+.image img {
+  object-fit: cover;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.amount {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.rate {
+  color: var(--color-primary);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-md);
+  margin: 0;
+}
+
+.stats dd {
+  margin: 0;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  font-size: 12px;
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.body {
+  white-space: pre-line; /* 창작자가 넣은 줄바꿈을 그대로 */
+}
+
+.ctaDesktop {
+  display: none;
+}
+
+.bottomBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sticky-bar);
+}
+
+/* 데스크톱: 왼쪽 사진·소개, 오른쪽 요약·리워드 (Figma D02) */
+@media (min-width: 1024px) {
+  .page {
+    padding-bottom: var(--spacing-3xl);
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 400px;
+    /* 첫 줄은 사진 높이만큼, 나머지는 소개가 — 오른쪽 요약이 길어도 사진 아래가 비지 않게 */
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "image summary"
+      "description summary";
+    column-gap: var(--spacing-2xl);
+    padding-top: var(--spacing-2xl);
+  }
+
+  .image {
+    grid-area: image;
+  }
+
+  .summary {
+    grid-area: summary;
+    align-self: start;
+  }
+
+  .description {
+    grid-area: description;
+    align-self: start;
+  }
+
+  .ctaDesktop {
+    display: block;
+  }
+
+  .bottomBar {
+    display: none;
+  }
+}
