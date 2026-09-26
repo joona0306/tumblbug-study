@@ -6,7 +6,7 @@ import { consumeRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/session";
 import { projectIdSchema } from "@/lib/validation/likes";
 
-// GET /api/projects/3/fundings — 이 프로젝트의 최근 결제 완료 후원 (창작자 본인만)
+// GET /api/projects/3/fundings — 이 프로젝트의 최근 결제 완료 후원 5건 (창작자 본인만)
 // 창작자 화면이 15초마다 부른다(자동 새로고침). 응답: { items: [...] }
 //   401 로그인 필요 · 403 남의 프로젝트 · 404 없거나 숨긴 프로젝트 · 429 너무 자주
 const RATE_LIMIT = { limit: 30, windowSeconds: 60 }; // 15초마다면 1분에 4번 — 창을 여러 개 열어도 넉넉하다

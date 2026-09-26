@@ -23,8 +23,8 @@ export type RecentFunding = {
   paidAt: string; // ISO 시각 (JSON 으로 보내므로 글자로)
 };
 
-// 이 프로젝트의 최근 "결제 완료" 후원 (새것부터). 응원 메시지는 창작자에게만 보여 준다 (확인 화면 안내와 같게)
-export async function listRecentFundings(db: Db, projectId: number, limit = 20): Promise<RecentFunding[]> {
+// 이 프로젝트의 최근 "결제 완료" 후원 5건 (새것부터 — 전체 목록은 대시보드의 후원자 표). 응원 메시지는 창작자에게만 보여 준다 (확인 화면 안내와 같게)
+export async function listRecentFundings(db: Db, projectId: number, limit = 5): Promise<RecentFunding[]> {
   const rows = await db
     .select({
       id: funding.id,

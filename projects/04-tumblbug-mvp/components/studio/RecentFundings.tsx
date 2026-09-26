@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/providers/ToastProvider";
 import { formatWon } from "@/lib/format";
@@ -22,6 +23,7 @@ async function fetchFundings(projectId: number): Promise<RecentFunding[]> {
 //  - 새 후원이 생기면 토스트로 알리고, 새 줄을 잠깐 강조한다
 export function RecentFundings({ projectId, initial }: { projectId: number; initial: RecentFunding[] }) {
   const toast = useToast();
+  const router = useRouter();
   const { data = [], dataUpdatedAt, isError } = useQuery({
     queryKey: ["fundings", projectId],
     queryFn: () => fetchFundings(projectId),
@@ -39,9 +41,10 @@ export function RecentFundings({ projectId, initial }: { projectId: number; init
   useEffect(() => {
     if (newCount === 0) return;
     toast.show(`새 후원 ${newCount}건이 들어왔어요`);
+    router.refresh(); // 서버가 그린 모금 현황·표도 새 숫자로 (13주차) — 이 화면의 서버 컴포넌트만 다시 그린다
     const timer = setTimeout(() => setSeenAt(latestAt), 3_000); // 3초 동안 강조한 뒤 "본 것"으로
     return () => clearTimeout(timer);
-  }, [latestAt, newCount, toast]);
+  }, [latestAt, newCount, toast, router]);
 
   return (
     <section className={styles.section} aria-labelledby="recent-title">
