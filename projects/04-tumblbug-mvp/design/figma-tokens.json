@@ -1,0 +1,41 @@
+{
+  "_comment": "Figma 예시 파일(Local variables)에서 내보낸 토큰 값. Figma를 고치면 이 파일도 다시 내보낸다. tests/tokens.test.ts가 app/globals.css와 비교한다.",
+  "exportedAt": "2026-09-26",
+  "colors": {
+    "--color-bg": { "light": "#f7f7f8", "dark": "#121214" },
+    "--color-surface": { "light": "#ffffff", "dark": "#1c1c1f" },
+    "--color-surface-muted": { "light": "#ededf0", "dark": "#2a2a2f" },
+    "--color-text": { "light": "#1a1a1a", "dark": "#f0f0f0" },
+    "--color-text-muted": { "light": "#5f5f66", "dark": "#a0a0a6" },
+    "--color-subtle-text": { "light": "#5f5f66", "dark": "#b4b4bb" },
+    "--color-border": { "light": "#e2e2e5", "dark": "#2e2e33" },
+    "--color-primary": { "light": "#c8342a", "dark": "#ff7a6b" },
+    "--color-primary-hover": { "light": "#b42318", "dark": "#ffb3a9" },
+    "--color-on-primary": { "light": "#ffffff", "dark": "#1a0b09" },
+    "--color-primary-subtle": { "light": "#fdecea", "dark": "#3a1a16" },
+    "--color-primary-strong": { "light": "#b42318", "dark": "#ffb3a9" },
+    "--color-success": { "light": "#17703c", "dark": "#6ee79a" },
+    "--color-success-subtle": { "light": "#e6f4ec", "dark": "#12301f" },
+    "--color-danger": { "light": "#c42b2b", "dark": "#ff6b6b" },
+    "--color-warning": { "light": "#9a5b00", "dark": "#fbbf5a" },
+    "--color-warning-subtle": { "light": "#fff4e0", "dark": "#33220a" },
+    "--color-accent": { "light": "#1f2a44", "dark": "#dfe5f2" },
+    "--color-on-accent": { "light": "#ffffff", "dark": "#1f2a44" },
+    "--color-focus": { "light": "#2563eb", "dark": "#93c5fd" },
+    "--color-overlay": { "light": "rgb(0 0 0 / 0.5)", "dark": "rgb(0 0 0 / 0.5)" },
+    "--color-on-image": { "light": "#ffffff", "dark": "#ffffff" }
+  },
+  "sizes": {
+    "--spacing-xs": 4,
+    "--spacing-sm": 8,
+    "--spacing-md": 12,
+    "--spacing-lg": 16,
+    "--spacing-xl": 24,
+    "--spacing-2xl": 32,
+    "--spacing-3xl": 48,
+    "--radius-sm": 6,
+    "--radius-md": 12,
+    "--radius-lg": 16,
+    "--radius-full": 999
+  }
+}
