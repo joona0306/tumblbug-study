@@ -1,4 +1,4 @@
-import { LogOut, Plus, User } from "lucide-react";
+import { LayoutDashboard, LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { HeaderLikes } from "@/components/like/HeaderLikes";
@@ -22,6 +22,10 @@ export async function AppHeader() {
           {user ? (
             <>
               <HeaderLikes />
+              <Link href="/studio" className={styles.link}>
+                <LayoutDashboard size={18} aria-hidden="true" />
+                <span className={styles.label}>스튜디오</span>
+              </Link>
               {/* 이름을 누르면 내 후원 내역으로 (11주차) */}
               <Link href="/me/fundings" className={styles.link} title="내 후원 내역">
                 <User size={18} aria-hidden="true" />

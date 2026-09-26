@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleAlert, CircleCheck } from "lucide-react";
-import { createContext, useCallback, useContext, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import styles from "./ToastProvider.module.css";
 
 // 토스트 알림 (상태 관리 지도: "앱 전체 공유 값" → React Context)
@@ -24,8 +24,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), DURATION_MS);
   }, []);
 
+  // 값 객체를 한 번만 만든다 — 그러지 않으면 알림이 뜰 때마다(=이 컴포넌트가 다시 그려질 때마다) 새 객체가 되어,
+  // useToast() 를 useEffect 의존성에 넣은 컴포넌트가 "바뀌었다"고 보고 효과를 또 실행한다 (같은 알림이 여러 번 뜨는 버그)
+  const api = useMemo(() => ({ show }), [show]);
+
   return (
-    <ToastContext.Provider value={{ show }}>
+    <ToastContext.Provider value={api}>
       {children}
       {/* aria-live: 화면 낭독기가 새 알림을 읽어 준다 (화면을 보지 못해도 결과를 알 수 있게) */}
       <div className={styles.region} role="status" aria-live="polite">
