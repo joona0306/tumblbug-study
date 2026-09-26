@@ -3,9 +3,9 @@ import { expect, test } from "@playwright/test";
 // 5주차 흐름 테스트: 앱이 뜨고, 디자인 시스템 부품이 사람이 쓸 수 있는 상태로 보이는지.
 // 화면을 찾을 때는 "보이는 글자·역할"로 찾는다 (getByRole) — 화면 낭독기가 찾는 방식과 같아서 접근성도 함께 확인된다.
 
-test("첫 화면에 서비스 소개가 보인다", async ({ page }) => {
+test("첫 화면(홈)이 뜬다", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "작은 응원이 모여 창작이 돼요" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "작은 공방의 첫 생산을 응원하세요" })).toBeVisible();
 });
 
 test("디자인 시스템: 버튼·배지·진행률이 보인다", async ({ page }) => {

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 흐름 테스트가 만드는 보고서·결과 폴더 (자동 생성 파일)
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

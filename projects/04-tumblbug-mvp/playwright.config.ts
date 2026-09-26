@@ -10,6 +10,8 @@ const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: "./e2e",
+  // 진짜 DB·사진 저장소를 쓰므로 화면 확인은 10초까지 기다린다 (내 컴퓨터 → 해외 리전 DB는 쿼리마다 약 0.1초)
+  expect: { timeout: 10_000 },
   // CI에서는 실수로 남긴 test.only 를 막고, 가끔 생기는 일시적 실패를 한 번 더 시도한다
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
