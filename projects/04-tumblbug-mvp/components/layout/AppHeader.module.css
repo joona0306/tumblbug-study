@@ -19,8 +19,7 @@
   gap: var(--spacing-xs);
 }
 
-.link,
-.user {
+.link {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -39,11 +38,6 @@
 
 .link:hover {
   background: var(--color-surface-muted);
-}
-
-.user {
-  cursor: default;
-  color: var(--color-text-muted);
 }
 
 /* 좁은 화면에서는 아이콘만 (글자는 화면 낭독기용으로 남긴다) */
