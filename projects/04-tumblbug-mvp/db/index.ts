@@ -1,4 +1,4 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { serverEnv } from "@/lib/env";
 import * as schema from "./schema";
@@ -14,4 +14,5 @@ const pool = new Pool({
 });
 
 export const db = drizzle({ client: pool, schema });
-export type Db = typeof db;
+// 함수가 db 를 인자로 받을 때 쓰는 타입 (테스트에서는 트랜잭션용 db 를 넘길 수 있다)
+export type Db = NodePgDatabase<typeof schema>;

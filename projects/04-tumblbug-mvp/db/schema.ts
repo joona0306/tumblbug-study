@@ -16,6 +16,7 @@ import { CATEGORY_VALUES } from "@/lib/categories";
 import { user } from "./auth-schema";
 
 // 표 설계도 = 물리 ERD를 코드로 (templates/07-data-model.md ③).
+// 시각 칸은 모두 timestamptz(시간대 포함)로 저장한다 — DB 서버는 UTC, 사용자는 한국 시간이라 어긋나지 않게.
 // 규칙은 되도록 DB에도 새긴다(CHECK·UNIQUE·외래 키). 앱 코드에 버그가 있어도 DB가 마지막으로 막아 준다.
 // 로그인에 필요한 표(user, session, account, verification)는 Better Auth CLI가 만든 auth-schema.ts 에 있다.
 export * from "./auth-schema";
@@ -46,8 +47,8 @@ export const project = pgTable(
     // 확정 상태: 매일 예약 작업이 마감된 프로젝트를 success/failed 로 확정한다 (13주차). 화면은 항상 계산값을 쓴다 (ADR-001)
     status: text("status", { enum: PROJECT_STATUSES }).notNull().default("funding"),
     hidden: boolean("hidden").notNull().default(false), // 관리자가 숨긴 프로젝트
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
@@ -76,7 +77,7 @@ export const reward = pgTable(
     deliveryMonth: date("delivery_month", { mode: "string" }).notNull(), // 전달 예정 달 (1일로 저장)
     needsShipping: boolean("needs_shipping").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [
     index("reward_project_idx").on(t.projectId),
@@ -112,8 +113,8 @@ export const funding = pgTable(
     paymentKey: text("payment_key").unique(), // 토스페이먼츠가 준 결제 키 (결제 승인 후)
     status: text("status", { enum: FUNDING_STATUSES }).notNull().default("pending"),
     failReason: text("fail_reason"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    paidAt: timestamp("paid_at"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
   },
   (t) => [
     index("funding_supporter_idx").on(t.supporterId),
@@ -136,7 +137,7 @@ export const projectLike = pgTable(
     projectId: integer("project_id")
       .notNull()
       .references(() => project.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.projectId] }), index("project_like_project_idx").on(t.projectId)],
 );
@@ -148,5 +149,5 @@ export const paymentEvent = pgTable("payment_event", {
   orderId: text("order_id").notNull(),
   status: text("status").notNull(),
   payload: jsonb("payload").notNull(),
-  receivedAt: timestamp("received_at").defaultNow().notNull(),
+  receivedAt: timestamp("received_at", { withTimezone: true }).defaultNow().notNull(),
 });
