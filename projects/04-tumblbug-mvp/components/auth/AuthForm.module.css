@@ -1,0 +1,28 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  max-width: 400px;
+  margin: 0 auto;
+  padding-block: var(--spacing-3xl);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.error {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary-strong);
+  font-size: 14px;
+}
+
+.alt {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
