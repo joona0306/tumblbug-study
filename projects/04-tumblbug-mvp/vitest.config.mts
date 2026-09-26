@@ -8,6 +8,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // .env.local 읽기 (DB 테스트용 DATABASE_URL)
+    setupFiles: ["./tests/setup-env.ts"],
     // 흐름 테스트(Playwright, e2e 폴더)는 따로 돌리므로 여기서는 제외한다
     include: ["**/*.test.ts"],
     exclude: ["node_modules", ".next", "e2e"],
