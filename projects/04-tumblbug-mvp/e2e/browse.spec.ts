@@ -40,7 +40,9 @@ test("목록: '성공' 탭에는 끝난 성공 프로젝트만, 성공 배지와
 test("목록: 주소에 이상한 값을 넣어도 기본값(모금중)으로 보인다", async ({ page }) => {
   await page.goto("/projects?status=hacked&sort=%3Cscript%3E&category=food");
   await expect(page.getByRole("link", { name: "모금중" })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("article")).toHaveCount(6);
+  // 개수는 세지 않는다 — 다른 흐름 테스트가 동시에 프로젝트를 넣고 뺄 수 있다 (같은 DB를 함께 쓰므로)
+  await expect(page.getByRole("article").first()).toBeVisible();
+  await expect(page.getByRole("article").getByText(/^(성공|실패)$/)).toHaveCount(0); // 모금중만 = 성공·실패 배지가 없다
 });
 
 test("상세: 달성률·통계·리워드(남은 수량)가 보이고, 후원 버튼으로 간다", async ({ page }) => {
