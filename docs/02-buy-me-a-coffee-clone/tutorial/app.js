@@ -22,6 +22,7 @@
       "c1-metric",
       "c1-wire",
       "c1-state",
+      "c1-erd",
       "c1-design",
       "c1-copy",
       "c1-db",
