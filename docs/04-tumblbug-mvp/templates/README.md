@@ -12,13 +12,21 @@
 | `06-case-study.md` | 16주차 | 포트폴리오용 케이스 스터디 양식 |
 
 ## Figma 예시 파일 (3~4주차)
-[텀블벅 MVP — 디자인 시스템 & 시안 (예시)](https://www.figma.com/design/NkCzzAJnAtFvzA2iKw19nc)
+[크라우드펀딩 MVP — 디자인 시스템 & 시안 (예시 v2)](https://www.figma.com/design/NkCzzAJnAtFvzA2iKw19nc)
+
+페이지 순서가 곧 실무 순서입니다.
 
 | 페이지 | 내용 |
 |---|---|
-| Foundations | 색 토큰 14개(Light/Dark, 텍스트 대비 모두 4.5 이상), 글자 스타일 8개(Noto Sans KR), 간격 7단계, 모서리 3단계 |
-| Button · Input · Badge · ProgressBar · ProjectCard | 컴포넌트 5종 (모든 색·간격이 토큰에 연결됨) |
-| Screens | 모바일 시안 7개(목록·상세·후원·만들기·대시보드·내 후원·로딩/빈 화면/에러) + 데스크톱 목록 + 상세 Dark 모드 |
+| Flow | 사용자 흐름도(후원자·창작자) + 상태 전이도(프로젝트·결제) |
+| Wireframes | 저해상도 와이어프레임 3장 (홈·상세·후원 1단계) |
+| Foundations | 색 토큰 22개(Light/Dark, 텍스트 대비 모두 4.5 이상), 글자 9단계(Noto Sans KR), 간격 7단계, 모서리 4단계, 그림자 2개 |
+| Icons | Lucide 아이콘 19개 (코드에서는 lucide-react의 같은 이름) |
+| Button ~ Toast | 컴포넌트 17종 — Button(종류×크기×상태 24), Input(기본·포커스·에러·비활성), Badge(D-day 포함), ProgressBar, ProjectCard/Row, Chip, Tab, QuantityStepper, LikeButton, RewardCard(기본·선택·품절), Steps, AppHeader, PageHeader, BottomBar, Toast, Logo |
+| Screens | 모바일 13개 + 데스크톱 3개 + Dark 모드, 클릭 프로토타입(홈 → 상세 → 후원 1·2·3단계 → 완료) |
+| Archive — v1 | 개선 전 시안 (전후 비교용) |
 
-- 토큰 이름 = 코드의 CSS 변수 이름 (`color/primary` → `var(--color-primary)`, `spacing/lg` → `var(--spacing-lg)`). 5주차에 그대로 옮깁니다.
-- 시안의 입력 규칙(후원 1,000~1,000,000원, 목표 금액 최소 10,000원 등)은 코드의 zod 검사와 같은 문장이어야 합니다.
+- 브랜드 "모아"와 프로젝트 내용은 가상입니다. 사진은 Unsplash(Unsplash License), 아이콘은 Lucide(ISC)
+- 토큰 이름 = 코드의 CSS 변수 이름 (`color/primary` → `var(--color-primary)`, `spacing/lg` → `var(--spacing-lg)`). 5주차에 그대로 옮깁니다
+- 시안 속 주석(💡)은 상태를 어디에 두는지(URL·Zustand·Context) 설명입니다 — 실제 화면에는 넣지 않습니다
+- 시안의 입력 규칙(후원 1,000~1,000,000원 등)은 코드의 zod 검사와 같은 문장이어야 합니다
