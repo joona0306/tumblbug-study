@@ -10,3 +10,15 @@
 | `04-adr.md` | 2주차~ | 결정 기록 양식 + 예시 2개 (모금 상태 계산, 결제 시점) |
 | `05-pr-checklist.md` | 5주차~ | PR 본문 양식 + 합치기 전 셀프 리뷰 체크리스트 |
 | `06-case-study.md` | 14주차 | 포트폴리오용 케이스 스터디 양식 |
+
+## Figma 예시 파일 (3~4주차)
+[텀블벅 MVP — 디자인 시스템 & 시안 (예시)](https://www.figma.com/design/NkCzzAJnAtFvzA2iKw19nc)
+
+| 페이지 | 내용 |
+|---|---|
+| Foundations | 색 토큰 14개(Light/Dark, 텍스트 대비 모두 4.5 이상), 글자 스타일 8개(Noto Sans KR), 간격 7단계, 모서리 3단계 |
+| Button · Input · Badge · ProgressBar · ProjectCard | 컴포넌트 5종 (모든 색·간격이 토큰에 연결됨) |
+| Screens | 모바일 시안 7개(목록·상세·후원·만들기·대시보드·내 후원·로딩/빈 화면/에러) + 데스크톱 목록 + 상세 Dark 모드 |
+
+- 토큰 이름 = 코드의 CSS 변수 이름 (`color/primary` → `var(--color-primary)`, `spacing/lg` → `var(--spacing-lg)`). 5주차에 그대로 옮깁니다.
+- 시안의 입력 규칙(후원 1,000~1,000,000원, 목표 금액 최소 10,000원 등)은 코드의 zod 검사와 같은 문장이어야 합니다.
