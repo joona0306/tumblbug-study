@@ -44,8 +44,11 @@ test.describe("같은 계정·DB를 쓰는 흐름 (데스크톱에서만)", () =
 
     const heart = page.getByRole("button", { name: `${CAT} 찜하기` });
     await expect(heart).toHaveAttribute("aria-pressed", "false");
+    // 화면은 누르자마자 바뀌지만(낙관적 업데이트) 서버 저장은 조금 뒤에 끝난다 → 다른 화면으로 가기 전에 저장까지 기다린다
+    const saved = page.waitForResponse((r) => r.url().endsWith("/api/likes") && r.request().method() === "POST");
     await heart.click();
     await expect(heart).toHaveAttribute("aria-pressed", "true");
+    expect((await saved).status()).toBe(201);
     await expect(headerCount).toHaveText(String(before + 1));
 
     // 상세: 같은 캐시 → 이미 찜 상태 (새로고침 없이 이동해도)

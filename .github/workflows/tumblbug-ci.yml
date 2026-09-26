@@ -34,6 +34,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tumblbug_test
       BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-000
       BETTER_AUTH_URL: http://localhost:3100
+      CRON_SECRET: ci-only-cron-secret-000000 # 예약 작업 주소 테스트용 (13주차)
     steps:
       - uses: actions/checkout@v7
 

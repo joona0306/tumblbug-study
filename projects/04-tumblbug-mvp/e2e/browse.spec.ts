@@ -72,6 +72,7 @@ test("상세: 내 프로젝트에서는 후원 대신 '수정하기'", async ({ 
 });
 
 test("리워드: 추가 → 수정 → 삭제, 판매된 리워드는 금액 잠금·삭제 없음", async ({ page }, testInfo) => {
+  test.slow(); // 추가·수정·삭제를 한 흐름에서 모두 하느라 길다 — 테스트가 동시에 많이 돌면 30초를 넘길 수 있다
   // 이 테스트만의 프로젝트를 DB에 직접 만든다 (후원이 없어야 삭제를 시험할 수 있다)
   const title = `리워드 테스트 ${testInfo.project.name} ${Date.now()}`;
   const { rows } = await pool.query<{ id: number }>(
