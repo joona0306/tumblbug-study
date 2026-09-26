@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { project, projectLike } from "@/db/schema";
 import { addLike, getMyLikeIds, removeLike } from "@/lib/queries/likes";
+import { listLikedProjects } from "@/lib/queries/listing";
 import { closePool, makeProject, makeUser, withRollback } from "./helpers";
 
 afterAll(closePool);
@@ -45,5 +46,19 @@ describe("찜 (addLike·removeLike·getMyLikeIds)", () => {
       await db.update(projectLike).set({ createdAt: new Date("2026-09-01T00:00:00Z") }).where(and(eq(projectLike.userId, me), eq(projectLike.projectId, a)));
       await addLike(db, other, c);
       expect(await getMyLikeIds(db, me)).toEqual([b, a]);
+    }));
+
+  it("내 찜 카드 목록(listLikedProjects): 찜한 순서, 숨긴 프로젝트는 빠진다", () =>
+    withRollback(async (db) => {
+      const me = await makeUser(db);
+      const creator = await makeUser(db);
+      const [a, b, hiddenOne] = [await makeProject(db, creator), await makeProject(db, creator), await makeProject(db, creator)];
+      for (const id of [a, b, hiddenOne]) await addLike(db, me, id);
+      await db.update(projectLike).set({ createdAt: new Date("2026-09-01T00:00:00Z") }).where(and(eq(projectLike.userId, me), eq(projectLike.projectId, a)));
+      await db.update(project).set({ hidden: true }).where(eq(project.id, hiddenOne));
+
+      const cards = await listLikedProjects(db, me);
+      expect(cards.map((c) => c.id)).toEqual([b, a]);
+      expect(cards[0]).toMatchObject({ status: "funding", raised: 0, supporters: 0 });
     }));
 });

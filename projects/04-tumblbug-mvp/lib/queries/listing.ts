@@ -81,20 +81,7 @@ export async function listProjects(db: Db, { category, status, sort = "deadline"
           : sql`(${project.deadline}, ${project.id}) > (${String(cursor.v)}::date, ${cursor.id})`;
 
   const rows = await db
-    .select({
-      id: project.id,
-      title: project.title,
-      summary: project.summary,
-      category: project.category,
-      imageUrl: project.imageUrl,
-      deadline: project.deadline,
-      goalAmount: project.goalAmount,
-      raised: sql<number>`coalesce(${s.raised}, 0)`,
-      supporters,
-      creatorName: user.name,
-      status: computedStatus,
-      createdAt: project.createdAt,
-    })
+    .select(cardColumns(s))
     .from(project)
     .innerJoin(user, eq(user.id, project.creatorId))
     .leftJoin(s, eq(s.projectId, project.id))
@@ -108,7 +95,42 @@ export async function listProjects(db: Db, { category, status, sort = "deadline"
     )
     .orderBy(...order)
     .limit(limit);
-  return rows.map(({ createdAt, ...row }) => ({ ...row, createdAt: createdAt.toISOString() })) as ProjectCardData[];
+  return toCards(rows);
+}
+
+// 카드 한 장에 필요한 칸들 — 목록과 "내 찜"이 같은 모양을 쓴다
+function cardColumns(s: ReturnType<typeof stats>) {
+  return {
+    id: project.id,
+    title: project.title,
+    summary: project.summary,
+    category: project.category,
+    imageUrl: project.imageUrl,
+    deadline: project.deadline,
+    goalAmount: project.goalAmount,
+    raised: sql<number>`coalesce(${s.raised}, 0)`,
+    supporters: sql<number>`coalesce(${s.supporters}, 0)`,
+    creatorName: user.name,
+    status: statusSql(s),
+    createdAt: project.createdAt,
+  };
+}
+
+const toCards = (rows: { createdAt: Date }[]) => rows.map(({ createdAt, ...row }) => ({ ...row, createdAt: createdAt.toISOString() })) as ProjectCardData[];
+
+// 내 찜 (/me/likes, 12주차): 내가 찜한 프로젝트를 최근 찜한 순서로. 숨긴 프로젝트는 뺀다
+export async function listLikedProjects(db: Db, userId: string, limit = 100): Promise<ProjectCardData[]> {
+  const s = stats(db);
+  const rows = await db
+    .select(cardColumns(s))
+    .from(projectLike)
+    .innerJoin(project, eq(project.id, projectLike.projectId))
+    .innerJoin(user, eq(user.id, project.creatorId))
+    .leftJoin(s, eq(s.projectId, project.id))
+    .where(and(eq(projectLike.userId, userId), eq(project.hidden, false)))
+    .orderBy(desc(projectLike.createdAt), desc(project.id))
+    .limit(limit);
+  return toCards(rows);
 }
 
 // 한 페이지 + 다음 페이지 커서. limit+1개를 가져와서 하나가 더 있으면 "다음이 있다"
