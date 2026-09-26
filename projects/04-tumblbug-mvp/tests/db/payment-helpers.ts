@@ -4,6 +4,7 @@ import { Pool } from "pg";
 import * as schema from "@/db/schema";
 import { funding, paymentEvent, project, reward, user } from "@/db/schema";
 import type { TossClient, TossResult } from "@/lib/payments/toss";
+import { uniq } from "./unique";
 
 // 결제 테스트 공용 도우미 (승인·웹훅).
 // 결제 코드는 트랜잭션을 여러 번 쓰므로 "끝나면 되돌리기" 대신 진짜로 저장하고 테스트마다 지운다 (transaction.test.ts 와 같은 방식)
@@ -32,7 +33,7 @@ export function fakeToss(options: { confirm?: ConfirmAnswer; payment?: (paymentK
 }
 
 export async function setup(limitQty: number | null, soldQty = 0) {
-  const id = `pay-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const id = uniq("pay-test");
   await db.insert(user).values([
     { id: `${id}-c`, name: "창작자", email: `${id}-c@example.com` },
     { id: `${id}-s`, name: "후원자", email: `${id}-s@example.com` },
@@ -51,10 +52,8 @@ export async function setup(limitQty: number | null, soldQty = 0) {
 }
 
 // 결제 대기 후원 하나 (startFunding 이 만드는 것과 같은 모양)
-let seq = 0;
 export async function pendingFunding(s: Awaited<ReturnType<typeof setup>>, quantity = 1) {
-  seq += 1;
-  const orderId = `pay-order-${Date.now()}-${seq}`;
+  const orderId = uniq("pay-order");
   created.orders.push(orderId);
   await db.insert(funding).values({ projectId: s.projectId, supporterId: s.supporterId, rewardId: s.rewardId, quantity, amount: 10_000 * quantity, orderId });
   return { orderId, paymentKey: `pk-${orderId}`, amount: 10_000 * quantity, supporterId: s.supporterId };
