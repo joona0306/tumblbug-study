@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 // 빌드할 때 구글 서버에 접속하지 않아도 되므로 CI에서도 안정적이다. (한국어 글꼴은 조각 파일이 많아 내려받기가 자주 실패한다)
 import "@fontsource-variable/noto-sans-kr";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,8 +15,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ko">
       <body>
-        <AppHeader />
-        {children}
+        <QueryProvider>
+          <AppHeader />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

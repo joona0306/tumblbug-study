@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ProjectCard } from "@/components/project/ProjectCard";
-import grid from "@/components/project/ProjectGrid.module.css";
+import { InfiniteProjectGrid } from "@/components/project/InfiniteProjectGrid";
 import { Chip } from "@/components/ui/Chip";
 import { db } from "@/db";
 import { CATEGORIES, type Category } from "@/lib/categories";
-import { listProjects } from "@/lib/queries/listing";
+import { listProjectsPage } from "@/lib/queries/listing";
 import { listHref, listParamsSchema } from "@/lib/validation/list-params";
 import styles from "./projects.module.css";
 
@@ -25,8 +24,8 @@ const SORTS = [
 // 목록 (Figma M02): 필터·정렬은 모두 주소(URL)에 담긴다 → 새로고침·공유·뒤로가기해도 그대로 (상태 관리 지도: URL 상태)
 export default async function ProjectsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = listParamsSchema.parse(await searchParams);
-  const projects = await listProjects(db, { ...params, category: params.category as Category | undefined, limit: 24 });
-  const now = new Date();
+  // 첫 페이지는 서버에서 — 나머지는 InfiniteProjectGrid 가 스크롤하면 API로 이어서 (9주차)
+  const firstPage = await listProjectsPage(db, { ...params, category: params.category as Category | undefined, limit: 12 });
 
   return (
     <main className={`container ${styles.page}`}>
@@ -60,16 +59,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
         </nav>
       </div>
 
-      <p className="text-caption text-muted">{projects.length}개 프로젝트</p>
-      {projects.length === 0 ? (
-        <p className={grid.empty}>조건에 맞는 프로젝트가 없어요.</p>
-      ) : (
-        <div className={grid.grid}>
-          {projects.map((p, i) => (
-            <ProjectCard key={p.id} project={p} now={now} compact priority={i < 4} />
-          ))}
-        </div>
-      )}
+      <InfiniteProjectGrid key={JSON.stringify(params)} params={params} initialPage={firstPage} nowIso={new Date().toISOString()} />
     </main>
   );
 }
