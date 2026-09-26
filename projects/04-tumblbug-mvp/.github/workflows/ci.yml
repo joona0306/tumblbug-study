@@ -11,6 +11,30 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    # 테스트 전용 PostgreSQL을 Docker 컨테이너로 잠깐 띄운다 (6주차).
+    # 매번 빈 DB에서 시작하므로 테스트끼리 영향을 주지 않고, 운영·개발 DB는 건드리지 않는다.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tumblbug_test
+        ports: ["5432:5432"]
+        # DB가 접속을 받을 준비가 될 때까지 기다린다
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # 테스트용 값 (진짜 비밀값이 아니다 — 컨테이너 안에서만 쓰이고 사라진다)
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tumblbug_test
+      BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-000
+      BETTER_AUTH_URL: http://localhost:3100
+
     steps:
       - uses: actions/checkout@v7
 
@@ -28,7 +52,10 @@ jobs:
       - name: 타입 검사 (TypeScript)
         run: npm run typecheck
 
-      - name: 단위 테스트 (Vitest)
+      - name: DB 마이그레이션 (빈 테스트 DB에 표 만들기)
+        run: npm run db:migrate
+
+      - name: 단위·DB 테스트 (Vitest)
         run: npm test
 
       - name: 빌드
