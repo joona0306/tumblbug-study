@@ -43,6 +43,11 @@ describe("parseEnv", () => {
     expect(() => parseEnv({ ...required, NEXT_PUBLIC_TOSS_CLIENT_KEY: "live_gck_example" })).toThrow(/테스트 키만/);
   });
 
+  it("BETTER_AUTH_URL 이 비어 있으면 Vercel 배포 주소(VERCEL_URL)를 쓴다, 적어 두면 그 값", () => {
+    expect(parseEnv({ ...required, VERCEL_URL: "moa-abc123.vercel.app" }).BETTER_AUTH_URL).toBe("https://moa-abc123.vercel.app");
+    expect(parseEnv({ ...required, VERCEL_URL: "moa-abc123.vercel.app", BETTER_AUTH_URL: "https://moa.example.com" }).BETTER_AUTH_URL).toBe("https://moa.example.com");
+  });
+
   it("NODE_ENV에 정해진 값 말고 다른 값이 오면 멈춘다", () => {
     expect(() => parseEnv({ ...required, NODE_ENV: "staging" })).toThrow();
   });

@@ -45,7 +45,10 @@ export type Env = z.infer<typeof envSchema>;
 
 // 값 묶음을 받아 검사한다 (테스트하기 쉽도록 process.env를 직접 읽지 않고 인자로 받는다)
 export function parseEnv(values: Record<string, string | undefined>): Env {
-  const result = envSchema.safeParse(values);
+  // Vercel 미리보기 배포는 주소가 배포마다 달라서 BETTER_AUTH_URL 을 미리 적어 둘 수 없다 (14주차)
+  // → 비어 있으면 Vercel 이 알려 주는 이 배포의 주소(VERCEL_URL, "https://" 없이 옴)를 쓴다
+  const authUrl = values.BETTER_AUTH_URL || (values.VERCEL_URL ? `https://${values.VERCEL_URL}` : undefined);
+  const result = envSchema.safeParse({ ...values, BETTER_AUTH_URL: authUrl });
   if (!result.success) {
     throw new Error(`환경 변수가 올바르지 않습니다:\n${z.prettifyError(result.error)}`);
   }
