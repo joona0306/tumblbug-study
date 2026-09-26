@@ -1,4 +1,8 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+
+// 테스트 코드도 DB·Blob에 접근하므로 .env.local 을 읽는다 (CI에서는 워크플로의 env 값)
+if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
 // 흐름 테스트(e2e) 설정: 진짜 브라우저를 띄워 사람이 쓰듯 화면을 눌러 본다.
 const PORT = 3100;
