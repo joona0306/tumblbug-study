@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { Heart } from "lucide-react";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import grid from "@/components/project/ProjectGrid.module.css";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useLikes } from "@/lib/likes-client";
 import type { ProjectCardData } from "@/lib/queries/listing";
 
@@ -14,11 +15,7 @@ export function LikedProjectGrid({ projects, nowIso }: { projects: ProjectCardDa
   const visible = projects.filter((p) => likes?.includes(p.id));
 
   if (visible.length === 0) {
-    return (
-      <p className="text-body-m text-muted">
-        아직 찜한 프로젝트가 없어요. <Link href="/projects">프로젝트 둘러보기</Link>
-      </p>
-    );
+    return <EmptyState icon={Heart} title="아직 찜한 프로젝트가 없어요" description="마음에 드는 프로젝트의 하트를 누르면 여기에 모여요." action={{ href: "/projects", label: "프로젝트 둘러보기" }} />;
   }
   return (
     <div className={grid.grid}>

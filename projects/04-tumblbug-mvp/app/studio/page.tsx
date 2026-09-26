@@ -3,7 +3,8 @@ import Link from "next/link";
 import { DailyChart, RewardTable, SummaryCards, SupporterTable } from "@/components/studio/Dashboard";
 import { RecentFundings } from "@/components/studio/RecentFundings";
 import { Chip } from "@/components/ui/Chip";
-import { ButtonLink } from "@/components/ui/Button";
+import { Rocket } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { db } from "@/db";
 import { getDailyRaised, getDashboardSummary, getRewardBreakdown, listSupporters } from "@/lib/queries/dashboard";
 import { listMyProjects, listRecentFundings } from "@/lib/queries/studio";
@@ -23,8 +24,7 @@ export default async function StudioPage({ searchParams }: Props) {
     return (
       <main className="container" style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-lg)", paddingBlock: "var(--spacing-xl)" }}>
         <h1 className="text-heading-l">창작자 스튜디오</h1>
-        <p className="text-body-m text-muted">아직 만든 프로젝트가 없어요.</p>
-        <ButtonLink href="/projects/new">첫 프로젝트 만들기</ButtonLink>
+        <EmptyState icon={Rocket} title="아직 만든 프로젝트가 없어요" description="프로젝트를 올리면 여기서 모금 현황과 후원자를 볼 수 있어요." action={{ href: "/projects/new", label: "첫 프로젝트 만들기" }} />
       </main>
     );
   }

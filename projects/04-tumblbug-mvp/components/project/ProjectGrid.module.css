@@ -43,11 +43,6 @@
   }
 }
 
-.empty {
-  padding: var(--spacing-3xl) var(--spacing-lg);
-  text-align: center;
-  color: var(--color-text-muted);
-}
 
 /* 무한 스크롤 아래: 더 보기 버튼 / 끝 안내 / 에러 */
 .more {

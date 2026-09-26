@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function SentryCheckPage() {
+// ?throw=render: 화면을 "그리는 중에" 에러를 낸다 → app/error.tsx 화면이 나오는지 + Sentry 에 서버 에러로 남는지 확인 (13주차)
+export default async function SentryCheckPage({ searchParams }: { searchParams: Promise<{ throw?: string }> }) {
+  if ((await searchParams).throw === "render") throw new Error("Sentry 확인용 렌더링 에러");
   return (
     <main className="container" style={{ paddingBlock: "var(--spacing-3xl)", display: "grid", gap: "var(--spacing-lg)" }}>
       <h1 className="text-heading-l">Sentry 연결 확인</h1>
@@ -16,6 +18,7 @@ export default function SentryCheckPage() {
       </p>
       <ThrowButton />
       <a href="/api/debug/sentry">서버에서 테스트 에러 내기 (/api/debug/sentry)</a>
+      <a href="/debug/sentry?throw=render">화면을 그리다 에러 내기 (에러 화면 확인)</a>
     </main>
   );
 }

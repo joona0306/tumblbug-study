@@ -1,8 +1,10 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { SearchX } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { ProjectCardData } from "@/lib/queries/listing";
 import { ProjectCard } from "./ProjectCard";
 import grid from "./ProjectGrid.module.css";
@@ -52,7 +54,9 @@ export function InfiniteProjectGrid({ params, initialPage, nowIso }: { params: P
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const projects = query.data.pages.flatMap((p) => p.items);
-  if (projects.length === 0) return <p className={grid.empty}>조건에 맞는 프로젝트가 없어요.</p>;
+  if (projects.length === 0) {
+    return <EmptyState icon={SearchX} title="조건에 맞는 프로젝트가 없어요" description="다른 카테고리나 상태를 골라 보세요." action={{ href: "/projects", label: "필터 초기화" }} />;
+  }
 
   return (
     <>

@@ -1,9 +1,10 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Sprout } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ProjectCard } from "@/components/project/ProjectCard";
 import grid from "@/components/project/ProjectGrid.module.css";
 import { Chip } from "@/components/ui/Chip";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { db } from "@/db";
 import { CATEGORIES } from "@/lib/categories";
 import { listProjects } from "@/lib/queries/listing";
@@ -43,21 +44,31 @@ export default async function Home() {
         ))}
       </nav>
 
-      <Section title="마감 임박 프로젝트" href="/projects">
-        <div className={grid.scroller}>
-          {closingSoon.map((p, i) => (
-            <ProjectCard key={p.id} project={p} now={now} priority={i < 2} />
-          ))}
+      {closingSoon.length === 0 && (
+        <div className="container">
+          <EmptyState icon={Sprout} title="지금 모금 중인 프로젝트가 없어요" description="첫 번째 프로젝트의 주인공이 되어 보세요." action={{ href: "/projects/new", label: "프로젝트 올리기" }} />
         </div>
-      </Section>
+      )}
 
-      <Section title="인기 프로젝트" href="/projects?sort=popular">
-        <div className={grid.grid}>
-          {popular.map((p) => (
-            <ProjectCard key={p.id} project={p} now={now} compact />
-          ))}
-        </div>
-      </Section>
+      {closingSoon.length > 0 && (
+        <Section title="마감 임박 프로젝트" href="/projects">
+          <div className={grid.scroller}>
+            {closingSoon.map((p, i) => (
+              <ProjectCard key={p.id} project={p} now={now} priority={i < 2} />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {popular.length > 0 && (
+        <Section title="인기 프로젝트" href="/projects?sort=popular">
+          <div className={grid.grid}>
+            {popular.map((p) => (
+              <ProjectCard key={p.id} project={p} now={now} compact />
+            ))}
+          </div>
+        </Section>
+      )}
     </main>
   );
 }

@@ -1,0 +1,19 @@
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-3xl) var(--spacing-lg);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.icon {
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-muted);
+}
+
+.empty a {
+  margin-top: var(--spacing-sm);
+}

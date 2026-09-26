@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge, type BadgeStatus } from "@/components/ui/Badge";
-import { ButtonLink } from "@/components/ui/Button";
+import { Receipt } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { db } from "@/db";
 import { formatWon } from "@/lib/format";
 import { listMyFundings, type MyFundingStatus } from "@/lib/queries/fundings";
@@ -29,10 +30,7 @@ export default async function MyFundingsPage() {
     <main className={`container ${styles.page}`}>
       <h1 className="text-heading-l">내 후원 내역</h1>
       {fundings.length === 0 ? (
-        <div className={styles.empty}>
-          <p>아직 후원한 프로젝트가 없어요.</p>
-          <ButtonLink href="/projects">프로젝트 둘러보기</ButtonLink>
-        </div>
+        <EmptyState icon={Receipt} title="아직 후원한 프로젝트가 없어요" description="응원하고 싶은 프로젝트를 찾아보세요." action={{ href: "/projects", label: "프로젝트 둘러보기" }} />
       ) : (
         <ul className={styles.list}>
           {fundings.map((f) => {
