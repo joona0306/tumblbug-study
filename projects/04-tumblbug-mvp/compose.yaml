@@ -11,6 +11,8 @@ x-app-env: &app-env
   DATABASE_URL: postgresql://moa:moa-local-only@db:5432/moa_dev
   BETTER_AUTH_SECRET: local-docker-only-secret-not-used-anywhere-else
   BETTER_AUTH_URL: http://localhost:3000
+  # 부하 테스트 주소(/api/load-test/…)를 여는 연습용 값 (16주차 k6) — 운영에는 넣지 않는다
+  LOAD_TEST_SECRET: local-load-test-secret-000
 
 services:
   db:

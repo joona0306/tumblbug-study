@@ -38,6 +38,8 @@ test("잠긴 곳은 잠겨 있다: 로그인 필요한 화면·찜 API·예약 �
 
   expect((await request.get("/api/likes")).status()).toBe(401);
   expect((await request.get("/api/cron/daily")).status()).not.toBe(200); // 비밀값 없이는 실행되지 않는다 (401, 설정 전이면 500)
+  // 부하 테스트 주소(16주차)는 배포된 곳에서 "없는 주소" — 비밀값 머리글을 아무렇게나 넣어도
+  expect((await request.post("/api/load-test/setup", { headers: { "x-load-test-secret": "guess-guess-guess-guess" } })).status()).toBe(404);
 });
 
 test("없는 주소는 404", async ({ page }) => {
