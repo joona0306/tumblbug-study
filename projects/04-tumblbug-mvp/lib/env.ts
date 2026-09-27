@@ -39,6 +39,10 @@ export const envSchema = z.object({
 
   // 예약 작업 주소(/api/cron/daily)를 부를 때 쓰는 비밀값 (13주차). 비워 두면 예약 작업 주소가 동작하지 않는다
   CRON_SECRET: z.preprocess(emptyToUndefined, z.string().min(16, { error: "CRON_SECRET은 16자 이상이어야 합니다" }).optional()),
+
+  // 부하 테스트 전용 주소(/api/load-test/…)를 여는 비밀값 (16주차 k6). 비워 두면 그 주소는 404 — 평소에는 비워 둔다
+  // Vercel 에서는 값이 있어도 열리지 않는다 (lib/load-test.ts)
+  LOAD_TEST_SECRET: z.preprocess(emptyToUndefined, z.string().min(16, { error: "LOAD_TEST_SECRET은 16자 이상이어야 합니다" }).optional()),
 });
 
 export type Env = z.infer<typeof envSchema>;
