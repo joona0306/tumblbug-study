@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TrackFunnel } from "@/components/funnel/TrackFunnel";
 import { LikeButton } from "@/components/like/LikeButton";
 import { RewardCard } from "@/components/reward/RewardCard";
 import { Badge } from "@/components/ui/Badge";
@@ -131,6 +132,9 @@ export default async function ProjectDetailPage({ params }: Props) {
       </div>
 
       {/* 모바일: 스크롤해도 후원 버튼이 항상 보이게 하단에 고정 (Figma BottomBar) */}
+      {/* 퍼널: 상세 보기 (15주차) — 창작자 본인이 자기 프로젝트를 보는 것은 세지 않는다 */}
+      {!mine && <TrackFunnel projectId={project.id} step="view" />}
+
       <div className={styles.bottomBar}>
         <div className={styles.ctaRow}>{ctaRow}</div>
       </div>

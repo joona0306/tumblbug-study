@@ -167,3 +167,28 @@ export const rateLimit = pgTable(
   },
   (t) => [primaryKey({ columns: [t.key, t.windowStart] })],
 );
+
+// 퍼널 기록 (15주차) — "상세를 본 사람 중 몇 명이 후원까지 갔나, 어디서 가장 많이 빠지나" (PLAN 성공 지표)
+// 한 방문자(visitor_id)가 한 프로젝트에서 각 단계에 처음 도착한 순간만 남긴다 (새로고침해도 한 번)
+// 개인정보 없음: visitor_id 는 브라우저 쿠키의 무작위 값 — 로그인 계정·IP·기기 정보와 연결하지 않는다
+export const FUNNEL_STEPS = ["view", "reward", "shipping", "payment_request", "paid"] as const;
+export type FunnelStep = (typeof FUNNEL_STEPS)[number];
+
+export const funnelEvent = pgTable(
+  "funnel_event",
+  {
+    visitorId: text("visitor_id").notNull(),
+    projectId: integer("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    step: text("step", { enum: FUNNEL_STEPS }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    // 기본 키 = 같은 사람·같은 프로젝트·같은 단계는 한 줄만 (INSERT ... ON CONFLICT DO NOTHING)
+    primaryKey({ columns: [t.visitorId, t.projectId, t.step] }),
+    // 퍼널 집계: "최근 N일, 단계별" 로 거른다
+    index("funnel_event_created_idx").on(t.createdAt),
+    check("funnel_event_step_check", sql`${t.step} in (${inList(FUNNEL_STEPS)})`),
+  ],
+);
