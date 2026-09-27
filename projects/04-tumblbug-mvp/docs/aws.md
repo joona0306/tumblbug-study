@@ -156,7 +156,8 @@ ssh -i ~/.ssh/moa-ec2-key.pem ubuntu@탄력적IP 'bash -s' < deploy/ec2-setup.sh
 🆘 막혔을 때
 | 증상 | 원인 → 해결 |
 |---|---|
-| 배포의 "설정 파일 올리기"가 `Connection timed out` | 보안 그룹 SSH(22) 소스가 아직 "내 IP" → 위치 무관으로 |
+| 배포의 "SSH 준비"·"설정 파일 올리기"가 실패 (`Connection timed out`, `exit code 1`) | 보안 그룹 SSH(22) 소스가 아직 "내 IP" → 위치 무관으로 |
+| 보안 그룹을 고치기 **전에** PR 을 머지해서 배포가 실패했다 | 보안 그룹을 고친 뒤 Actions → 실패한 **EC2** 실행 → **Re-run jobs → Re-run failed jobs** (이미지는 이미 올라가 있어서 배포만 다시 한다, 몇 분) |
 | `Permission denied (publickey)` | `EC2_SSH_KEY` 에 .pem 내용이 일부만 들어감 → BEGIN~END 전체를 다시 |
 | 주소는 열리는데 인증서 경고 | 인증서 발급 전(1~2분) — 80·443 이 열려 있는지 보안 그룹 확인 |
 | `unhealthy` 로 롤백됨 | 워크플로 로그의 "최근 로그" 부분에 앱이 멈춘 이유 (환경 변수 등) |
