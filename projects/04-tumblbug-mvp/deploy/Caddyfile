@@ -1,0 +1,6 @@
+# Caddy 설정 (16주차) — 이 주소로 오는 요청을 app 컨테이너로 넘긴다
+# 주소만 적으면 Caddy 가 HTTPS 인증서를 알아서 받는다 (도메인 대신 sslip.io: "IP주소를 - 로 이은 이름"이 그 IP 를 가리키는 무료 서비스)
+{$SITE_ADDRESS} {
+	encode zstd gzip # 응답을 압축해서 보낸다 (전송량 절약)
+	reverse_proxy app:3000
+}

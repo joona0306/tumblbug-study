@@ -1,0 +1,2 @@
+# 리눅스 서버에서 실행하는 스크립트는 줄바꿈을 LF 로 (Windows 의 CRLF 면 bash 가 "$'\r': command not found" 로 멈춘다)
+*.sh text eol=lf
