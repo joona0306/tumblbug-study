@@ -33,11 +33,11 @@ export async function AppHeader() {
                 <LayoutDashboard size={18} aria-hidden="true" />
                 <span className={styles.label}>스튜디오</span>
               </Link>
-              {/* 이름을 누르면 내 후원 내역으로 (11주차) */}
-              <Link href="/me/fundings" className={styles.link} title="내 후원 내역">
+              {/* 이름을 누르면 마이페이지로 (14주차 — 내 후원·내 찜·화면 테마) */}
+              <Link href="/me" className={styles.link} title="마이페이지">
                 <User size={18} aria-hidden="true" />
                 <span className={styles.label}>{user.name}</span>
-                <span className="sr-only"> — 내 후원 내역</span>
+                <span className="sr-only"> — 마이페이지</span>
               </Link>
               <form action={signOut}>
                 <button type="submit" className={styles.link}>

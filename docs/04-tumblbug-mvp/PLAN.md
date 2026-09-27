@@ -69,7 +69,7 @@
 4. 후원하기 `/projects/[id]/fund` — ① 리워드 ② 배송지 ③ 확인·결제 → 결제 성공/실패
 5. 프로젝트 만들기·수정 `/projects/new`, `/projects/[id]/edit` (기본 정보 + 리워드)
 6. 창작자 대시보드 `/studio` (모금 현황, 후원자·배송지 목록)
-7. 내 후원 내역 `/me/fundings`, 내 찜 `/me/likes`
+7. 마이페이지 `/me` (내 정보, 화면 테마: 시스템·라이트·다크), 내 후원 내역 `/me/fundings`, 내 찜 `/me/likes`
 8. 관리자 `/admin` (프로젝트 숨기기, 결제 실패 목록)
 9. 회원가입 / 로그인
 
@@ -105,6 +105,7 @@ payment_event: id, event_id(토스가 준 고유값, UNIQUE = 같은 웹훅 두 
 | 클라이언트 상태 (브라우저에만 있는 값) | **Zustand** | 후원 단계 간 선택 유지 (`persist`로 새로고침해도 유지, 결제 완료 시 비움) |
 | 서버 상태를 브라우저에서 다룰 때 | **TanStack Query** | ① 목록 무한 스크롤(`useInfiniteQuery` + 커서 API) ② 찜하기(`useMutation` 낙관적 업데이트 + 실패 시 되돌리기, 카드·상세·헤더가 같은 캐시 공유) ③ 창작자 대시보드 새 후원 자동 확인(`refetchInterval`) |
 | 앱 전체 공유 값 | React Context | 토스트 알림 |
+| 사용자 설정 (기기별) | 쿠키 → 서버가 읽어 `<html data-theme>` | 화면 테마 (첫 화면부터 맞는 색 — localStorage 는 깜빡임이 생김) |
 - 핵심 구분: **서버 컴포넌트가 처음 그리는 데이터**(서버 상태, 새로고침 시 다시 읽음) / **브라우저가 이어서 가져오고 바꾸는 서버 데이터**(TanStack Query) / **서버에 없는 값**(Zustand)
 
 ## 결정 사항
