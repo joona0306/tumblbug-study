@@ -57,8 +57,12 @@ curl -X POST https://운영주소/api/webhooks/toss -H "Content-Type: applicatio
    - **Send Test Notification** 을 눌러 테스트 메일이 오는지 본다
 6. 이름: `모아 운영 — 새 에러` → **Create Alert**
 
-**확인**: 운영 주소의 `/debug/sentry?throw=render` 를 열어 에러 화면이 나오게 한다 → 몇 분 안에 메일이 오는지 본다.
-(이 주소는 5·13주차에 만든 확인용 화면이다. 확인 뒤 Sentry 에서 그 이슈를 **Resolve** 한다)
+**확인** (알림은 "새 에러" 와 "고친 에러의 재발" 에만 울린다 — 이미 있는 에러가 또 나는 것으로는 안 울린다):
+1. Sentry **Issues** 에서 `Sentry` 로 검색 → 5·13주차에 확인하면서 생긴 테스트 이슈가 있으면 모두 골라 **Resolve**
+   - 이걸 안 하면 테스트 에러가 "이미 있는 이슈에 1건 더" 로 붙기만 해서 알림이 **울리지 않는다** (15주차에 실제로 겪음)
+2. 운영 주소의 `/debug/sentry?throw=render` 를 열어 에러 화면이 나오게 한다 (5·13주차에 만든 확인용 화면)
+3. Issues 에서 그 이슈가 **Regressed** (처음이면 **New**) 로 바뀌었는지 → 알림 화면(**Monitors → Alerts → 내 알림**)의 **History** 에 1줄 생겼는지 → 메일이 왔는지
+4. 확인이 끝나면 그 이슈를 다시 **Resolve**
 
 **실제 사례 (15주차)**: 알림을 켜자마자 `Error: Connection terminated unexpectedly` (Fatal) 메일이 왔다.
 Neon 이 한동안 쉬던 DB 연결을 끊었는데, 앱에 "연결이 끊겼을 때" 를 받는 코드가 없어서 서버 프로세스가 통째로 멈춘 것이다.
