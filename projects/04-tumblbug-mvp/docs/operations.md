@@ -131,12 +131,14 @@ Neon 은 DB 의 과거 상태를 일정 기간 기억한다 (**보관 기간은 
 그 기간 안의 **아무 시점으로 새 브랜치를 만들 수 있다** — 운영 DB 는 건드리지 않고 과거 모습을 따로 꺼내 보는 것이다.
 
 연습 (운영 `moa-prod` 에서, 운영 데이터는 바뀌지 않는다):
-1. 지금 시각을 적어 둔다 → SQL Editor 에서 `select count(*) from project;` 결과를 적어 둔다
+1. SQL Editor 에서 `select count(*) from project;` 결과를 적어 둔다
+   - 실행한 시각은 SQL Editor 왼쪽 **History** 에 남는다 → 그 시각을 적는다 (2를 하기 **전**의 시각이면 된다)
 2. 운영 사이트에서 테스트 프로젝트를 하나 만든다 (복구로 "사라지게" 할 대상)
 3. Neon → **Branches → New Branch** (화면에 따라 Create branch)
    - 이름 `restore-drill` · 부모(Parent) = 운영 데이터가 있는 기본 브랜치 (`main` 또는 `production`)
-   - 데이터 범위: **Past point in time**(과거 시점, 화면에 따라 Specific date & time)을 고르고 **1에서 적은 시각**을 넣는다
-     (**Current point in time** 은 "지금" 복사라 연습이 안 되고, **Schema only** 는 표 모양만 복사하고 데이터는 없다)
+   - 데이터 범위: **Branch data and schema from a past point in time** (과거 시점의 데이터·표) 을 고르고 **1에서 적은 시각**을 넣는다
+     (**Branch data and schema** 는 "지금" 복사라 연습이 안 된다. Beta 표시가 붙은 선택지는 고르지 않는다)
+   - 시각 입력칸의 시간대(한국 시간 / UTC)를 확인한다 — History 의 시각과 기준이 다르면 9시간 차이가 난다
    - 시각은 보관 기간 안이어야 한다 — 너무 옛날이면 고를 수 없다
 4. `restore-drill` 브랜치의 SQL Editor 에서 `select count(*) from project;` → **1의 숫자와 같으면 복구 성공** (2에서 만든 프로젝트가 없다)
 5. 끝나면 `restore-drill` 브랜치를 **삭제**한다 (남겨 두면 무료 사용량을 차지한다)
