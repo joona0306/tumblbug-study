@@ -1,0 +1,56 @@
+# 내 컴퓨터에서 "앱 + DB"를 한 번에 띄워 보기 (16주차)
+#   docker compose up --build     → http://localhost:3000   (끄기: Ctrl+C → docker compose down)
+#
+# 컨테이너 3개가 순서대로 뜬다:  db(PostgreSQL) → migrate(표 만들기 + 예시 데이터) → app(모아)
+#
+# 여기 적힌 값은 모두 "이 컴퓨터의 컨테이너 안에서만" 쓰는 연습용이다 (CI 의 테스트용 값과 같다)
+# 진짜 비밀값(Neon 주소, 운영 로그인 비밀키, 토스 키)은 여기에 적지 않는다 → 결제 버튼·Sentry·사진 올리기는 꺼진 채로 동작한다
+
+x-app-env: &app-env
+  # "db" = 아래 db 컨테이너의 이름. compose 는 컨테이너끼리 이름으로 서로를 찾게 해 준다
+  DATABASE_URL: postgresql://moa:moa-local-only@db:5432/moa_dev
+  BETTER_AUTH_SECRET: local-docker-only-secret-not-used-anywhere-else
+  BETTER_AUTH_URL: http://localhost:3000
+
+services:
+  db:
+    image: postgres:18-alpine # CI 와 같은 PostgreSQL 18
+    environment:
+      POSTGRES_USER: moa
+      POSTGRES_PASSWORD: moa-local-only
+      POSTGRES_DB: moa_dev # 이름이 _dev 로 끝나야 예시 데이터 넣기(db:seed)가 실행된다 (운영 DB 보호 장치)
+    volumes:
+      # DB 파일을 컨테이너 밖(볼륨)에 둔다 → 컨테이너를 지웠다 다시 만들어도 데이터가 남는다
+      # 완전히 지우려면: docker compose down -v
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moa -d moa_dev"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      target: migrator # Dockerfile 의 ② 단계
+    environment: *app-env
+    command: sh -c "npm run db:migrate && npm run db:seed"
+    depends_on:
+      db:
+        condition: service_healthy # DB 가 요청을 받을 준비가 된 뒤에
+
+  app:
+    build:
+      context: .
+      target: runner # Dockerfile 의 ④ 단계 (최종 이미지)
+    image: moa-app:local
+    ports:
+      - "3000:3000" # 내 컴퓨터의 3000번 → 컨테이너의 3000번
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully # 표 만들기가 "성공으로 끝난" 뒤에
+    restart: unless-stopped # 앱이 죽으면 Docker 가 다시 켠다 (내가 직접 끈 경우만 빼고)
+
+volumes:
+  db-data:

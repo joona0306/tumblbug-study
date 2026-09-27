@@ -1,0 +1,20 @@
+# 이미지를 만들 때 "보내지 않을" 파일 목록 (16주차) — .gitignore 와 비슷하다
+# ① 비밀값: 이미지에 들어가면 이미지를 받은 누구나 꺼내 볼 수 있다
+.env*
+!.env.example
+*.pem
+.vercel
+
+# ② 이미지 안에서 새로 만드는 것: 내 컴퓨터(Windows)용으로 설치·빌드된 것은 리눅스 이미지에서 쓰면 안 된다
+node_modules
+.next
+*.tsbuildinfo
+
+# ③ 실행에 필요 없는 것 (이미지가 작을수록 올리고 내려받기 빠르다)
+.git
+coverage
+playwright-report
+test-results
+Dockerfile
+compose.yaml
+.dockerignore
