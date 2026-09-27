@@ -93,9 +93,11 @@
   color-scheme: light dark;
 }
 
-/* ---------- 의미 색 (Color / Dark) — 원시 색만 바꿔 끼운다 ---------- */
+/* ---------- 의미 색 (Color / Dark) — 원시 색만 바꿔 끼운다 ----------
+   테마 고르기 (14주차): 마이페이지에서 고른 값이 <html data-theme="light|dark"> 로 붙는다 (없으면 "시스템 설정 따라가기")
+   ① 시스템이 다크이고, 사용자가 "라이트"를 고르지 않았을 때 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-bg: var(--dark-bg);
     --color-surface: var(--dark-surface);
     --color-surface-muted: var(--dark-surface-2);
@@ -117,6 +119,38 @@
     --color-on-accent: var(--navy-900);
     --color-focus: var(--blue-300);
   }
+}
+
+/* ② 사용자가 "다크"를 골랐을 때 — 시스템 설정과 상관없이. ①과 똑같은 값 (tests/tokens.test.ts 가 같은지 확인한다) */
+:root[data-theme="dark"] {
+  --color-bg: var(--dark-bg);
+  --color-surface: var(--dark-surface);
+  --color-surface-muted: var(--dark-surface-2);
+  --color-text: var(--dark-text);
+  --color-text-muted: var(--dark-muted);
+  --color-subtle-text: var(--dark-subtle-text);
+  --color-border: var(--dark-border);
+  --color-primary: var(--red-300);
+  --color-primary-hover: var(--red-200);
+  --color-on-primary: var(--red-ink);
+  --color-primary-subtle: var(--red-950);
+  --color-primary-strong: var(--red-200);
+  --color-success: var(--green-300);
+  --color-success-subtle: var(--green-950);
+  --color-danger: var(--danger-300);
+  --color-warning: var(--amber-300);
+  --color-warning-subtle: var(--amber-950);
+  --color-accent: var(--navy-100);
+  --color-on-accent: var(--navy-900);
+  --color-focus: var(--blue-300);
+}
+
+/* 입력칸·스크롤바 같은 브라우저 기본 부품의 색도 고른 테마를 따르게 */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 /* ---------- 글자 스타일 (Text styles) — Figma 이름을 클래스로 ---------- */

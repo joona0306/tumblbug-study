@@ -46,3 +46,13 @@ describe("Figma 간격·모서리 토큰 = CSS 변수", () => {
     });
   }
 });
+
+describe("다크 색은 두 곳에 똑같이 (14주차 테마 고르기)", () => {
+  it("시스템 다크(@media) 블록 = 사용자가 고른 다크([data-theme=dark]) 블록", () => {
+    const media = css.slice(darkStart, css.indexOf(':root[data-theme="dark"]'));
+    const explicitStart = css.indexOf(':root[data-theme="dark"] {');
+    const explicit = css.slice(explicitStart, css.indexOf("}", explicitStart));
+    expect(readVariables(explicit)).toEqual(readVariables(media));
+    expect(Object.keys(readVariables(explicit)).length).toBeGreaterThan(10);
+  });
+});
