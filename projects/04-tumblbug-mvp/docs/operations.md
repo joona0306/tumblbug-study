@@ -133,7 +133,11 @@ Neon 은 DB 의 과거 상태를 일정 기간 기억한다 (**보관 기간은 
 연습 (운영 `moa-prod` 에서, 운영 데이터는 바뀌지 않는다):
 1. 지금 시각을 적어 둔다 → SQL Editor 에서 `select count(*) from project;` 결과를 적어 둔다
 2. 운영 사이트에서 테스트 프로젝트를 하나 만든다 (복구로 "사라지게" 할 대상)
-3. Neon → **Branches → Create branch** → 부모 `main`, **시점 = 1에서 적은 시각** (Point in time) → 이름 `restore-drill`
+3. Neon → **Branches → New Branch** (화면에 따라 Create branch)
+   - 이름 `restore-drill` · 부모(Parent) = 운영 데이터가 있는 기본 브랜치 (`main` 또는 `production`)
+   - 데이터 범위: **Past point in time**(과거 시점, 화면에 따라 Specific date & time)을 고르고 **1에서 적은 시각**을 넣는다
+     (**Current point in time** 은 "지금" 복사라 연습이 안 되고, **Schema only** 는 표 모양만 복사하고 데이터는 없다)
+   - 시각은 보관 기간 안이어야 한다 — 너무 옛날이면 고를 수 없다
 4. `restore-drill` 브랜치의 SQL Editor 에서 `select count(*) from project;` → **1의 숫자와 같으면 복구 성공** (2에서 만든 프로젝트가 없다)
 5. 끝나면 `restore-drill` 브랜치를 **삭제**한다 (남겨 두면 무료 사용량을 차지한다)
 
