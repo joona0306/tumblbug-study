@@ -31,14 +31,28 @@
 
 5주차에 연결한 Sentry 는 에러를 **모아 두기만** 한다. 알림을 켜야 내가 안다.
 
-1. Sentry → **Alerts → Create Alert** → **Issues** 선택
-2. 조건: **"A new issue is created"** (처음 보는 에러가 생겼을 때) + 환경(Environment) = `production`
+> 프로젝트를 만들 때 Sentry 가 **"Send a notification for high priority issues"** 알림을 이미 하나 만들어 둔다 (중요해 보이는 에러만 메일).
+> 아래는 "처음 보는 에러는 전부" 받는 알림을 하나 더 만드는 것이다. Sentry 화면은 자주 바뀐다 — 메뉴 이름이 다르면 비슷한 이름을 찾는다 (2026년 9월 화면 기준)
+
+1. 왼쪽 메뉴 **Monitors → Alerts** → 오른쪽 위 **+ Create Alert**
+   (예전 화면의 "Issues / Metrics / Uptime 중 고르기" 단계는 없어졌다. 바로 설정 화면이 나온다)
+2. **Source** (어떤 에러를 볼까): **Alert on all issues in selected projects** → 프로젝트 `tumblbug-study`
+   - 바로 아래 **Filter Issues** → 환경(Environment) = `production`
    - 미리보기(`preview`) 에러까지 받으면 메일이 너무 많아진다 → 운영만
-3. 동작: **Send a notification to** → 나(이메일)
-4. 이름: `모아 운영 — 새 에러` → 저장
+3. **WHEN** (언제): **A new issue is created** (처음 보는 에러가 생겼을 때)
+   - 하나 더 추가 권장: **A resolved issue regresses** (고쳤다고 Resolve 한 에러가 다시 생겼을 때)
+4. **IF** (추가 조건): 비워 두거나 **Any event** 그대로
+5. **THEN** (무엇을): **Notify** → 이메일 → 나(Member) 선택
+   - **Send Test Notification** 을 눌러 테스트 메일이 오는지 본다
+6. 이름: `모아 운영 — 새 에러` → **Create Alert**
 
 **확인**: 운영 주소의 `/debug/sentry?throw=render` 를 열어 에러 화면이 나오게 한다 → 몇 분 안에 메일이 오는지 본다.
 (이 주소는 5·13주차에 만든 확인용 화면이다. 확인 뒤 Sentry 에서 그 이슈를 **Resolve** 한다)
+
+**실제 사례 (15주차)**: 알림을 켜자마자 `Error: Connection terminated unexpectedly` (Fatal) 메일이 왔다.
+Neon 이 한동안 쉬던 DB 연결을 끊었는데, 앱에 "연결이 끊겼을 때" 를 받는 코드가 없어서 서버 프로세스가 통째로 멈춘 것이다.
+→ `db/pool.ts` 에서 끊김을 기록만 하고 다음 요청은 새 연결로 처리하게 고쳤다 (재현 테스트 `tests/db/pool.test.ts`).
+배포 뒤 Sentry 에서 그 이슈를 **Resolve** 해 두면, 다시 생길 때 3번의 "regresses" 알림이 온다.
 
 ## 2. 가동 감시 — 사이트가 안 열리면 메일
 
