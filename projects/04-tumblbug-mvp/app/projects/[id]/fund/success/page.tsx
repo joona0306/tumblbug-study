@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { ClearDraft } from "@/components/fund/ClearDraft";
 import { FundResult } from "@/components/fund/FundResult";
 import { db } from "@/db";
 import { formatWon } from "@/lib/format";
 import { confirmFunding } from "@/lib/funding/confirm";
+import { recordFunnelStep, VISITOR_COOKIE } from "@/lib/funnel";
 import { tossClient } from "@/lib/payments/toss";
 import { requireUser } from "@/lib/session";
 
@@ -29,6 +31,10 @@ export default async function FundSuccessPage({ params, searchParams }: Props) {
   }
 
   const result = await confirmFunding(db, tossClient, { paymentKey, orderId, amount: Number(amount), supporterId: me.id });
+
+  // 퍼널: 결제 완료 (15주차) — 서버가 승인을 확인한 뒤에만 기록한다 (새로고침해도 한 번)
+  const visitorId = (await cookies()).get(VISITOR_COOKIE)?.value;
+  if (result.status === "paid" && visitorId) await recordFunnelStep(db, visitorId, Number(id), "paid");
 
   switch (result.status) {
     case "paid":

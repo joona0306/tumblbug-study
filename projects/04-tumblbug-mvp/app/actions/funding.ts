@@ -1,9 +1,11 @@
 "use server";
 
 import { and, eq, isNull } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { db } from "@/db";
 import { funding, project } from "@/db/schema";
 import { quoteFunding } from "@/lib/funding/quote";
+import { recordFunnelStep, VISITOR_COOKIE } from "@/lib/funnel";
 import { getCurrentUser } from "@/lib/session";
 import { fundingDraftSchema } from "@/lib/validation/funding";
 
@@ -41,6 +43,10 @@ export async function startFunding(input: unknown): Promise<StartResult> {
   });
 
   const [p] = await db.select({ title: project.title }).from(project).where(eq(project.id, draft.projectId));
+  // 퍼널: 결제 요청 (15주차) — 서버가 기록한다. 방문자 쿠키가 없으면(상세를 거치지 않고 바로 온 경우) 건너뛴다
+  const visitorId = (await cookies()).get(VISITOR_COOKIE)?.value;
+  if (visitorId) await recordFunnelStep(db, visitorId, draft.projectId, "payment_request");
+
   return { ok: true, orderId, orderName: `${p.title} 후원`.slice(0, 100), amount: quote.amount, customerName: me.name };
 }
 

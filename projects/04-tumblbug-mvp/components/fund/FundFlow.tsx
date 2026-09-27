@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore } from "react";
 import { allowedStep, type RewardForRules, type Step } from "@/lib/funding/rules";
 import { useFundingStore } from "@/lib/funding/store";
+import { TrackFunnel } from "@/components/funnel/TrackFunnel";
 import { ConfirmStep } from "./ConfirmStep";
 import { RewardStep } from "./RewardStep";
 import { ShippingStep } from "./ShippingStep";
@@ -44,6 +45,9 @@ export function FundFlow({ project, rewards, step, tossClientKey }: { project: F
   return (
     <div className={styles.flow}>
       <Steps current={allowed} />
+      {/* 퍼널: 리워드 단계·배송지 단계에 도착 (15주차) */}
+      {allowed === 1 && <TrackFunnel projectId={project.id} step="reward" />}
+      {allowed === 2 && <TrackFunnel projectId={project.id} step="shipping" />}
       {allowed === 1 && <RewardStep rewards={rewards} onNext={() => go(allowedStep(2, useFundingStore.getState(), rewards))} />}
       {allowed === 2 && <ShippingStep onPrev={() => go(1)} onNext={() => go(3)} />}
       {allowed === 3 && <ConfirmStep project={project} rewards={rewards} onEdit={go} tossClientKey={tossClientKey} />}
