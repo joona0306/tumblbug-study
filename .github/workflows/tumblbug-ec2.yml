@@ -1,0 +1,165 @@
+# 교재 저장소 전용 사본: 독자가 쓰는 파일은 projects/04-tumblbug-mvp/.github/workflows/ec2.yml 이다.
+# 다른 점 ① 기다리는 워크플로 이름이 "tumblbug CI/CD" ② 명령·빌드는 4단계 폴더에서
+#
+# EC2 배포 파이프라인 (16주차) — 같은 앱을 Docker 이미지로 만들어 내 서버(EC2)에 올린다
+#
+#   main 의 CI/CD 가 성공하면:  이미지 빌드 → GHCR 에 올림 → EC2 DB 마이그레이션 → SSH 로 서버에서 바꿔 끼우기
+#                               → healthy 가 안 되면 서버가 이전 이미지로 되돌림 → HTTPS 주소에 연기 테스트
+#   손으로 실행(Run workflow):  image_tag 를 비우면 지금 main 으로 새로 배포 / 옛 커밋 SHA 를 넣으면 그 이미지로 배포 (롤백 연습)
+#
+# 스위치: 저장소 변수 EC2_ENABLED 가 "true" 일 때만 돈다 — 실습이 끝나 서버를 지우면 false 로 (docs/aws.md 4번)
+# 필요한 설정 (docs/aws.md 에 만드는 방법):
+#   Environment "ec2": Secret EC2_SSH_KEY(서버 접속 열쇠 .pem 내용), EC2_BETTER_AUTH_SECRET / Variable EC2_HOST(탄력적 IP)
+#   (이미 있는 것) Secret NEON_API_KEY, Variable NEON_PROJECT_ID — EC2 용 DB 브랜치를 만든다
+name: tumblbug EC2
+
+on:
+  workflow_run:
+    workflows: ["tumblbug CI/CD"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "배포할 이미지 태그(커밋 SHA 전체). 비우면 지금 main 으로 새로 빌드"
+        required: false
+        default: ""
+
+defaults:
+  run:
+    working-directory: projects/04-tumblbug-mvp
+
+# 배포는 한 번에 하나씩, 중간에 끊지 않는다
+concurrency:
+  group: tumblbug-ec2
+  cancel-in-progress: false
+
+env:
+  # GHCR(GitHub Container Registry) = GitHub 이 주는 이미지 보관소. 이름은 소문자만 된다
+  IMAGE: ghcr.io/${{ github.repository_owner }}/moa-app
+  # 배포할 커밋: CI/CD 가 끝난 그 커밋 (손으로 실행하면 지금 main)
+  COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+jobs:
+  build:
+    # CI/CD 가 실패했으면 배포하지 않는다. image_tag 를 줬으면 빌드를 건너뛴다 (이미 올린 이미지를 쓴다)
+    if: >-
+      vars.EC2_ENABLED == 'true' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+       (github.event_name == 'workflow_dispatch' && inputs.image_tag == ''))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write # GHCR 에 이미지를 올리기 위해
+    steps:
+      - uses: actions/checkout@v7
+        with: { ref: "${{ env.COMMIT }}" }
+      - uses: docker/setup-buildx-action@v4
+      # GITHUB_TOKEN = 이 작업 동안만 쓰는 임시 열쇠 → 따로 토큰을 만들지 않아도 GHCR 에 올릴 수 있다
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 이미지 빌드·올리기
+        uses: docker/build-push-action@v7
+        with:
+          context: projects/04-tumblbug-mvp
+          target: runner # Dockerfile 의 ④ 실행 단계
+          push: true
+          # 태그 = 커밋 SHA → "어느 커밋의 이미지인가"가 이름에 남는다 (롤백할 때 이 이름을 쓴다)
+          tags: ${{ env.IMAGE }}:${{ env.COMMIT }}
+          # 이미지를 이 저장소와 연결 → 서버가 배포 작업의 GITHUB_TOKEN 으로 내려받을 수 있다 (비공개 이미지)
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          # 이전 빌드의 단계별 결과를 재사용 (패키지가 그대로면 npm ci 를 건너뛴다)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    # 빌드가 성공했거나, 빌드를 건너뛰고 image_tag 로 배포할 때
+    if: >-
+      always() && vars.EC2_ENABLED == 'true' &&
+      (needs.build.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.image_tag != ''))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ec2
+    permissions:
+      contents: read
+      packages: read # 서버가 GHCR 에서 이미지를 내려받을 때 이 작업의 GITHUB_TOKEN 을 잠깐 빌려준다
+    env:
+      TAG: ${{ inputs.image_tag || github.event.workflow_run.head_sha || github.sha }}
+      HOST: ${{ vars.EC2_HOST }}
+    steps:
+      - uses: actions/checkout@v7
+        with: { ref: "${{ env.COMMIT }}" }
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm, cache-dependency-path: projects/04-tumblbug-mvp/package-lock.json }
+      - run: npm ci
+
+      # EC2 용 DB: 개발 DB(tumblbug_dev)를 복사한 Neon 브랜치 "ec2" (있으면 그대로 쓴다)
+      # → 1GB 서버에 DB 까지 올리지 않고, 운영 DB 와도 분리된다
+      - name: EC2 DB 브랜치 (없으면 만들기)
+        id: db
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+          branch_name: ec2
+          database: tumblbug_dev
+          role: neondb_owner
+          ssl: verify-full
+
+      - name: EC2 DB 마이그레이션
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: ${{ steps.db.outputs.db_url }}
+
+      # 서버 주소: 탄력적 IP 의 . 을 - 로 바꾼 sslip.io 이름 (3.34.218.244 → 3-34-218-244.sslip.io)
+      - name: SSH 준비
+        run: |
+          echo "SITE=$(echo "$HOST" | tr . -).sslip.io" >> "$GITHUB_ENV"
+          install -m 700 -d ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/ec2.pem && chmod 600 ~/.ssh/ec2.pem
+          # 서버의 "지문"을 미리 적어 둔다 (처음 접속할 때 묻는 yes/no 를 건너뛰기 위해)
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: 설정 파일 올리기
+        run: |
+          scp -i ~/.ssh/ec2.pem deploy/compose.prod.yaml deploy/Caddyfile deploy/deploy.sh "ubuntu@$HOST:moa/"
+          # .env: 비밀값은 git 이 아니라 GitHub Secrets 에서 → 서버에 바로 쓴다 (umask 077 = 나만 읽을 수 있는 파일)
+          printf '%s\n' \
+            "DATABASE_URL=$DATABASE_URL" \
+            "BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET" \
+            "BETTER_AUTH_URL=https://$SITE" \
+            "SITE_ADDRESS=$SITE" \
+            | ssh -i ~/.ssh/ec2.pem "ubuntu@$HOST" 'umask 077 && cat > moa/.env'
+        env:
+          DATABASE_URL: ${{ steps.db.outputs.db_url_pooled }}
+          BETTER_AUTH_SECRET: ${{ secrets.EC2_BETTER_AUTH_SECRET }}
+
+      # 서버가 GHCR 에 로그인(이 작업의 임시 열쇠) → 새 이미지로 바꿔 끼우기 → 로그아웃
+      # deploy.sh 가 healthy 를 기다리고, 실패하면 이전 이미지로 되돌린 뒤 실패로 끝난다
+      - name: 서버에서 배포
+        run: |
+          echo "$GH_TOKEN" | ssh -i ~/.ssh/ec2.pem "ubuntu@$HOST" \
+            "docker login ghcr.io -u '$GITHUB_ACTOR' --password-stdin >/dev/null && \
+             bash moa/deploy.sh '$IMAGE:$TAG'; code=\$?; docker logout ghcr.io >/dev/null; exit \$code"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 바깥(HTTPS 주소)에서 한 번 더: 방금 올린 커밋이 돌고 있고, 화면·API 가 규칙대로인지 (Vercel 과 같은 연기 테스트)
+      - name: 연기 테스트
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test e2e/smoke.spec.ts --project=desktop
+        env:
+          E2E_BASE_URL: https://${{ env.SITE }}
+          EXPECTED_COMMIT: ${{ env.TAG }}
+
+      - name: 배포 주소
+        run: echo "### ✅ EC2 배포 — https://$SITE (이미지 $IMAGE:${TAG:0:7})" >> "$GITHUB_STEP_SUMMARY"
