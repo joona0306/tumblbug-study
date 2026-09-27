@@ -2,6 +2,9 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // 실행에 필요한 파일만 .next/standalone 폴더에 모은다 → Docker 이미지가 작아진다 (16주차, Dockerfile)
+  // Vercel 은 이 설정과 상관없이 자기 방식으로 배포한다
+  output: "standalone",
   experimental: {
     serverActions: {
       // 서버 액션으로 보낼 수 있는 요청 크기 (기본 1MB). 사진은 브라우저에서 줄여 보내지만 여유를 두고 2MB
