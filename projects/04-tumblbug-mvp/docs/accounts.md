@@ -29,6 +29,7 @@
 | `band_3am@seed.moa.test` | 밴드 새벽세시 | 창작자 | |
 | `green_hand@seed.moa.test` | 초록손 | 창작자 | |
 
+- 가상 사례(`npm run ops:simulate`, 17~20주차 예시)가 만드는 `…@sim.moa.test` 계정은 비밀번호가 없다 — 로그인용이 아니다
 - 흐름 테스트(Playwright)가 잠깐 만드는 `…@e2e.moa.test`, 부하 테스트가 만드는 `…@loadtest.moa.test` 계정은 테스트가 끝나면 지워진다 — 로그인용이 아니다
 
 ## 운영 계정 (운영 사이트에서 직접 가입한 것)

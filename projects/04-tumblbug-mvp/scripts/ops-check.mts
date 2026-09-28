@@ -1,4 +1,5 @@
 // 운영 점검 한 번에 보기 (15주차):  npm run ops:check
+//  - 프로젝트 하나의 퍼널만:  npm run ops:check -- --project=12   (18주차 — 내 프로젝트만 보고 싶을 때)
 //  - 기본은 .env.local 의 DB (개발 DB)
 //  - 운영 DB 를 볼 때:  DATABASE_URL="운영 주소" npm run ops:check   (이미 있는 환경 변수는 .env.local 이 덮어쓰지 않는다)
 // 퍼널·결제 실패 이유를 보여 주고, 점검 4가지 중 하나라도 문제가 있으면 종료 코드 1 (나중에 CI·예약 작업에서 쓸 수 있게)
@@ -22,11 +23,18 @@ const pool = new Pool({ connectionString: url, max: 2 });
 const db = drizzle({ client: pool, schema });
 const dbName = new URL(url).pathname.slice(1);
 const DAYS = 30;
+// --project=12 → 퍼널을 그 프로젝트만으로 (나머지 점검은 DB 전체 그대로)
+const projectArg = process.argv.find((a) => a.startsWith("--project="));
+const projectId = projectArg ? Number(projectArg.split("=")[1]) : undefined;
+if (projectId !== undefined && !(Number.isInteger(projectId) && projectId > 0)) {
+  console.error("--project= 뒤에는 프로젝트 번호(양의 정수)를 넣어 주세요");
+  process.exit(1);
+}
 
 console.log(`\n📊 운영 점검 — DB: ${dbName} · 최근 ${DAYS}일\n`);
 
-console.log("■ 퍼널 (방문자·프로젝트 기준)");
-const funnel = await getFunnel(db, { days: DAYS });
+console.log(`■ 퍼널 (방문자·프로젝트 기준${projectId ? ` · 프로젝트 ${projectId}만` : ""})`);
+const funnel = await getFunnel(db, { days: DAYS, projectId });
 for (const row of funnel) {
   const rates = row.fromPrevious === null ? "" : `   (앞 단계의 ${row.fromPrevious ?? "-"}% · 상세의 ${row.fromView ?? "-"}%)`;
   console.log(`  ${String(row.count).padStart(5)}  ${row.label}${rates}`);
