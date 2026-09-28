@@ -4,7 +4,9 @@ import type { Metadata } from "next";
 import "@fontsource-variable/noto-sans-kr";
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { cookies } from "next/headers";
+import { AppFooter } from "@/components/layout/AppFooter";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { StudyNotice } from "@/components/layout/StudyNotice";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { db } from "@/db";
@@ -36,8 +38,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <QueryProvider>
           <HydrationBoundary state={dehydrate(queryClient)}>
             <ToastProvider>
+              <StudyNotice />
               <AppHeader />
               {children}
+              <AppFooter />
             </ToastProvider>
           </HydrationBoundary>
         </QueryProvider>
