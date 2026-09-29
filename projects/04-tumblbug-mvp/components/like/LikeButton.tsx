@@ -44,7 +44,8 @@ export function LikeButton({
       type="button"
       className={`${styles.button} ${styles[variant]}`}
       aria-pressed={liked}
-      aria-label={`${title} 찜하기`}
+      // 보이는 숫자(찜 개수)도 이름에 넣는다 — 음성으로 누르는 사람이 "14"라고 말해도 찾게 (20주차 Lighthouse: label-content-name-mismatch)
+      aria-label={shownCount === undefined ? `${title} 찜하기` : `${title} 찜하기, 찜 ${shownCount}개`}
       onClick={onClick}
     >
       <Heart size={variant === "overlay" ? 20 : 22} className={liked ? styles.filled : undefined} aria-hidden="true" />

@@ -59,6 +59,8 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
         </nav>
       </div>
 
+      {/* 카드 제목(h3) 앞에 h2 를 둔다 — 제목 단계를 건너뛰지 않게 (20주차 Lighthouse: heading-order). 화면에는 안 보인다 */}
+      <h2 className="sr-only">프로젝트 목록</h2>
       <InfiniteProjectGrid key={JSON.stringify(params)} params={params} initialPage={firstPage} nowIso={new Date().toISOString()} />
     </main>
   );
