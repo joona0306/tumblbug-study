@@ -45,7 +45,7 @@ test("리워드·수량 → 배송지 → 확인까지 가고, 새로고침해�
   await main.getByRole("textbox", { name: "연락처" }).fill("1234");
   await main.getByRole("textbox", { name: "주소" }).fill("서울시 중구 세종대로 1, 101동 101호");
   await main.getByRole("button", { name: "다음: 확인" }).click();
-  await expect(main.getByRole("alert")).toContainText("연락처");
+  await expect(main.getByRole("textbox", { name: "연락처" })).toHaveAccessibleDescription(/010-1234-5678 모양/); // 19주차: 칸마다 이유
   await main.getByRole("textbox", { name: "연락처" }).fill("010-1234-5678");
   await main.getByRole("button", { name: "다음: 확인" }).click();
 
