@@ -30,5 +30,5 @@ npm run ops:check -- --project=번호      # 마지막 줄에 나온 프로젝�
 |---|---|---|
 | 17 | [week17-operate.md](week17-operate.md) | 2주 운영 — 무엇이 쌓였나 (퍼널·결제·알림·설문 응답) |
 | 18 | [week18-prioritize.md](week18-prioritize.md) | 숫자와 사용자의 말로 **가장 먼저 고칠 것** 고르기 |
-| 19 | week19-improve.md (다음) | 개선 PR → CI → CD → 재측정 |
+| 19 | [week19-improve.md](week19-improve.md) | 개선 PR → CI → CD → 재측정 |
 | 20 | week20-case-study.md (다음) | 케이스 스터디 + 운영 종료(데이터 삭제) |
