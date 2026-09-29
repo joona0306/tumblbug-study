@@ -13,7 +13,7 @@ const { drizzle } = await import("drizzle-orm/node-postgres");
 const { Pool } = await import("pg");
 const schema = await import("@/db/schema");
 const { parseDatabaseUrl } = await import("@/lib/env");
-const { getFunnel } = await import("@/lib/funnel");
+const { getFunnel, getShippingPass } = await import("@/lib/funnel");
 const { countFailureReasons } = await import("@/lib/queries/admin");
 const { findPaymentMismatches, findStalePendings, findStockMismatches, findUnfinalizedProjects } = await import("@/lib/ops/checks");
 
@@ -38,6 +38,12 @@ const funnel = await getFunnel(db, { days: DAYS, projectId });
 for (const row of funnel) {
   const rates = row.fromPrevious === null ? "" : `   (앞 단계의 ${row.fromPrevious ?? "-"}% · 상세의 ${row.fromView ?? "-"}%)`;
   console.log(`  ${String(row.count).padStart(5)}  ${row.label}${rates}`);
+}
+// 배송지 통과율 (19주차): 배송 없는 리워드는 배송지를 건너뛰므로 "결제 요청"의 앞 단계 %는 믿을 수 없다 → 사람을 따라가 따로 계산
+const pass = await getShippingPass(db, { days: DAYS, projectId });
+if (pass.arrived > 0) {
+  console.log(`  ↳ 배송지 통과율 ${pass.rate}%  (배송지에 온 ${pass.arrived}명 중 ${pass.passed}명이 결제 요청까지)`);
+  console.log("    ※ '결제 요청'의 앞 단계 %에는 배송지를 건너뛴 사람(배송 없는 리워드)도 섞여 있어요 — 배송지 화면은 위 통과율로 보세요");
 }
 // 단계마다 따로 세므로, 공유 링크로 후원 화면에 바로 온 사람이 있으면 앞 단계보다 많을 수 있다 (100% 초과)
 if (funnel.some((r) => (r.fromPrevious ?? 0) > 100)) console.log("  ※ 100%가 넘는 단계: 앞 단계를 거치지 않고 바로 들어온 방문자가 있어요 (공유 링크 등)");

@@ -17,7 +17,7 @@ const { Pool } = await import("pg");
 const schema = await import("@/db/schema");
 const { funding, funnelEvent, project, reward, user } = schema;
 const { parseDatabaseUrl } = await import("@/lib/env");
-const { getFunnel } = await import("@/lib/funnel");
+const { getFunnel, getShippingPass } = await import("@/lib/funnel");
 
 const url = parseDatabaseUrl(process.env);
 const dbName = new URL(url).pathname.slice(1);
@@ -148,5 +148,7 @@ const [total] = await db
 console.log(`[simulate] ✅ 가상 사례 만들기 끝 — DB: ${dbName} · 프로젝트 ${p.id} · 방문자 ${plans.length}명 · 후원 ${fundings}건 · 모인 금액 ${total.amount.toLocaleString()}원`);
 console.log("[simulate] 퍼널 (이 프로젝트만):");
 for (const row of funnel) console.log(`  ${String(row.count).padStart(3)}  ${row.label}${row.fromPrevious === null ? "" : `  (앞 단계의 ${row.fromPrevious ?? "-"}%)`}`);
+const pass = await getShippingPass(db, { days: 30, projectId: p.id });
+console.log(`  ↳ 배송지 통과율 ${pass.rate}% (${pass.passed}/${pass.arrived})`);
 console.log(`[simulate] 다음: npm run ops:check -- --project=${p.id}`);
 await pool.end();

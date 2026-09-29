@@ -51,3 +51,25 @@ export async function getFunnel(db: Db, { days = 30, projectId }: { days?: numbe
     };
   });
 }
+
+// 배송지 통과율 (19주차 개선 — 18주차에 운영자가 직접 속았던 것)
+// 배송이 없는 리워드는 배송지를 건너뛰고 결제 요청으로 간다 → 단계 개수로 나눈 "결제 요청 ÷ 배송지" 는 틀린 비율이다
+// (분자에 배송지를 거치지 않은 사람이 섞인다). 그래서 사람 한 명씩 따라가서
+// "배송지에 온 사람 중 결제 요청까지 간 사람" 만 센다 — sql/week18-funnel-paths.sql 의 ① 과 같은 계산
+export type ShippingPass = { arrived: number; passed: number; rate: number | null };
+
+export async function getShippingPass(db: Db, { days = 30, projectId }: { days?: number; projectId?: number } = {}): Promise<ShippingPass> {
+  const result = await db.execute<{ arrived: number; passed: number }>(sql`
+    with path as (
+      select bool_or(step = 'shipping') as shipping, bool_or(step = 'payment_request') as payment_request
+      from ${funnelEvent}
+      where created_at >= now() - make_interval(days => ${days})
+        ${projectId === undefined ? sql`` : sql`and project_id = ${projectId}`}
+      group by visitor_id, project_id
+    )
+    select count(*) filter (where shipping)::int as arrived,
+           count(*) filter (where shipping and payment_request)::int as passed
+    from path`);
+  const { arrived, passed } = result.rows[0];
+  return { arrived, passed, rate: arrived > 0 ? Math.round((passed / arrived) * 1000) / 10 : null };
+}
