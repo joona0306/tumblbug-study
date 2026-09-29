@@ -18,6 +18,11 @@
   padding-bottom: calc(88px + var(--spacing-xl)); /* 하단 고정 바에 가리지 않게 */
 }
 
+/* 틀린 칸으로 이동(focus)할 때, 칸과 그 아래 이유 문장이 하단 고정 바에 가리지 않게 여유를 두고 스크롤 (19주차) */
+.step input {
+  scroll-margin-bottom: calc(88px + var(--spacing-3xl));
+}
+
 .options {
   display: flex;
   flex-direction: column;

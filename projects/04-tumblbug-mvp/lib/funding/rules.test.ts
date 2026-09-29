@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allowedStep, type Draft, maxQuantity, rewardStepError, totalAmount } from "./rules";
+import { allowedStep, type Draft, maxQuantity, rewardStepError, shippingFieldErrors, shippingStepError, totalAmount } from "./rules";
 
 const rewards = [
   { id: 1, price: 35_000, limitQty: 100, soldQty: 12, needsShipping: true },
@@ -50,5 +50,28 @@ describe("단계 이동 규칙 allowedStep", () => {
 
   it("연락처 모양이 틀리면 2단계에 머문다", () => {
     expect(allowedStep(3, draft({ shipping: { ...filled, recipientPhone: "12345" } }), rewards)).toBe(2);
+  });
+});
+
+describe("배송지 칸마다 이유 (19주차)", () => {
+  it("비었거나 틀린 칸만, 칸마다 다른 이유로", () => {
+    expect(shippingFieldErrors(draft({ shipping: empty }))).toEqual({
+      recipientName: "받는 분 이름을 입력해 주세요",
+      recipientPhone: "연락처를 입력해 주세요",
+      address: "주소를 입력해 주세요",
+    });
+    expect(shippingFieldErrors(draft({ shipping: { ...filled, recipientPhone: "1234" } }))).toEqual({ recipientPhone: "연락처는 010-1234-5678 모양으로 입력해 주세요" });
+    expect(shippingFieldErrors(draft({ shipping: filled }))).toEqual({});
+  });
+
+  it("연락처는 - 없이도, 지역 번호도 된다", () => {
+    for (const phone of ["01012345678", "02-123-4567", "031-1234-5678"]) {
+      expect(shippingFieldErrors(draft({ shipping: { ...filled, recipientPhone: phone } }))).toEqual({});
+    }
+  });
+
+  it("단계 검사·서버 검사는 화면 순서상 첫 번째 이유 하나", () => {
+    expect(shippingStepError(draft({ shipping: { ...filled, recipientPhone: "1234", address: "" } }))).toBe("연락처는 010-1234-5678 모양으로 입력해 주세요");
+    expect(shippingStepError(draft({ shipping: filled }))).toBeNull();
   });
 });

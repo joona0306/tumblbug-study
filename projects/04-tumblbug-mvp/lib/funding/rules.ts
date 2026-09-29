@@ -44,11 +44,25 @@ export function needsShipping(draft: Pick<Draft, "rewardId">, rewards: RewardFor
   return rewards.find((r) => r.id === draft.rewardId)?.needsShipping ?? false;
 }
 
-export function shippingStepError(draft: Draft): string | null {
+// 배송지 칸마다 무엇이 틀렸나 (19주차 개선 — 전에는 "모두 입력해 주세요" 한 줄만 보여 줘서 어느 칸인지 몰랐다)
+// 화면(ShippingStep)은 이 결과를 칸 아래에 하나씩 보여 주고, 서버(quote.ts)는 첫 번째 문장을 쓴다 — 규칙은 여기 한 곳
+export type ShippingField = keyof Draft["shipping"];
+export const SHIPPING_FIELDS: ShippingField[] = ["recipientName", "recipientPhone", "address"]; // 화면 위에서 아래 순서
+export function shippingFieldErrors(draft: Draft): Partial<Record<ShippingField, string>> {
   const { recipientName, recipientPhone, address } = draft.shipping;
-  if (!recipientName.trim() || !recipientPhone.trim() || !address.trim()) return "받는 분·연락처·주소를 모두 입력해 주세요";
-  if (!/^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(recipientPhone.trim())) return "연락처는 010-1234-5678 모양으로 입력해 주세요";
-  return null;
+  const errors: Partial<Record<ShippingField, string>> = {};
+  if (!recipientName.trim()) errors.recipientName = "받는 분 이름을 입력해 주세요";
+  if (!recipientPhone.trim()) errors.recipientPhone = "연락처를 입력해 주세요";
+  else if (!/^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(recipientPhone.trim())) errors.recipientPhone = "연락처는 010-1234-5678 모양으로 입력해 주세요";
+  if (!address.trim()) errors.address = "주소를 입력해 주세요";
+  return errors;
+}
+
+// 배송지 단계를 통과할 수 없는 이유 하나 (없으면 null) — 단계 이동 검사·서버 검사용
+export function shippingStepError(draft: Draft): string | null {
+  const errors = shippingFieldErrors(draft);
+  const first = SHIPPING_FIELDS.find((field) => errors[field]);
+  return first ? errors[first]! : null;
 }
 
 export type Step = 1 | 2 | 3;
