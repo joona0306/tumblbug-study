@@ -87,6 +87,8 @@ Sentry 는 "앱이 돌면서 낸 에러"만 안다. 서버가 아예 멈추거�
 3. **확인**: 감시 화면에서 **Up**(초록)이 뜨는지. (일부러 장애를 내 보려면 16주차 EC2 실습 때 서버를 잠깐 꺼 본다)
 
 > 알림이 오면 → 사이트를 직접 열어 본다 → Vercel **Deployments·Logs**, Neon **Monitoring**, Sentry 순서로 본다 → 끝나면 **장애 회고**를 쓴다 (`docs/04-tumblbug-mvp/templates/08-incident-review.md`)
+>
+> 업체 쪽 장애인지 먼저 본다 — 즐겨찾기해 두기: Vercel 상태 https://www.vercel-status.com · Neon 상태 https://neonstatus.com (같은 시각에 장애 공지가 있으면 우리 코드 문제가 아니다. 18주차 가상 사례의 장애 회고에서 나온 할 일)
 
 ## 3. 매일 아침 운영 점검 — 데이터가 어긋나면 메일
 
