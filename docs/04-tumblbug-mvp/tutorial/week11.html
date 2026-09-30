@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>11주차 결제와 초과 판매 방지 · 모아 교재</title>
+  <meta name="description" content="토스페이먼츠 결제위젯(테스트 모드)으로 결제하고, 조건부 차감·트랜잭션으로 초과 판매를 막고, 웹훅으로 돌아오지 못한 결제를 마무리한다">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week11">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11" aria-current="page">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">11주차 · 5단계 · 구현의 핵심</span>
+    <h1>결제와 초과 판매 방지</h1>
+    <p class="lead">
+      모아에서 가장 조심해야 하는 순간입니다. 돈이 오가고, <strong>한정 수량</strong>이 걸려 있습니다.
+      이번 주에는 2단계(커피 후원)의 결제 흐름에 세 가지를 더합니다:
+      <strong>남은 수량보다 많이 팔지 않기</strong>, <strong>결제 결과를 여러 곳에서 받아도 한 번만 반영하기</strong>(웹훅),
+      그리고 이것을 <strong>테스트로 증명하기</strong>.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 결제 한 건이 지나가는 길</span>
+      <div class="flow">
+        <div class="node"><strong>① 결제하기</strong><small>서버가 총액 계산 → 결제 대기(pending) 후원 저장</small></div>
+        <span class="arrow"></span>
+        <div class="node ext"><strong>② 토스 결제창</strong><small>테스트 모드 — 실제 청구 없음</small></div>
+        <span class="arrow" data-label="성공 주소"></span>
+        <div class="node warn"><strong>③ 승인 전 트랜잭션</strong><small>금액 비교 → 주문 선점 + 재고 조건부 차감</small></div>
+        <span class="arrow"></span>
+        <div class="node ext"><strong>④ 토스 승인</strong><small>트랜잭션 밖에서 (느릴 수 있으니까)</small></div>
+        <span class="arrow"></span>
+        <div class="node"><strong>⑤ 결과 반영</strong><small>완료: 결제 기록 / 실패: 재고 되돌리기</small></div>
+      </div>
+      <p class="flow-note">결제창에서 돌아오지 못하면(브라우저를 닫음 등) → 토스가 보내는 <strong>웹훅</strong>이, 그것도 없으면 13주차 <strong>예약 작업</strong>이 마무리한다.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead>
+        <tbody>
+          <tr><td><strong>조건부 차감</strong></td><td>"남아 있을 때만 줄여라"를 UPDATE 한 문장에 넣는 것. 확인과 차감 사이에 다른 사람이 끼어들 틈이 없다</td></tr>
+          <tr><td><strong>트랜잭션</strong></td><td>여러 DB 변경을 "모두 되거나, 모두 안 되거나"로 묶는 것</td></tr>
+          <tr><td><strong>웹훅</strong></td><td>결제 상태가 바뀌면 토스가 우리 서버 주소로 알려 주는 것</td></tr>
+          <tr><td><strong>멱등성</strong></td><td>같은 요청이 여러 번 와도 결과가 한 번 온 것과 같은 성질</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>결제 시작: 결제 대기 후원 + 결제위젯</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 결제창을 열기 "전에" 후원을 저장하나요?</span>
+          결제가 끝나고 돌아왔을 때 "원래 얼마였지?"를 비교할 기준이 필요합니다. 브라우저가 알려 주는 금액은 조작될 수 있으니,
+          <strong>서버가 계산한 금액</strong>을 결제 대기(pending) 후원으로 먼저 적어 두고, 돌아온 금액과 비교합니다 (2단계 커피 후원과 같은 원리).
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm install @tosspayments/tosspayments-sdk@2.8.1</code></pre>
+        </figure>
+        <p><code>.env.local</code> 에 토스 <strong>테스트</strong> 키 두 개를 넣습니다 (개발자센터 → API 키 → 결제위젯 연동 키). 실수로 라이브 키(<code>live_</code>)를 넣으면 서버가 시작할 때 막습니다 (<code>lib/env.ts</code>).</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">.env.local (값은 여러분의 테스트 키 — 채팅·저장소에 올리지 않기)</span></figcaption>
+          <pre><code>NEXT_PUBLIC_TOSS_CLIENT_KEY=test_gck_...
+TOSS_SECRET_KEY=test_gsk_...</code></pre>
+        </figure>
+        <figure class="code" data-src="app/actions/funding.ts" data-tag="tumblbug-week11-step1">
+          <figcaption><span class="label">app/actions/funding.ts</span></figcaption>
+          <pre><code>"use server";
+
+import { and, eq, isNull } from "drizzle-orm";
+import { db } from "@/db";
+import { funding, project } from "@/db/schema";
+import { quoteFunding } from "@/lib/funding/quote";
+import { getCurrentUser } from "@/lib/session";
+import { fundingDraftSchema } from "@/lib/validation/funding";
+
+export type StartResult =
+  | { ok: true; orderId: string; orderName: string; amount: number; customerName: string }
+  | { ok: false; error: string; step: 1 | 2 | null };
+
+// 확인 화면의 "결제하기" → 결제창을 열기 "직전"에 부른다 (2단계 커피 후원과 같은 흐름).
+// 1) 서버가 후원서를 다시 검사하고 총액을 계산한다 (10주차 quoteFunding)
+// 2) 결제 대기(pending) 후원을 만들어 "서버가 계산한 금액"을 적어 둔다 → 결제가 끝나고 돌아오면 이 금액과 비교한다
+export async function startFunding(input: unknown): Promise&lt;StartResult&gt; {
+  const me = await getCurrentUser();
+  if (!me) return { ok: false, error: "로그인이 필요해요. 다시 로그인해 주세요", step: null };
+
+  const parsed = fundingDraftSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "후원 내용이 올바르지 않아요. 처음부터 다시 골라 주세요", step: 1 };
+  const draft = parsed.data;
+
+  const quote = await quoteFunding(db, me.id, draft);
+  if (!quote.ok) return quote;
+
+  // 주문 번호: 겹칠 일이 사실상 없는 무작위 문자열 (토스 규칙: 6~64자, 영문·숫자·-·_)
+  const orderId = crypto.randomUUID();
+  await db.insert(funding).values({
+    projectId: draft.projectId,
+    supporterId: me.id,
+    rewardId: quote.rewardId,
+    quantity: quote.quantity,
+    extraAmount: draft.extraAmount,
+    amount: quote.amount,
+    message: draft.message,
+    // 배송이 필요한 리워드일 때만 배송지를 저장한다 (필요 없는 개인정보는 받지도 두지도 않는다)
+    ...(quote.needsShipping ? draft.shipping : {}),
+    orderId,
+  });
+
+  const [p] = await db.select({ title: project.title }).from(project).where(eq(project.id, draft.projectId));
+  return { ok: true, orderId, orderName: `${p.title} 후원`.slice(0, 100), amount: quote.amount, customerName: me.name };
+}
+
+// 결제창을 닫았거나(취소) 결제를 시작하지 못했을 때 → 결제 대기였던 "내" 후원을 실패로 기록한다.
+// 아직 승인 단계에 들어가지 않은 것(payment_key 없음)만 바꾼다 — 이미 승인 중·완료인 후원은 건드리지 않는다
+export async function cancelFunding(orderId: string, reason: string) {
+  const me = await getCurrentUser();
+  if (!me) return;
+  await db
+    .update(funding)
+    .set({ status: "failed", failReason: reason.slice(0, 100) })
+    .where(and(eq(funding.orderId, orderId), eq(funding.supporterId, me.id), eq(funding.status, "pending"), isNull(funding.paymentKey)));
+}</code></pre>
+        </figure>
+        <p>확인 화면은 결제위젯을 그리고, "결제하기"를 누르면 서버에 <strong>고른 것만</strong> 보낸 뒤 <strong>서버가 준 금액</strong>으로 결제창을 엽니다.</p>
+        <figure class="code" data-src="components/fund/ConfirmStep.tsx" data-tag="tumblbug-week11-step1" data-lines="37-94">
+          <figcaption><span class="label">components/fund/ConfirmStep.tsx (결제 부분)</span></figcaption>
+          <pre><code>  // 1. 처음 한 번: 토스 SDK를 불러와 결제위젯 도구를 만든다 (키가 없으면 결제를 끈다)
+  useEffect(() =&gt; {
+    if (!tossClientKey) return;
+    let cancelled = false;
+    loadTossPayments(tossClientKey).then((toss) =&gt; {
+      if (!cancelled) setWidgets(toss.widgets({ customerKey: ANONYMOUS }));
+    });
+    return () =&gt; {
+      cancelled = true;
+    };
+  }, [tossClientKey]);
+
+  // 2. 도구가 준비되면: 금액을 정하고 결제수단·약관을 그린다
+  useEffect(() =&gt; {
+    if (!widgets) return;
+    (async () =&gt; {
+      await widgets.setAmount({ currency: "KRW", value: totalAmount(useFundingStore.getState(), rewards) });
+      await Promise.all([
+        widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" }),
+        widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" }),
+      ]);
+      setReady(true);
+    })();
+  }, [widgets, rewards]);
+
+  // 3. "결제하기": 서버가 검사·금액 기록(결제 대기 후원 만들기) → 서버가 계산한 금액으로 결제창을 연다
+  async function pay() {
+    if (!widgets) return;
+    setFailure(null);
+    setPending(true);
+    const { projectId, rewardId, quantity, extraAmount, shipping, message } = useFundingStore.getState();
+    // 서버에는 "고른 것"만 보낸다 (총액은 보내지 않는다 — 서버가 다시 계산)
+    const order = await startFunding({ projectId, rewardId, quantity, extraAmount, shipping, message });
+    if (!order.ok) {
+      setFailure(order);
+      setPending(false);
+      return;
+    }
+
+    try {
+      await widgets.setAmount({ currency: "KRW", value: order.amount });
+      // 결제가 끝나면 토스가 successUrl(성공) 또는 failUrl(실패)로 이동시킨다
+      const base = `${window.location.origin}/projects/${project.id}/fund`;
+      await widgets.requestPayment({
+        orderId: order.orderId,
+        orderName: order.orderName,
+        customerName: order.customerName,
+        successUrl: `${base}/success`,
+        failUrl: `${base}/fail`,
+      });
+    } catch (e) {
+      // 결제창을 닫았거나, 약관에 동의하지 않은 경우 등 → 만들어 둔 후원을 "실패"로 기록 (어디서 포기했는지 보기 위해)
+      const error = e as { code?: string; message?: string };
+      await cancelFunding(order.orderId, error.code ?? "CLIENT_ERROR");
+      setFailure({ ok: false, error: error.message ?? "결제를 시작하지 못했어요. 다시 시도해 주세요", step: null });
+      setPending(false);
+    }
+  }</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>확인 화면에 결제수단·약관 위젯이 그려지고 "○○원 결제하기" 버튼이 켜진다</li>
+            <li>결제창을 열었다 <strong>닫으면</strong> "결제를 시작하지 못했어요" 안내 + DB 의 그 후원이 <code>failed</code></li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>버튼이 "결제 준비 안 됨"에서 바뀌지 않아요</summary><p><code>NEXT_PUBLIC_TOSS_CLIENT_KEY</code> 가 비어 있습니다. <code>.env.local</code> 을 고친 뒤 개발 서버를 <strong>다시 시작</strong>하세요 (<code>NEXT_PUBLIC_</code> 값은 시작할 때 읽습니다). CI 처럼 키가 없는 곳에서는 일부러 결제를 끈 상태입니다.</p></details>
+          <details><summary>전자결제 신청 전이라 "문서 예제용 공용 키"(test_gck_docs_…)만 보여요</summary><p>결제 테스트는 됩니다. 다만 이 공용 키로 한 결제는 <strong>여러분 상점의 웹훅을 부르지 않습니다</strong> (작성자가 실제로 확인한 한계 — 3단계 참고).</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"결제하기"를 누르면 서버가 다시 검사하고, 서버가 계산한 금액으로 결제 대기 후원을 만든 뒤, 그 금액으로 토스 결제창을 엽니다. 결제창을 닫으면 그 후원은 "실패"로 남아 어디서 포기했는지 알 수 있습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t11-s1-code"><span>SDK 설치, 테스트 키, startFunding · cancelFunding · 결제위젯</span></label></li>
+          <li><label><input type="checkbox" data-task="t11-s1-check"><span>위젯이 그려지고, 결제창을 닫으면 failed 로 기록</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>결제 승인: 주문 선점 + 조건부 차감 → 토스 승인 → 결과 반영</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 남은 1개를 두 사람이 동시에</span>
+          <div class="flow">
+            <div class="node"><strong>A 의 UPDATE</strong><small>sold_qty + 1 ≤ limit_qty 일 때만</small></div>
+            <span class="arrow" data-label="먼저 도착"></span>
+            <div class="node"><strong>✅ 1줄 바뀜</strong><small>A 는 토스 승인으로</small></div>
+          </div>
+          <div class="flow">
+            <div class="node"><strong>B 의 UPDATE</strong><small>같은 조건 — A 가 끝날 때까지 줄을 기다림</small></div>
+            <span class="arrow" data-label="이제 0개 남음"></span>
+            <div class="node warn"><strong>❌ 0줄 바뀜</strong><small>B 는 품절 → 토스를 부르지 않는다 (돈이 안 나감)</small></div>
+          </div>
+          <p class="flow-note">"확인(SELECT) 후 차감(UPDATE)" 두 문장으로 나누면, 둘 다 "1개 남았네"를 보고 사 버릴 수 있다.</p>
+        </div>
+        <figure class="code" data-src="lib/reward-stock.ts" data-tag="tumblbug-week11-step2">
+          <figcaption><span class="label">lib/reward-stock.ts</span></figcaption>
+          <pre><code>import { and, eq, isNull, or, sql } from "drizzle-orm";
+import type { Db } from "@/db";
+import { reward } from "@/db/schema";
+
+// 리워드 재고를 "남아 있을 때만" 줄인다 (ADR-003 조건부 차감).
+// 확인(SELECT)과 차감(UPDATE)을 따로 하면, 그 사이에 다른 사람이 끼어들어 둘 다 "남았다"고 보고 사 버릴 수 있다.
+// UPDATE 한 문장 안에 조건을 넣으면 DB가 한 줄씩 잠그며 처리하므로, 동시에 와도 한 명만 성공한다.
+// 반환: 차감했으면 true, 품절이라 못 했으면 false
+export async function takeRewardStock(db: Db, rewardId: number, quantity: number): Promise&lt;boolean&gt; {
+  const updated = await db
+    .update(reward)
+    .set({ soldQty: sql`${reward.soldQty} + ${quantity}` })
+    .where(
+      and(
+        eq(reward.id, rewardId),
+        // 무제한이거나, 늘린 뒤에도 한정 수량 이하일 때만
+        or(isNull(reward.limitQty), sql`${reward.soldQty} + ${quantity} &lt;= ${reward.limitQty}`),
+      ),
+    )
+    .returning({ id: reward.id });
+  return updated.length === 1;
+}
+
+// 결제 승인이 실패했을 때 차감한 수량을 되돌린다
+export async function returnRewardStock(db: Db, rewardId: number, quantity: number): Promise&lt;void&gt; {
+  await db
+    .update(reward)
+    .set({ soldQty: sql`${reward.soldQty} - ${quantity}` })
+    .where(eq(reward.id, rewardId));
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/funding/confirm.ts" data-tag="tumblbug-week11-step2" data-lines="20-84">
+          <figcaption><span class="label">lib/funding/confirm.ts (승인 순서)</span></figcaption>
+          <pre><code>// 결제창에서 돌아온 뒤(성공 주소) 결제를 최종 승인한다. 순서가 핵심이다:
+//  ① 금액 비교 → ② [트랜잭션] 주문 선점 + 재고 조건부 차감 → ③ 토스 승인 (트랜잭션 밖) → ④ [트랜잭션] 결과 반영
+// 토스 승인(외부 API, 느릴 수 있음)을 트랜잭션 안에 넣지 않는 이유: 그동안 DB 줄이 잠겨 다른 후원이 모두 기다리게 된다 (ADR-003)
+export async function confirmFunding(
+  db: Db,
+  toss: TossClient,
+  input: { orderId: string; paymentKey: string; amount: number; supporterId: string },
+): Promise&lt;ConfirmResult&gt; {
+  const [f] = await db
+    .select({ id: funding.id, orderId: funding.orderId, rewardId: funding.rewardId, quantity: funding.quantity, amount: funding.amount, status: funding.status, paymentKey: funding.paymentKey, failReason: funding.failReason })
+    .from(funding)
+    .where(and(eq(funding.orderId, input.orderId), eq(funding.supporterId, input.supporterId)));
+  if (!f) return { status: "not_found" };
+
+  // 새로고침 등으로 다시 들어온 경우: 이미 끝난 후원이면 결과만 돌려준다 (토스를 다시 부르지 않는다)
+  if (f.status === "paid") return { status: "paid", fundingId: f.id, amount: f.amount };
+  if (f.status === "failed") return { status: "failed", reason: f.failReason ?? "UNKNOWN", message: messageOf(f.failReason ?? "") };
+  if (f.paymentKey !== null) return { status: "processing" }; // 다른 요청이 이미 승인 중
+
+  // ① 주소에 담겨 온 금액 = 서버가 기록한 금액? (결제위젯 금액을 조작했다면 여기서 걸린다 — 승인하지 않으면 돈이 나가지 않는다)
+  if (input.amount !== f.amount) {
+    await db
+      .update(funding)
+      .set({ status: "failed", failReason: "AMOUNT_MISMATCH" })
+      .where(and(eq(funding.id, f.id), eq(funding.status, "pending"), isNull(funding.paymentKey)));
+    return { status: "failed", reason: "AMOUNT_MISMATCH", message: messageOf("AMOUNT_MISMATCH") };
+  }
+
+  // ② 주문 선점 + 재고 차감을 한 트랜잭션으로.
+  //  - 선점: payment_key 를 "비어 있을 때만" 채운다 → 같은 주문으로 두 요청이 동시에 와도 한 요청만 다음으로 간다
+  //  - 차감: 남아 있을 때만 줄인다 (6주차 조건부 차감). 품절이면 토스를 부르지 않고 바로 실패
+  //  - 둘을 묶어 두면 "선점했는데 차감은 안 된" 어중간한 상태가 생기지 않는다 → 되돌릴 때 헷갈리지 않는다
+  const claim = await db.transaction(async (tx) =&gt; {
+    const claimed = await tx
+      .update(funding)
+      .set({ paymentKey: input.paymentKey })
+      .where(and(eq(funding.id, f.id), eq(funding.status, "pending"), isNull(funding.paymentKey)))
+      .returning({ id: funding.id });
+    if (claimed.length === 0) return "taken" as const;
+    if (f.rewardId !== null &amp;&amp; !(await takeRewardStock(tx, f.rewardId, f.quantity))) {
+      await tx.update(funding).set({ status: "failed", failReason: "SOLD_OUT" }).where(eq(funding.id, f.id));
+      return "sold_out" as const;
+    }
+    return "claimed" as const;
+  });
+  if (claim === "taken") return { status: "processing" };
+  if (claim === "sold_out") return { status: "failed", reason: "SOLD_OUT", message: messageOf("SOLD_OUT") };
+
+  // ③ 토스 승인 — 금액은 브라우저가 아닌 "우리 DB의 금액"을 보낸다
+  let result: TossResult;
+  try {
+    result = await toss.confirm({ paymentKey: input.paymentKey, orderId: f.orderId, amount: f.amount });
+  } catch {
+    // 응답을 못 받음(시간 초과 등): 승인됐는지 안 됐는지 모른다 → 그대로 두고 웹훅·조회로 마무리한다
+    return { status: "processing" };
+  }
+
+  // ④ 결과 반영 (settle.ts 의 트랜잭션)
+  if (result.ok) {
+    await markPaid(db, f, result.payment);
+    return { status: "paid", fundingId: f.id, amount: f.amount };
+  }
+  await markFailed(db, f, result.code);
+  return { status: "failed", reason: result.code, message: messageOf(result.code, result.message) };
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 토스 승인을 트랜잭션 "밖"에서? (ADR-003)</span>
+          트랜잭션 안에서 바꾼 줄은 끝날 때까지 잠깁니다. 토스 승인은 바깥 서버라 몇 초 걸릴 수도 있어요.
+          그 사이 같은 리워드의 다른 후원이 <strong>모두 줄을 서서 기다리게</strong> 됩니다. 그래서 ② 선점·차감(짧게) → ③ 토스(밖) → ④ 결과 반영(짧게)으로 나눕니다.
+          ③에서 응답을 못 받으면 "처리 중"으로 두고, 웹훅·예약 작업이 마무리합니다.
+        </div>
+        <p>결제창이 성공하면 토스가 보내 주는 주소(성공 주소)에서 이 함수를 부릅니다:</p>
+        <figure class="code" data-src="app/projects/[id]/fund/success/page.tsx" data-tag="tumblbug-week11-step2" data-lines="14-31">
+          <figcaption><span class="label">app/projects/[id]/fund/success/page.tsx (일부)</span></figcaption>
+          <pre><code>// 결제창에서 결제가 끝나면 토스가 이 주소로 보낸다.
+// 예: /projects/3/fund/success?paymentKey=...&amp;orderId=...&amp;amount=36000
+// 아직 "결제 승인" 전이다 — 여기서 서버가 확인하고 승인해야 결제가 최종 완료된다 (lib/funding/confirm.ts)
+export default async function FundSuccessPage({ params, searchParams }: Props) {
+  const { id } = await params;
+  const { paymentKey, orderId, amount } = await searchParams;
+  const me = await requireUser(`/projects/${id}`);
+  const project = { href: `/projects/${id}`, label: "프로젝트로 돌아가기" };
+
+  if (!paymentKey || !orderId || !amount) {
+    return (
+      &lt;FundResult tone="error" title="결제 정보가 없어요" primary={project}&gt;
+        &lt;p&gt;결제창을 통해 다시 후원해 주세요.&lt;/p&gt;
+      &lt;/FundResult&gt;
+    );
+  }
+
+  const result = await confirmFunding(db, tossClient, { paymentKey, orderId, amount: Number(amount), supporterId: me.id });</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 — 가짜 토스로 승인 테스트</span></figcaption>
+          <pre><code>npx vitest run tests/db/confirm.test.ts</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>DB 테스트 통과 — 특히 <strong>"남은 1개를 10명이 동시에 결제해도 1명만 승인, 초과 판매 0건"</strong>, "같은 주문이 동시에 두 번 와도 토스 승인은 한 번만", "품절·금액 조작이면 토스를 부르지 않는다"</li>
+            <li>테스트는 진짜 토스 대신 <strong>가짜 토스</strong>(정해 둔 답을 돌려주는 도구)를 끼워 넣습니다 — <code>confirmFunding(db, toss, …)</code> 가 토스 도구를 인자로 받게 만든 이유</li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>동시성 테스트가 가끔만 실패해요</summary><p>확인과 차감이 한 문장인지 보세요. <code>select … soldQty</code> 로 읽고 JavaScript 에서 비교한 뒤 update 하면, 가끔 두 요청이 겹쳐 둘 다 통과합니다. 조건은 반드시 UPDATE 의 WHERE 안에.</p></details>
+          <details><summary>테스트에서 시각 비교가 이상해요 (<code>now()</code>)</summary><p>PostgreSQL 의 <code>now()</code> 는 <strong>트랜잭션이 시작한 시각</strong>입니다. 한 트랜잭션 안에서는 몇 번을 불러도 같은 값이에요. 시각 순서가 중요한 테스트는 값을 직접 넣으세요 (작성자가 겪은 함정).</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>결제 승인을 네 조각으로 나눴습니다. 가장 중요한 ②에서 "주문 선점"과 "재고 조건부 차감"을 한 트랜잭션으로 묶어, 동시에 몰려도 한정 수량을 넘지 않게 했습니다. 이 규칙은 16주차 k6 부하 테스트(50명 동시)로 다시 증명됩니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>"주문 선점"(payment_key 를 비어 있을 때만 채우기)은 무엇을 막나?</summary><p>같은 주문으로 요청이 두 번 동시에 오는 경우(새로고침, 두 번 클릭)입니다. 한 요청만 다음으로 가서, 토스 승인이 두 번 일어나지 않습니다.</p></details>
+          <details><summary>품절이면 왜 토스를 부르지 않나?</summary><p>승인하지 않으면 돈이 빠져나가지 않습니다. "돈을 받고 나서 환불"보다 "처음부터 받지 않기"가 사용자에게도, 운영에도 훨씬 안전합니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t11-s2-code"><span>조건부 차감 · confirmFunding · 성공 주소</span></label></li>
+          <li><label><input type="checkbox" data-task="t11-s2-test"><span>승인 DB 테스트 통과 (동시 10명 → 1명만)</span></label></li>
+          <li><label><input type="checkbox" data-task="t11-s2-pay"><span>직접 테스트 결제 1건 (결제창의 인증 단계는 직접 — 테스트라 실제 청구 없음)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>토스 웹훅: 돌아오지 못한 결제 마무리하기</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 알림을 믿지 말고 확인하라</span>
+          <div class="flow">
+            <div class="node ext"><strong>토스</strong><small>"결제 상태 바뀜" 알림 (여러 번 올 수 있음)</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>① 처리한 알림?</strong><small>이미 봤으면 건너뛰기</small></div>
+            <span class="arrow"></span>
+            <div class="node warn"><strong>② 토스에 직접 조회</strong><small>알림 내용은 누구나 꾸밀 수 있다</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>③ 결제 대기만 바꾸기</strong><small>이미 끝난 후원은 그대로</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>④ 알림 기록</strong><small>처리가 끝난 "다음에"</small></div>
+          </div>
+        </div>
+        <figure class="code" data-src="lib/funding/webhook.ts" data-tag="tumblbug-week11-step3">
+          <figcaption><span class="label">lib/funding/webhook.ts</span></figcaption>
+          <pre><code>import { and, eq, isNull } from "drizzle-orm";
+import { z } from "zod";
+import type { Db } from "@/db";
+import { funding, paymentEvent } from "@/db/schema";
+import type { TossClient } from "@/lib/payments/toss";
+import { markFailed, markPaid } from "./settle";
+
+// 토스 웹훅 "결제 상태 변경(PAYMENT_STATUS_CHANGED)" 알림의 모양 (쓰는 값만 검사하고 나머지는 그대로 둔다)
+export const tossWebhookSchema = z.object({
+  eventType: z.string(),
+  createdAt: z.string(),
+  data: z.looseObject({ paymentKey: z.string(), orderId: z.string(), status: z.string() }),
+});
+export type TossWebhook = z.infer&lt;typeof tossWebhookSchema&gt;;
+
+export type WebhookResult = "applied" | "duplicate" | "ignored";
+
+const FAILED_STATUSES = new Set(["CANCELED", "ABORTED", "EXPIRED"]);
+
+// 웹훅 처리. 결제창에서 돌아오지 못한 결제(브라우저를 닫음, 승인 응답 시간 초과 등)를 여기서 마무리한다.
+//  ① 같은 알림을 이미 처리했으면 건너뛴다 (토스는 200 응답을 못 받으면 최대 7번 다시 보낸다)
+//  ② 알림 내용을 믿지 않고 토스 "결제 조회"로 진짜 상태를 확인한다 — 일반 결제 웹훅에는 서명이 없어서 누구나 가짜 알림을 보낼 수 있다
+//  ③ 결과 반영 (settle.ts: 결제 대기인 것만 바꾼다 → 여러 번 반영해도 결과가 같다)
+//  ④ 처리가 끝난 "다음에" 알림을 기록한다 — 먼저 기록하면, 처리 중 에러가 났을 때 다시 온 알림을 "처리했음"으로 착각해 버린다
+// 에러는 던진다 → 라우트가 500으로 응답 → 토스가 나중에 다시 보낸다
+export async function handleTossWebhook(db: Db, toss: TossClient, event: TossWebhook): Promise&lt;WebhookResult&gt; {
+  if (event.eventType !== "PAYMENT_STATUS_CHANGED") return "ignored";
+  const { paymentKey, orderId } = event.data;
+  // 알림의 고유값: 다시 보낸 알림은 내용(시각 포함)이 같으므로 같은 값이 된다
+  const eventId = `${event.eventType}:${paymentKey}:${event.data.status}:${event.createdAt}`;
+
+  // ①
+  const [seen] = await db.select({ id: paymentEvent.id }).from(paymentEvent).where(eq(paymentEvent.eventId, eventId));
+  if (seen) return "duplicate";
+
+  // ② 토스가 모르는 결제거나, 알림의 주문 번호와 다르면 가짜 → 무시 (200으로 답해 다시 보내지 않게 한다)
+  const verified = await toss.getPayment(paymentKey);
+  if (!verified.ok || verified.payment.orderId !== orderId) return "ignored";
+  const payment = verified.payment;
+
+  const [f] = await db
+    .select({ id: funding.id, orderId: funding.orderId, rewardId: funding.rewardId, quantity: funding.quantity, status: funding.status, paymentKey: funding.paymentKey })
+    .from(funding)
+    .where(eq(funding.orderId, orderId));
+  if (!f) return "ignored";
+
+  // ③ 결제 대기인 후원만 바꾼다. 이미 끝난(paid·failed) 후원은 그대로 — 결제 완료 후 취소(환불)는 이 MVP의 범위 밖
+  if (f.status === "pending") {
+    if (payment.status === "DONE") {
+      await markPaid(db, f, payment);
+    } else if (FAILED_STATUSES.has(payment.status)) {
+      if (f.paymentKey !== null) {
+        await markFailed(db, f, `WEBHOOK_${payment.status}`); // 승인 단계에 들어갔던 후원 → 차감한 재고도 되돌린다
+      } else {
+        await db
+          .update(funding)
+          .set({ status: "failed", failReason: `WEBHOOK_${payment.status}` })
+          .where(and(eq(funding.id, f.id), eq(funding.status, "pending"), isNull(funding.paymentKey)));
+      }
+    }
+  }
+
+  // ④ 알림 기록 (동시에 두 번 와서 둘 다 여기까지 왔다면 하나만 남는다 — UNIQUE)
+  await db.insert(paymentEvent).values({ eventId, orderId, status: payment.status, payload: event }).onConflictDoNothing();
+  return "applied";
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/api/webhooks/toss/route.ts" data-tag="tumblbug-week11-step3">
+          <figcaption><span class="label">app/api/webhooks/toss/route.ts</span></figcaption>
+          <pre><code>import * as Sentry from "@sentry/nextjs";
+import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { apiError } from "@/lib/api";
+import { handleTossWebhook, tossWebhookSchema } from "@/lib/funding/webhook";
+import { tossClient } from "@/lib/payments/toss";
+
+// POST /api/webhooks/toss — 토스페이먼츠가 결제 상태가 바뀔 때마다 보내는 알림 (웹훅)
+// 토스 개발자센터 → 웹훅 → "https://배포주소/api/webhooks/toss" 등록, 이벤트: PAYMENT_STATUS_CHANGED (14주차 배포 후)
+// 규칙: 200으로 답하면 "잘 받았음". 그 밖의 응답이나 무응답이면 토스가 최대 7번까지 간격을 늘리며 다시 보낸다
+export async function POST(request: Request) {
+  const parsed = tossWebhookSchema.safeParse(await request.json().catch(() =&gt; null));
+  if (!parsed.success) return apiError("INVALID_BODY", "웹훅 내용이 올바르지 않아요");
+
+  try {
+    const result = await handleTossWebhook(db, tossClient, parsed.data);
+    console.log(`[웹훅] ${parsed.data.eventType} orderId=${parsed.data.data.orderId} status=${parsed.data.data.status} → ${result}`);
+    return NextResponse.json({ result });
+  } catch (error) {
+    // DB·토스 조회 실패 등 → 500: 토스가 나중에 다시 보내게 한다. Sentry에 남겨 운영 중에 알아차린다
+    Sentry.captureException(error);
+    console.error("[웹훅] 처리 실패", error);
+    return apiError("INTERNAL", "잠시 후 다시 보내 주세요");
+  }
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 기록을 "처리한 다음에" 남기나요?</span>먼저 기록하고 처리하다 에러가 나면, 토스가 다시 보낸 같은 알림을 "이미 처리했음"으로 착각해 영영 반영하지 못합니다. 처리 → 기록 순서면, 에러가 났을 때 500 으로 답해 토스가 다시 보내고, 그때 제대로 처리됩니다.</div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npx vitest run tests/db/webhook.test.ts</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>DB 테스트: 같은 알림 여러 번 → 한 번만 · 가짜로 DONE 이라고 보내도 토스 조회가 없으면 무시 · 주문 번호가 다르면 무시 · 이미 끝난 후원은 그대로 · 토스 조회가 실패하면 에러 → 500 → 다시 받기</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>웹훅을 등록하고 테스트 결제를 했는데 전송 기록이 비어 있어요</summary><p>작성자가 실제로 겪은 일입니다. 웹훅 주소 등록은 <strong>배포 뒤</strong>(14주차)에 하고, 결제위젯의 <strong>문서 예제용 공용 키</strong>로 결제하면 토스는 여러분 상점의 웹훅을 부르지 않습니다. 웹훅 코드는 DB 테스트와 흐름 테스트(가짜 알림 → "ignored")로 검증하고, 실제 전송은 전자결제 신청 후 받은 내 키로 확인합니다 (<code>docs/operations.md</code> 0번, PLAN 의 알려진 한계).</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>결제창에서 돌아오지 못한 결제도 토스의 알림으로 마무리되게 했습니다. 알림은 몇 번이 와도(멱등), 가짜가 와도(토스에 직접 조회) 결과가 틀어지지 않습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>웹훅 알림에 적힌 "DONE"을 그대로 믿으면 무슨 일이 생길까?</summary><p>누구나 우리 웹훅 주소로 "DONE" 알림을 꾸며 보내 돈을 내지 않고 후원 완료를 만들 수 있습니다. 그래서 토스 결제 조회로 진짜 상태를 확인합니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t11-s3-code"><span>webhook.ts · 웹훅 주소 작성</span></label></li>
+          <li><label><input type="checkbox" data-task="t11-s3-test"><span>웹훅 DB 테스트 통과</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>내 후원 내역 (/me/fundings)</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 필요한가요?</span>후원자가 가장 불안한 순간은 결제 직후입니다. "내 돈이 제대로 갔나?"를 스스로 확인할 곳이 있어야 문의가 줄고 신뢰가 생깁니다 (1주차 인터뷰의 인사이트).</div>
+        <figure class="code" data-src="lib/queries/fundings.ts" data-tag="tumblbug-week11-step4">
+          <figcaption><span class="label">lib/queries/fundings.ts</span></figcaption>
+          <pre><code>import { and, desc, eq, isNotNull, or } from "drizzle-orm";
+import type { Db } from "@/db";
+import { funding, project, reward } from "@/db/schema";
+
+export type MyFundingStatus = "paid" | "processing" | "failed";
+
+// 내 후원 내역 (/me/fundings).
+// 보여 주는 것: 결제 완료 + "승인 단계에 들어간" 후원(확인 중·승인 실패).
+// 결제창에서 취소하거나 그냥 떠난 후원(payment_key 없음)은 빼서 목록을 깔끔하게 둔다 — 돈이 오간 적이 없는 기록이라서
+export async function listMyFundings(db: Db, userId: string) {
+  const rows = await db
+    .select({
+      id: funding.id,
+      orderId: funding.orderId,
+      amount: funding.amount,
+      quantity: funding.quantity,
+      status: funding.status,
+      failReason: funding.failReason,
+      createdAt: funding.createdAt,
+      paidAt: funding.paidAt,
+      projectId: project.id,
+      projectTitle: project.title,
+      imageUrl: project.imageUrl,
+      rewardTitle: reward.title, // 리워드 없이 후원이면 null (LEFT JOIN)
+      deliveryMonth: reward.deliveryMonth,
+    })
+    .from(funding)
+    .innerJoin(project, eq(project.id, funding.projectId))
+    .leftJoin(reward, eq(reward.id, funding.rewardId))
+    .where(and(eq(funding.supporterId, userId), or(eq(funding.status, "paid"), isNotNull(funding.paymentKey))))
+    .orderBy(desc(funding.createdAt), desc(funding.id));
+
+  // DB 상태(pending·paid·failed)를 화면에서 쓰는 말로: 승인 단계의 pending = "확인 중"
+  return rows.map(({ status, ...row }) =&gt; ({ ...row, status: (status === "pending" ? "processing" : status) as MyFundingStatus }));
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>결제한 계정으로 <code>/me/fundings</code> → 방금 후원이 "결제 완료"로. 결제창을 닫은 후원은 보이지 않는다 (돈이 오간 적 없는 기록)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>DB 의 세 상태(pending·paid·failed)를 사용자에게 보이는 말(확인 중·결제 완료·실패)로 바꿔 보여 줬습니다. "승인 단계에 들어간" 후원만 보여서, 포기한 기록이 목록을 어지럽히지 않습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t11-s4-code"><span>내 후원 내역 화면·쿼리 + DB 테스트</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>결제 흐름 테스트</summary>
+      <div class="step-body">
+        <figure class="code" data-src="e2e/payment.spec.ts" data-tag="tumblbug-week11-step5" data-lines="1-79">
+          <figcaption><span class="label">e2e/payment.spec.ts (앞부분)</span></figcaption>
+          <pre><code>import { expect, type Frame, type Page, test } from "@playwright/test";
+import { Pool } from "pg";
+import { login } from "./helpers";
+
+// 11주차 흐름 테스트: 결제 승인·실패·내 후원 내역·웹훅
+// 결제 대기 후원을 DB에 직접 만들어 "결제창에서 돌아온 순간"을 흉내 낸다 (토스 결제창 없이도 CI에서 돈다)
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+const SUPPORTER = "supporter_kim@seed.moa.test";
+const MUG = "산과 들을 담은 수제 머그 2차";
+const hasToss = Boolean(process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY &amp;&amp; process.env.TOSS_SECRET_KEY);
+const createdOrders: string[] = [];
+
+async function one&lt;T&gt;(sql: string, params: unknown[]): Promise&lt;T&gt; {
+  return (await pool.query(sql, params)).rows[0] as T;
+}
+
+// 결제 대기(pending) 후원 하나 — startFunding 이 만드는 것과 같은 모양
+async function pendingFunding(amount = 5_000) {
+  const { id: projectId } = await one&lt;{ id: number }&gt;("select id from project where title = $1 order by id desc limit 1", [MUG]);
+  const { id: supporterId } = await one&lt;{ id: string }&gt;('select id from "user" where email = $1', [SUPPORTER]);
+  const orderId = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  createdOrders.push(orderId);
+  await pool.query("insert into funding (project_id, supporter_id, amount, order_id) values ($1, $2, $3, $4)", [projectId, supporterId, amount, orderId]);
+  return { projectId, orderId, amount };
+}
+
+const fundingOf = (orderId: string) =&gt; one&lt;{ status: string; fail_reason: string | null }&gt;("select status, fail_reason from funding where order_id = $1", [orderId]);
+
+test.afterAll(async () =&gt; {
+  await pool.query("delete from payment_event where order_id = any($1)", [createdOrders]);
+  await pool.query("delete from funding where order_id = any($1)", [createdOrders]);
+  await pool.end();
+});
+
+test("성공 주소의 금액을 조작하면 승인하지 않는다", async ({ page }) =&gt; {
+  const order = await pendingFunding(5_000);
+  await login(page, SUPPORTER, `/projects/${order.projectId}/fund/success?paymentKey=tampered&amp;orderId=${order.orderId}&amp;amount=100`);
+  await expect(page.getByRole("heading", { name: "결제하지 못했어요" })).toBeVisible();
+  await expect(page.getByRole("main")).toContainText("결제 금액이 올바르지 않아");
+  expect(await fundingOf(order.orderId)).toEqual({ status: "failed", fail_reason: "AMOUNT_MISMATCH" });
+});
+
+test("남의 주문 번호로는 결제 결과 화면을 볼 수 없다", async ({ page }) =&gt; {
+  const order = await pendingFunding();
+  await login(page, "supporter_lee@seed.moa.test", `/projects/${order.projectId}/fund/success?paymentKey=x&amp;orderId=${order.orderId}&amp;amount=${order.amount}`);
+  await expect(page.getByRole("heading", { name: "주문을 찾을 수 없어요" })).toBeVisible();
+  expect((await fundingOf(order.orderId)).status).toBe("pending");
+});
+
+test("결제창에서 취소하면 실패로 기록하고, 다시 결제할 수 있게 안내한다", async ({ page }) =&gt; {
+  const order = await pendingFunding();
+  await login(page, SUPPORTER, `/projects/${order.projectId}/fund/fail?code=PAY_PROCESS_CANCELED&amp;message=${encodeURIComponent("사용자에 의해 결제가 취소되었습니다.")}&amp;orderId=${order.orderId}`);
+  await expect(page.getByRole("heading", { name: "결제를 취소했어요" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "다시 결제하기" })).toHaveAttribute("href", `/projects/${order.projectId}/fund?step=3`);
+  expect(await fundingOf(order.orderId)).toEqual({ status: "failed", fail_reason: "PAY_PROCESS_CANCELED" });
+});
+
+test("내 후원 내역: 로그인이 필요하고, 결제 완료 후원이 보인다", async ({ page }) =&gt; {
+  await page.goto("/me/fundings");
+  await expect(page).toHaveURL(`/login?redirect=${encodeURIComponent("/me/fundings")}`);
+
+  await login(page, SUPPORTER, "/me/fundings");
+  await expect(page.getByRole("heading", { name: "내 후원 내역" })).toBeVisible();
+  await expect(page.getByRole("main").getByText("결제 완료").first()).toBeVisible(); // 예시 데이터의 결제 완료 후원
+});
+
+test("웹훅: 모양이 틀리면 400, 토스가 모르는 결제면 무시(200)", async ({ request }) =&gt; {
+  const bad = await request.post("/api/webhooks/toss", { data: { hello: "world" } });
+  expect(bad.status()).toBe(400);
+  expect((await bad.json()).error.code).toBe("INVALID_BODY");
+
+  const order = await pendingFunding();
+  const forged = await request.post("/api/webhooks/toss", {
+    data: { eventType: "PAYMENT_STATUS_CHANGED", createdAt: new Date().toISOString(), data: { paymentKey: "forged-key", orderId: order.orderId, status: "DONE" } },
+  });
+  expect(forged.status()).toBe(200);
+  expect(await forged.json()).toEqual({ result: "ignored" });
+  expect((await fundingOf(order.orderId)).status).toBe("pending"); // 가짜 "DONE" 알림으로 결제 완료가 되지 않았다
+});</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npx playwright test e2e/payment.spec.ts</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>금액 조작 → 승인 안 함 · 남의 주문 번호로 결과 화면 불가 · 결제창 취소 → 실패 기록 · 내 후원 내역 · 웹훅 모양 검사(400)·모르는 결제 무시(200)</li>
+            <li>진짜 토스 테스트 결제 테스트는 키가 있을 때만(내 컴퓨터) 돌고, CI 에서는 건너뜁니다</li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 결제창의 인증(PIN·카드사 화면)은 누가 하나요?</span><p>외부 결제창의 인증 단계는 자동화 도구나 AI 에게 맡기지 않고 <strong>여러분이 직접</strong> 합니다 (작성자도 이 단계는 직접 확인했어요). 테스트 모드라 실제로 청구되지 않습니다.</p></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>결제에서 사고가 날 수 있는 길(금액 조작, 남의 주문, 취소, 가짜 웹훅)을 하나씩 테스트로 막았습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t11-s5-e2e"><span>결제 흐름 테스트 통과</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">11주차 회고</h2>
+    <div class="retro card">
+      <label for="t11-note-1">잘된 것</label>
+      <textarea id="t11-note-1" data-note="t11-good" placeholder="예: 동시 결제 테스트가 통과하는 걸 보니 안심됐다"></textarea>
+      <label for="t11-note-2">막힌 것 (그림의 어느 조각이었나?)</label>
+      <textarea id="t11-note-2" data-note="t11-stuck" placeholder="예: 토스 승인을 왜 트랜잭션 밖에 두는지 헷갈렸다"></textarea>
+      <label for="t11-note-3">다음에 다르게 할 것</label>
+      <textarea id="t11-note-3" data-note="t11-next" placeholder="예: 외부 API 를 부르는 코드는 처음부터 도구를 인자로 받게 만들겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t11-retro"><span>11주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week10.html"><small>이전</small>← 10주차 · 여러 단계 후원</a>
+      <a class="card next" href="week12.html"><small>다음</small>12주차 · 찜하기 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Next.js 16.3.6 · 토스페이먼츠 SDK 2.8.1 · Drizzle ORM 0.45.3 · Vitest 5.0.2 · Playwright 1.63.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

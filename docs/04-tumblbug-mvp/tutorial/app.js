@@ -16,6 +16,79 @@
       "t-idx-picture",
       "t-idx-accounts"
     ],
+    "week1": [
+      "t1-s1-compare",
+      "t1-s1-summary",
+      "t1-s2-guide",
+      "t1-s2-recruit",
+      "t1-s3-interview",
+      "t1-s4-cluster",
+      "t1-s4-insight",
+      "t1-retro"
+    ],
+    "week10": [
+      "t10-s1-code",
+      "t10-s1-test",
+      "t10-s2-code",
+      "t10-s2-check",
+      "t10-s3-code",
+      "t10-s3-test",
+      "t10-s4-e2e",
+      "t10-retro"
+    ],
+    "week11": [
+      "t11-s1-code",
+      "t11-s1-check",
+      "t11-s2-code",
+      "t11-s2-test",
+      "t11-s2-pay",
+      "t11-s3-code",
+      "t11-s3-test",
+      "t11-s4-code",
+      "t11-s5-e2e",
+      "t11-retro"
+    ],
+    "week12": [
+      "t12-s1-api",
+      "t12-s2-code",
+      "t12-s2-check",
+      "t12-s3-code",
+      "t12-s4-code",
+      "t12-s5-e2e",
+      "t12-retro"
+    ],
+    "week13": [
+      "t13-s1-code",
+      "t13-s1-check",
+      "t13-s2-code",
+      "t13-s2-check",
+      "t13-s3-code",
+      "t13-s3-test",
+      "t13-s4-code",
+      "t13-s5-e2e",
+      "t13-retro"
+    ],
+    "week14": [
+      "t14-s1-prep",
+      "t14-s2-read",
+      "t14-s3-neon",
+      "t14-s3-vercel",
+      "t14-s4-github",
+      "t14-s5-preview",
+      "t14-s5-prod",
+      "t14-retro"
+    ],
+    "week15": [
+      "t15-s1-funnel",
+      "t15-s2-check",
+      "t15-s3-ops",
+      "t15-s4-alert",
+      "t15-s4-test",
+      "t15-s5-uptime",
+      "t15-s6-restore",
+      "t15-s7-webhook",
+      "t15-retro"
+    ],
     "week16": [
       "t16-s1-wsl",
       "t16-s1-docker",
@@ -38,6 +111,114 @@
       "t16-c-github",
       "t16-c-bill",
       "t16-retro"
+    ],
+    "week17": [
+      "t17-s1-code",
+      "t17-s2-form",
+      "t17-s3-admin",
+      "t17-s3-hide",
+      "t17-s3-alerts",
+      "t17-s3-dryrun",
+      "t17-s4-sim",
+      "t17-s4-log",
+      "t17-retro"
+    ],
+    "week18": [
+      "t18-s1-sql",
+      "t18-s2-group",
+      "t18-s3-rank",
+      "t18-s4-incident",
+      "t18-retro"
+    ],
+    "week19": [
+      "t19-s1-test",
+      "t19-s2-fix",
+      "t19-s3-pass",
+      "t19-s4-pr",
+      "t19-s4-measure",
+      "t19-retro"
+    ],
+    "week2": [
+      "t2-s1-prd",
+      "t2-s2-adr",
+      "t2-s3-erd",
+      "t2-s4-state",
+      "t2-retro"
+    ],
+    "week20": [
+      "t20-s1-lh",
+      "t20-s1-kbd",
+      "t20-s2-dry",
+      "t20-s2-real",
+      "t20-s3-dod",
+      "t20-s4-case",
+      "t20-retro"
+    ],
+    "week3": [
+      "t3-s1-flow",
+      "t3-s2-wire",
+      "t3-s2-states",
+      "t3-s3-map",
+      "t3-retro"
+    ],
+    "week4": [
+      "t4-s1-tokens",
+      "t4-s1-contrast",
+      "t4-s2-components",
+      "t4-s3-screens",
+      "t4-s4-proto",
+      "t4-s4-test",
+      "t4-retro"
+    ],
+    "week5": [
+      "t5-s1-create",
+      "t5-s1-tokens",
+      "t5-s2-ui",
+      "t5-s3-zod",
+      "t5-s3-tokens",
+      "t5-s4-e2e",
+      "t5-s5-ci",
+      "t5-s6-sentry",
+      "t5-s6-env",
+      "t5-s7-map",
+      "t5-s8-font",
+      "t5-retro"
+    ],
+    "week6": [
+      "t6-s1-db",
+      "t6-s1-ci",
+      "t6-s2-schema",
+      "t6-s3-test",
+      "t6-s4-seed",
+      "t6-s5-sql",
+      "t6-s5-code",
+      "t6-s6-explain",
+      "t6-s7-tx",
+      "t6-retro"
+    ],
+    "week7": [
+      "t7-s1-auth",
+      "t7-s1-redirect",
+      "t7-s2-proxy",
+      "t7-s3-create",
+      "t7-s3-edit",
+      "t7-s4-e2e",
+      "t7-retro"
+    ],
+    "week8": [
+      "t8-s1-status",
+      "t8-s2-reward",
+      "t8-s3-query",
+      "t8-s4-pages",
+      "t8-s5-e2e",
+      "t8-retro"
+    ],
+    "week9": [
+      "t9-s1-api",
+      "t9-s2-rate",
+      "t9-s3-infinite",
+      "t9-s4-e2e",
+      "t9-retro"
     ]
   };
   /* TASKS:END */
@@ -305,6 +486,17 @@
     if (details) details.open = true;
   }
 
+  // 주차 탭이 많으면(4단계 21개) 지금 주차 탭이 화면 밖에 있을 수 있다 → 메뉴를 옆으로 밀어 가운데에 보이게
+  function centerCurrentTab() {
+    var nav = document.querySelector(".week-tabs");
+    var current = nav && nav.querySelector('[aria-current="page"]');
+    if (!current) return;
+    var navBox = nav.getBoundingClientRect();
+    var tabBox = current.getBoundingClientRect();
+    var left = nav.scrollLeft + (tabBox.left - navBox.left) - (navBox.width - tabBox.width) / 2;
+    nav.scrollTo({ left: left, behavior: "instant" }); // 부드럽게 움직이면 처음 열 때 어지럽다
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setupThemeToggle();
     setupCheckboxes();
@@ -313,6 +505,8 @@
     setupCopyButtons();
     openFromHash();
     renderProgress();
+    centerCurrentTab(); // 탭마다 진행 개수("0/7")가 채워진 뒤에 — 먼저 맞추면 폭이 늘어나 위치가 밀린다
   });
+  window.addEventListener("load", centerCurrentTab); // 글꼴이 늦게 들어와 폭이 바뀌는 경우까지
   window.addEventListener("hashchange", openFromHash);
 })();

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3주차 흐름도·와이어프레임·화면-데이터 매핑 · 모아 교재</title>
+  <meta name="description" content="사용자 흐름도와 저해상도 와이어프레임을 그리고, 화면의 글자·숫자가 어느 데이터에서 오는지 매핑표로 확인한다">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week3">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3" aria-current="page">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">3주차 · 4단계 · UX 설계</span>
+    <h1>사용자 흐름도, 와이어프레임, 화면-데이터 매핑</h1>
+    <p class="lead">
+      PRD 의 사용자 스토리를 <strong>화면의 순서</strong>로 바꿉니다. 색과 모양은 아직 신경 쓰지 않고(저해상도), 무엇이 어디에 있어야 하는지만 정합니다.
+      마지막으로 화면에 보이는 글자·숫자 하나하나가 <strong>어느 데이터에서 오는지</strong> 표로 확인합니다 — 여기서 빠진 데이터를 찾는 것이 이번 주의 가장 큰 수확입니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 이야기 → 순서 → 뼈대 → 데이터 확인</span>
+<div class="flow">
+  <div class="node ext"><strong>사용자 스토리</strong><small>2주차 PRD</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>① 사용자 흐름도</strong><small>화면과 갈림길의 순서</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>② 와이어프레임</strong><small>회색 상자로 그린 화면 뼈대</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>③ 화면-데이터 매핑표</strong><small>보이는 값 ↔ 개념 ERD</small></div>
+  <span class="arrow" data-label="빈 칸이 있으면"></span>
+  <div class="node warn"><strong>ERD 고치기 / 시안에서 빼기</strong></div>
+</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead>
+        <tbody>
+          <tr><td><strong>사용자 흐름도</strong></td><td>사용자가 목적을 이루기까지 거치는 화면과 갈림길(로그인했나? 품절인가?)을 화살표로 이은 그림</td></tr>
+          <tr><td><strong>와이어프레임</strong></td><td>색·글꼴 없이 회색 상자와 글자로만 그린 화면 뼈대. 고치기 쉬워서 먼저 그린다</td></tr>
+          <tr><td><strong>Figma</strong></td><td>브라우저에서 쓰는 디자인 도구 (무료 요금제로 충분). 프레임 = 화면 한 장</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>사용자 흐름도 (창작자·후원자·관리자)</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 화면보다 흐름을 먼저?</span>화면을 한 장씩 그리면 "그다음엔 어디로 가지?", "로그인 안 했으면?"을 놓칩니다. 흐름도는 <strong>갈림길</strong>을 먼저 드러내요. 갈림길마다 화면이나 안내 문구가 하나씩 필요합니다.</div>
+        <div class="box picture"><span class="box-title">🗺️ 후원자 흐름 (여러 단계 후원 포함)</span>
+<div class="flow">
+  <div class="node"><strong>홈 / 목록</strong><small>카드: 사진·진행률·남은 일수</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>상세</strong><small>로그인했나? → 아니면 로그인 후 돌아오기</small></div>
+  <span class="arrow" data-label="후원하기"></span>
+  <div class="node"><strong>① 리워드</strong><small>품절은 선택 불가 · 리워드 없이도 가능</small></div>
+  <span class="arrow" data-label="배송 필요?"></span>
+  <div class="node"><strong>② 배송지</strong><small>배송이 없으면 건너뜀</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>③ 확인·결제</strong><small>토스 결제창</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>성공 / 실패</strong><small>→ 내 후원 내역</small></div>
+</div>
+        </div>
+        <ul>
+          <li><strong>창작자</strong>: 가입 → 프로젝트 올리기(기본 정보·사진) → 리워드 추가 → 스튜디오에서 모금 현황·후원자·배송지</li>
+          <li><strong>관리자</strong>: 관리자 화면 → 프로젝트 숨기기 · 결제 실패 목록</li>
+          <li>갈림길 예: 로그인 여부, 내 프로젝트인가(내 프로젝트에는 후원 불가), 품절인가, 마감이 지났나, 배송이 필요한 리워드인가</li>
+        </ul>
+        <p>예시: Figma 예시 파일(<a href="https://www.figma.com/design/NkCzzAJnAtFvzA2iKw19nc">크라우드펀딩 MVP — 예시 v2</a>)의 <strong>Flow</strong> 페이지</p>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>세 역할의 흐름이 있고, 갈림길 5개 이상에 "예/아니오" 화살표가 모두 있다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>Figma 가 처음이에요</summary><p>새 디자인 파일 → 왼쪽 위 도구에서 사각형(R)·글자(T)·화살표(Shift+L)만 써도 흐름도는 충분합니다. FigJam(Figma 의 화이트보드)이나 종이에 그려서 사진을 찍어도 괜찮아요 — 이번 주는 도구보다 갈림길이 중요합니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>사용자 스토리를 "화면의 순서와 갈림길"로 바꿨습니다. 갈림길 하나하나가 나중에 코드의 <code>if</code> 와 테스트가 됩니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>배송이 필요 없는 리워드를 고르면 흐름이 어떻게 달라지나?</summary><p>② 배송지 단계를 건너뛰고 바로 ③ 확인·결제로 갑니다. 이 갈림길은 15·18주차 퍼널 분석에서 "결제 요청 비율이 부풀려지는" 원인이 되기도 해요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t3-s1-flow"><span>후원자·창작자·관리자 흐름도 (갈림길 포함)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>와이어프레임 (저해상도)</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 회색 상자부터?</span>색과 글꼴이 들어가면 "예쁜가"에 눈이 가서 "필요한 게 다 있나"를 놓칩니다. 회색 상자는 고치는 데 1분이라 마음껏 바꿔 볼 수 있어요.</div>
+        <p>최소 세 장: <strong>홈 · 상세 · 후원 1단계</strong> (예시 파일의 <strong>Wireframes</strong> 페이지). <strong>모바일 먼저</strong>(가로 390px 정도) 그립니다 — 좁은 화면에서 되면 넓은 화면은 쉽습니다.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>화면</th><th>꼭 있어야 할 것 (PRD 인수 조건에서)</th></tr></thead>
+          <tbody>
+            <tr><td>홈·목록 카드</td><td>사진 · 제목 · 진행률 막대 · % · 남은 일수 · 찜 하트</td></tr>
+            <tr><td>상세</td><td>창작자 · 목표·모인 금액 · 후원자 수 · 마감일 · 리워드 목록(남은 수량) · 하단 고정 "후원하기"</td></tr>
+            <tr><td>후원 1단계</td><td>단계 표시(① ② ③) · 리워드 선택(품절 표시) · 수량 · 추가 후원금 · 총액 · 다음</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box help"><span class="box-title">🆘 잊기 쉬운 화면 상태</span><p>화면마다 <strong>로딩 중 · 비어 있음 · 에러</strong> 모습도 한 칸씩 그려 두세요. 예: 찜한 프로젝트가 없을 때 "아직 찜한 프로젝트가 없어요 + 둘러보기 버튼". 13주차에 이 그림대로 만듭니다.</p></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>세 장의 와이어프레임에 위 표의 요소가 모두 있고, 비어 있음/에러 상태가 최소 1개씩 있다.</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"무엇을 어디에"를 정했습니다. 다음 주 디자인 시스템은 이 뼈대에 옷을 입히는 일입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t3-s2-wire"><span>와이어프레임 3장 (모바일)</span></label></li>
+          <li><label><input type="checkbox" data-task="t3-s2-states"><span>로딩·비어 있음·에러 상태</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>화면-데이터 매핑표 — 빠진 데이터 찾기</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜?</span>시안에 "찜 → 후원 전환율 4.0%" 를 그려 놓고 개발을 시작했는데, 그걸 계산할 데이터가 없다면? 이 표는 <strong>개발을 시작하기 전에</strong> 그런 구멍을 찾아 줍니다.</div>
+        <p>와이어프레임의 글자·숫자 하나하나에 대해 "어느 개체의 어느 속성에서, 어떻게 계산되어, 누가 볼 수 있나"를 적습니다. 예시: <a href="../templates/07-data-model.md">templates/07-data-model.md</a> ②</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>화면</th><th>보이는 것</th><th>출처</th><th>계산</th><th>누가 볼 수 있나</th></tr></thead>
+          <tbody>
+            <tr><td>목록 카드</td><td>진행률 78%</td><td>후원(결제 완료)의 총액 합계 ÷ 목표 금액</td><td>합계</td><td>모두</td></tr>
+            <tr><td>목록 카드</td><td>12일 남음</td><td>마감일 − 오늘</td><td>계산</td><td>모두</td></tr>
+            <tr><td>상세</td><td>12개 남음</td><td>리워드 수량 한정 − 판매 수량</td><td>계산</td><td>모두</td></tr>
+            <tr><td>대시보드</td><td>최근 후원자·배송지</td><td>후원의 배송지 속성</td><td>목록</td><td><strong>그 프로젝트 창작자만, 결제 완료 건만</strong></td></tr>
+          </tbody>
+        </table></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>와이어프레임의 모든 숫자가 표에 있고, "출처" 칸이 빈 줄이 없다. 비어 있던 줄은 ERD 를 고쳤거나 시안에서 뺐다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>출처를 모르겠는 숫자가 있어요</summary><p>그게 바로 이 표가 찾아 준 구멍입니다. 개념 ERD 에 속성을 더하거나(예: 찜에 날짜), 그 숫자를 시안에서 빼세요. 둘 중 무엇을 골랐는지 한 줄 남기면 좋은 ADR 재료가 됩니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>화면(디자인)과 데이터(ERD)를 한 줄씩 맞춰 봤습니다. "누가 볼 수 있나" 칸은 7주차 권한 설계로 이어집니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>진행률을 프로젝트 표에 저장해 두지 않고 매번 계산하는 이유는?</summary><p>저장하면 후원이 들어올 때마다 두 곳을 고쳐야 하고, 하나라도 빠지면 값이 어긋납니다. "같은 사실은 한 곳에만" (정규화) — 6주차에 자세히 봅니다.</p></details>
+          <details><summary>매핑표의 "누가 볼 수 있나" 칸은 왜 필요할까?</summary><p>배송지 같은 개인정보는 정해진 사람만 봐야 합니다. 화면을 설계할 때 정해 두지 않으면, 개발할 때 권한 검사를 빠뜨리기 쉽습니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t3-s3-map"><span>화면-데이터 매핑표 (빈 출처 없음)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">3주차 회고</h2>
+    <div class="retro card">
+      <label for="t3-note-1">잘된 것</label>
+      <textarea id="t3-note-1" data-note="t3-good" placeholder="예: 매핑표에서 빠진 데이터를 하나 찾았다"></textarea>
+      <label for="t3-note-2">막힌 것 (어디서, 왜)</label>
+      <textarea id="t3-note-2" data-note="t3-stuck" placeholder="예: 갈림길을 어디까지 그려야 할지 몰랐다"></textarea>
+      <label for="t3-note-3">다음에 다르게 할 것</label>
+      <textarea id="t3-note-3" data-note="t3-next" placeholder="예: 빈 화면·에러 화면을 처음부터 같이 그리겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t3-retro"><span>3주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week2.html"><small>이전</small>← 2주차 · PRD·결정 기록·개념 ERD</a>
+      <a class="card next" href="week4.html"><small>다음</small>4주차 · 디자인 시스템과 시안 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Figma(무료)</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

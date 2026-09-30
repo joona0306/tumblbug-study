@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>6주차 DB·SQL 심화 · 모아 교재</title>
+  <meta name="description" content="표준 pg 드라이버, 물리 ERD와 DB 제약 조건, 진짜 DB 테스트, 시드, SQL 통계와 시간대, 인덱스 실행 계획, 트랜잭션과 동시성">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week6">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6" aria-current="page">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">6주차 · 7단계</span>
+    <h1>DB·SQL 심화: 데이터가 사는 집 짓기</h1>
+    <p class="lead">1~3단계에서는 표를 "쓰기만" 했다면, 이번 주에는 표를 <strong>설계하고, 규칙을 새기고, 빠르게 하고, 동시에 몰려도 틀리지 않게</strong> 합니다. 4단계에서 가장 공학적인 주입니다.</p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 데이터가 사는 집을 짓는다</span>
+<div class="flow">
+  <div class="node"><strong>개념 ERD (2주차)</strong><small>무엇을 기억할까</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>물리 ERD + 규칙</strong><small>칸·키·CHECK·인덱스</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>SQL 로 확인</strong><small>통계·실행 계획</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>트랜잭션</strong><small>초과 판매 없는 재고 차감</small></div>
+</div>
+<p class="flow-note">화면은 아직 없다. 하지만 이번 주에 만든 규칙이 11주차 결제와 16주차 부하 테스트까지 앱을 지킨다.</p>
+        </div>
+
+        <div class="table-wrap"><table><thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead><tbody><tr><td><strong>외래 키</strong></td><td>다른 표의 줄을 가리키는 칸 (후원.project_id → 프로젝트.id)</td></tr><tr><td><strong>CHECK 제약</strong></td><td>칸 값이 지켜야 할 규칙을 DB 가 직접 검사 (가격 1,000~1,000,000)</td></tr><tr><td><strong>인덱스</strong></td><td>빨리 찾기 위한 찾아보기 (책 뒤의 색인)</td></tr><tr><td><strong>실행 계획</strong></td><td>DB 가 쿼리를 "어떤 방법으로" 실행했는지 (EXPLAIN ANALYZE)</td></tr><tr><td><strong>트랜잭션</strong></td><td>여러 작업을 "둘 다 되거나 둘 다 안 되게" 묶기</td></tr></tbody></table></div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>DB 연결: 표준 드라이버 pg + CI 의 테스트용 PostgreSQL</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 같은 코드로 세 곳의 DB 에 붙는다</span>
+<div class="flow">
+  <div class="node"><strong>db/index.ts</strong><small>pg Pool (연결 보관함, 5개)</small></div>
+  <span class="arrow"></span>
+  <div class="node ext"><strong>Neon 개발 DB</strong><small>tumblbug_dev (-pooler 주소)</small></div>
+  <div class="node ext"><strong>CI 의 PostgreSQL</strong><small>매번 빈 DB 로 시작</small></div>
+  <div class="node ext"><strong>16주차 Docker·EC2</strong><small>일반 PostgreSQL</small></div>
+</div>
+<p class="flow-note">1~3단계의 Neon 전용 HTTP 드라이버 대신 표준 드라이버를 쓰는 이유가 바로 이 그림 — ADR-005</p>
+        </div>
+        <p><strong>ADR</strong>(결정 기록) = "무엇을 골랐고, 무엇을 버렸고, 왜"를 짧게 남긴 글. 나중의 나(또는 동료)가 "왜 이렇게 했지?"를 알 수 있게 합니다.</p>
+        <figure class="code" data-src="docs/adr/005-db-driver.md" data-tag="tumblbug-week6-step1">
+          <figcaption><span class="label">docs/adr/005-db-driver.md</span></figcaption>
+          <pre><code># ADR-005: DB 드라이버를 무엇으로 할까
+- 상태: 결정
+- 날짜: 2026-09-26 (4단계 6주차)
+
+## 상황
+1~3단계는 Neon 전용 HTTP 드라이버(`@neondatabase/serverless`의 `neon()`)를 썼다. 4단계에는 새 요구가 생겼다.
+- 11주차 결제: 수량 차감·후원 확정을 **트랜잭션**으로 묶어야 한다
+- CI: 매번 깨끗한 DB에서 **진짜 DB 테스트**를 돌리고 싶다 (GitHub Actions의 PostgreSQL 컨테이너)
+- 16주차: 같은 앱을 Docker로 EC2에 올린다 (일반 PostgreSQL에도 붙을 수 있어야 함)
+
+## 선택지
+1. **Neon HTTP 드라이버 유지** — 설정 간단, 서버리스 첫 요청이 빠름 / 트랜잭션 불가, Neon에만 붙음
+2. **Neon Pool(WebSocket) 드라이버** — 트랜잭션 가능 / 여전히 Neon 전용이라 CI·Docker의 일반 PostgreSQL에 바로 붙지 않음
+3. **표준 PostgreSQL 드라이버 `pg` + Pool** — 트랜잭션 가능, Neon·CI·Docker 어디든 같은 코드 / 서버리스에서 연결 수 관리 필요
+
+## 결정
+3번 `pg` (drizzle-orm/node-postgres). Neon은 풀러 주소(`-pooler`)를 쓰고, 함수 하나당 Pool 크기는 5로 작게 둔다.
+
+## 이유
+- 세 요구를 모두 만족하는 유일한 선택지
+- "표준 드라이버"라서 배운 내용이 다른 PostgreSQL 서비스(AWS RDS 등)에도 그대로 통한다
+
+## 결과
+- DB 주소의 `sslmode=require` → `sslmode=verify-full` 로 바꾼다 (`pg` 8.20+ 보안 경고. 인증서까지 확인하는 가장 엄격한 모드)
+- 미들웨어(Edge)에서는 DB에 직접 붙지 않는다 (쿠키만 확인) — Edge에서는 TCP 연결을 못 쓰기 때문
+- 1~3단계와 드라이버가 달라진 이유를 교재에서 설명한다</code></pre>
+        </figure>
+        <figure class="code" data-src="db/index.ts" data-tag="tumblbug-week6-step1">
+          <figcaption><span class="label">db/index.ts</span></figcaption>
+          <pre><code>import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { serverEnv } from "@/lib/env";
+import * as schema from "./schema";
+
+// DB 연결 통로. 1~3단계의 Neon 전용 HTTP 드라이버 대신 표준 PostgreSQL 드라이버(pg)를 쓴다 — ADR-005
+//  - 트랜잭션(둘 다 되거나 둘 다 안 되게)을 쓸 수 있다 (11주차 결제)
+//  - Neon 뿐 아니라 CI·Docker 의 일반 PostgreSQL 에도 같은 코드로 붙는다 (16주차 EC2)
+// Pool = 연결 여러 개를 만들어 두고 돌려 쓰는 "연결 보관함". 요청마다 새로 연결하지 않아 빠르다.
+const pool = new Pool({
+  connectionString: serverEnv().DATABASE_URL,
+  // 서버리스(Vercel)에서는 함수 하나가 연결을 많이 잡지 않게 작게 둔다. Neon 풀러가 뒤에서 나눠 쓴다.
+  max: 5,
+});
+
+export const db = drizzle({ client: pool, schema });
+export type Db = typeof db;</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm i drizzle-orm@0.45.3 pg@8.23.0 better-auth@1.7.6
+npm i -D drizzle-kit@0.31.11 @types/pg@8.23.1 tsx@4.23.15</code></pre>
+        </figure>
+        <p>Neon 에서 <code>tumblbug_dev</code> DB 를 만들고, Connect 화면에서 <strong>Connection pooling</strong> 을 켠 주소를 복사해 <code>.env.local</code> 의 <code>DATABASE_URL</code> 에 넣습니다. 이때 주소 끝의 <code>sslmode=require</code> 를 <code>sslmode=verify-full</code> 로 바꿉니다.</p>
+        <figure class="code" data-src=".github/workflows/ci.yml" data-tag="tumblbug-week6-step1" data-lines="15-36">
+          <figcaption><span class="label">.github/workflows/ci.yml (테스트용 DB 부분)</span></figcaption>
+          <pre><code>    # 테스트 전용 PostgreSQL을 Docker 컨테이너로 잠깐 띄운다 (6주차).
+    # 매번 빈 DB에서 시작하므로 테스트끼리 영향을 주지 않고, 운영·개발 DB는 건드리지 않는다.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tumblbug_test
+        ports: ["5432:5432"]
+        # DB가 접속을 받을 준비가 될 때까지 기다린다
+        options: &gt;-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # 테스트용 값 (진짜 비밀값이 아니다 — 컨테이너 안에서만 쓰이고 사라진다)
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tumblbug_test
+      BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-000
+      BETTER_AUTH_URL: http://localhost:3100</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 CI 에 DB 를 따로 띄우나요?</span>테스트가 개발 DB(Neon)를 쓰면 여러 사람·여러 PR 의 테스트가 서로의 데이터를 건드립니다. CI 는 매번 <strong>빈 PostgreSQL 컨테이너</strong>를 잠깐 띄워 테스트하고 버립니다. 여기 적힌 비밀번호는 컨테이너 안에서만 쓰이고 사라지는 값이라 적어도 괜찮아요.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li><code>npx drizzle-kit generate --name auth_tables</code> → <code>npm run db:migrate</code> 로 인증 표(user·session·account·verification)가 생긴다 (Neon → Tables)</li><li>PR 의 CI 에서 PostgreSQL 컨테이너가 뜨고 통과</li></ul></div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>pg 가 sslmode 경고를 내요</summary><p>pg 8.20 이상은 <code>sslmode=require</code> 에 보안 경고를 냅니다. 인증서까지 확인하는 <code>verify-full</code> 로 바꾸세요 (ADR-005 결과).</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>앱이 DB 에 붙는 통로(Pool)를 만들고, 그 결정을 ADR 로 남겼습니다. 같은 코드가 Neon·CI·Docker 어디서든 동작합니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>Pool 크기를 5로 작게 두는 이유는?</summary><p>서버리스(Vercel)는 요청마다 함수가 여러 개 뜰 수 있어서, 함수 하나가 연결을 많이 잡으면 DB 연결 한도를 금방 넘습니다. Neon 풀러가 뒤에서 나눠 씁니다. (16주차 부하 테스트에서 이 5개가 병목이 되는 것도 봅니다)</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t6-s1-db"><span>Neon tumblbug_dev + .env.local (verify-full)</span></label></li>
+          <li><label><input type="checkbox" data-task="t6-s1-ci"><span>CI 에 테스트용 PostgreSQL</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>물리 ERD: 표·칸·키·규칙을 코드로</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 개념 ERD 에서 무엇이 더해졌나</span>
+<div class="flow">
+  <div class="node"><strong>2주차 개념 ERD</strong><small>개체와 관계만 (창작자 1:N 프로젝트)</small></div>
+  <span class="arrow" data-label="6주차"></span>
+  <div class="node"><strong>물리 ERD (db/schema.ts)</strong><small>칸의 타입 · 기본 키 · 외래 키 · CHECK · UNIQUE · 인덱스</small></div>
+</div>
+<p class="flow-note">찜(사용자 N : M 프로젝트)은 연결 표 project_like 가 된다 — 두 칸을 합친 것이 기본 키라 같은 프로젝트를 두 번 찜할 수 없다.</p>
+        </div>
+        <p>템플릿 <code>07-data-model.md</code> ③ 의 물리 ERD 를 Drizzle 표 설계도로 옮깁니다. 핵심인 리워드 표부터:</p>
+        <figure class="code" data-src="db/schema.ts" data-tag="tumblbug-week6-step2" data-lines="63-88">
+          <figcaption><span class="label">db/schema.ts (reward)</span></figcaption>
+          <pre><code>// 리워드: 프로젝트 1 : N 리워드
+export const reward = pgTable(
+  "reward",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id")
+      .notNull()
+      .references(() =&gt; project.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    price: integer("price").notNull(),
+    limitQty: integer("limit_qty"), // 비어 있으면(NULL) 무제한
+    soldQty: integer("sold_qty").notNull().default(0),
+    deliveryMonth: date("delivery_month", { mode: "string" }).notNull(), // 전달 예정 달 (1일로 저장)
+    needsShipping: boolean("needs_shipping").notNull().default(true),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) =&gt; [
+    index("reward_project_idx").on(t.projectId),
+    check("reward_price_check", sql`${t.price} between 1000 and 1000000`),
+    check("reward_limit_check", sql`${t.limitQty} is null or ${t.limitQty} &gt; 0`),
+    // ⭐ 초과 판매 방지의 마지막 방어선: 판매 수량은 한정 수량을 넘을 수 없다 (ADR-003)
+    check("reward_sold_check", sql`${t.soldQty} &gt;= 0 and (${t.limitQty} is null or ${t.soldQty} &lt;= ${t.limitQty})`),
+  ],
+);</code></pre>
+        </figure>
+        <figure class="code" data-src="db/schema.ts" data-tag="tumblbug-week6-step2" data-lines="90-127">
+          <figcaption><span class="label">db/schema.ts (funding)</span></figcaption>
+          <pre><code>// 후원: 사용자(후원자) 1 : N 후원, 프로젝트 1 : N 후원, 리워드 1 : N 후원(0~1개)
+export const funding = pgTable(
+  "funding",
+  {
+    id: serial("id").primaryKey(),
+    // 후원(결제) 기록은 지우면 안 되므로 restrict — 프로젝트·사용자·리워드가 먼저 지워지는 것을 막는다
+    projectId: integer("project_id")
+      .notNull()
+      .references(() =&gt; project.id, { onDelete: "restrict" }),
+    supporterId: text("supporter_id")
+      .notNull()
+      .references(() =&gt; user.id, { onDelete: "restrict" }),
+    rewardId: integer("reward_id").references(() =&gt; reward.id, { onDelete: "restrict" }), // NULL = 리워드 없이 후원
+    quantity: integer("quantity").notNull().default(1),
+    extraAmount: integer("extra_amount").notNull().default(0), // 추가 후원금
+    amount: integer("amount").notNull(), // 총액 = 리워드 가격 × 수량 + 추가 후원금 (서버가 계산)
+    message: text("message").notNull().default(""),
+    // 배송지 (개인정보 — 결제 완료 후 해당 프로젝트 창작자에게만 보여준다)
+    recipientName: text("recipient_name"),
+    recipientPhone: text("recipient_phone"),
+    address: text("address"),
+    orderId: text("order_id").notNull().unique(), // 토스페이먼츠 주문 번호 (우리가 만든다)
+    paymentKey: text("payment_key").unique(), // 토스페이먼츠가 준 결제 키 (결제 승인 후)
+    status: text("status", { enum: FUNDING_STATUSES }).notNull().default("pending"),
+    failReason: text("fail_reason"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    paidAt: timestamp("paid_at"),
+  },
+  (t) =&gt; [
+    index("funding_supporter_idx").on(t.supporterId),
+    check("funding_status_check", sql`${t.status} in (${inList(FUNDING_STATUSES)})`),
+    check("funding_amount_check", sql`${t.amount} between 1000 and 1000000`),
+    check("funding_quantity_check", sql`${t.quantity} between 1 and 5`),
+    check("funding_extra_check", sql`${t.extraAmount} &gt;= 0`),
+    // 결제 완료라면 결제 키와 완료 시각이 반드시 있어야 한다
+    check("funding_paid_check", sql`${t.status} &lt;&gt; 'paid' or (${t.paymentKey} is not null and ${t.paidAt} is not null)`),
+  ],
+);</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 규칙을 DB 에도 새기나요? 코드에서 검사하면 되지 않나요?</span>코드는 여러 곳에서 DB 를 바꿉니다(서버 액션·웹훅·예약 작업·사람이 SQL Editor 에서). 한 곳이라도 검사를 빠뜨리면 틀린 값이 들어가요. <strong>DB 의 CHECK 는 마지막 방어선</strong> — 특히 <code>reward_sold_check</code>(판매 수 ≤ 한정 수량)는 초과 판매를 막는 최후의 벽입니다.</div>
+        <div class="table-wrap"><table><thead><tr><th>삭제 규칙</th><th>뜻</th><th>어디에</th></tr></thead><tbody><tr><td><code>restrict</code></td><td>딸린 줄이 있으면 지우지 못하게 막는다</td><td>후원이 있는 프로젝트·사용자 (결제 기록은 지우면 안 됨)</td></tr><tr><td><code>cascade</code></td><td>부모를 지우면 딸린 줄도 함께 지운다</td><td>프로젝트를 지우면 리워드·찜도</td></tr></tbody></table></div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npx drizzle-kit generate --name domain_tables
+npm run db:migrate</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>Neon → Tables 에 <code>project · reward · funding · project_like · payment_event</code></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"이 앱이 기억해야 할 것"을 표로 확정하고, 틀리면 안 되는 규칙은 DB 가 직접 거절하게 했습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>후원(funding)의 외래 키를 restrict 로 한 이유는?</summary><p>후원은 결제 기록이라 지워지면 안 됩니다. 프로젝트나 사용자를 지우려 해도 후원이 딸려 있으면 DB 가 막습니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t6-s2-schema"><span>db/schema.ts 물리 ERD + 마이그레이션</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>DB 규칙이 정말 막는지 테스트 (끝나면 되돌리기)</summary>
+      <div class="step-body">
+        <p>DB 테스트는 <strong>진짜 DB</strong>로 합니다. 대신 각 테스트를 트랜잭션 안에서 돌리고 끝나면 무조건 <code>ROLLBACK</code> — 개발 DB 에 흔적이 남지 않습니다.</p>
+        <figure class="code" data-src="tests/db/helpers.ts" data-tag="tumblbug-week6-step3" data-lines="1-21">
+          <figcaption><span class="label">tests/db/helpers.ts</span></figcaption>
+          <pre><code>import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { expect } from "vitest";
+import * as schema from "@/db/schema";
+
+// DB 테스트 도우미.
+// 각 테스트를 트랜잭션 안에서 실행하고 끝나면 무조건 되돌린다(ROLLBACK) → 개발 DB에 흔적이 남지 않는다.
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3 });
+export type TestDb = NodePgDatabase&lt;typeof schema&gt;;
+
+export async function withRollback(run: (db: TestDb) =&gt; Promise&lt;void&gt;) {
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    await run(drizzle({ client, schema }));
+  } finally {
+    await client.query("rollback");
+    client.release();
+  }
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="tests/db/constraints.test.ts" data-tag="tumblbug-week6-step3" data-lines="11-22">
+          <figcaption><span class="label">tests/db/constraints.test.ts</span></figcaption>
+          <pre><code>describe("리워드", () =&gt; {
+  it("⭐ 판매 수량이 한정 수량을 넘으면 DB가 거절한다 (초과 판매 방지)", () =&gt;
+    withRollback(async (db) =&gt; {
+      const projectId = await makeProject(db, await makeUser(db));
+      const rewardId = await makeReward(db, projectId, 1);
+      await db.update(reward).set({ soldQty: 1 }).where(eq(reward.id, rewardId)); // 마지막 1개 판매: 통과
+      await expectRejected(
+        db.update(reward).set({ soldQty: sql`${reward.soldQty} + 1` }).where(eq(reward.id, rewardId)),
+        PG.CHECK,
+        "reward_sold_check",
+      );
+    }));</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📌 테스트가 가정을 바로잡은 순간</span>작성자는 "restrict 로 막히면 외래 키 에러(23503)"라고 생각했는데, 테스트를 돌려 보니 <code>23001</code>(restrict_violation)이었습니다. 문서가 아니라 <strong>실제로 돌려 본 결과</strong>가 답이에요.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm test</code> → constraints 테스트 11개 통과 (초과 판매·가격·카테고리·금액·결제 완료 조건·중복 주문·중복 찜·restrict/cascade)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"DB 가 막아 준다"를 말이 아니라 테스트로 확인했습니다. 누가 나중에 규칙을 지워도 테스트가 알려 줍니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t6-s3-test"><span>DB 제약 조건 테스트 통과</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>시드 데이터 (예시 데이터 넣기)</summary>
+      <div class="step-body">
+        <figure class="code" data-src="scripts/seed.mts" data-tag="tumblbug-week6-step4" data-lines="1-22">
+          <figcaption><span class="label">scripts/seed.mts</span></figcaption>
+          <pre><code>// 개발용 예시 데이터 넣기:  npm run db:seed
+// 여러 번 실행해도 같은 결과가 되도록, 먼저 예시 데이터를 지우고 다시 넣는다.
+// ⚠️ 안전장치: DB 이름이 _dev 또는 _test 로 끝날 때만 실행한다 (운영 DB를 실수로 지우지 않게)
+
+import { existsSync } from "node:fs";
+
+if (existsSync(".env.local")) process.loadEnvFile(".env.local");
+
+const { like, inArray, sql } = await import("drizzle-orm");
+const { db } = await import("@/db");
+const { funding, project, projectLike, reward, user, account } = await import("@/db/schema");
+const { auth } = await import("@/lib/auth");
+
+// 개발용 계정 비밀번호 (예시 데이터 전용 — 운영에는 절대 쓰지 않는다)
+export const SEED_PASSWORD = "moa-dev-1234";
+const SEED_EMAIL_DOMAIN = "seed.moa.test"; // 예시 계정 이메일은 모두 이 주소로 끝난다
+
+const dbName = new URL(process.env.DATABASE_URL ?? "").pathname.slice(1);
+if (!/_(dev|test)$/.test(dbName)) {
+  console.error(`[seed] DB 이름이 "${dbName}" 입니다. _dev 또는 _test 로 끝나는 DB에서만 실행합니다.`);
+  process.exit(1);
+}</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm run db:seed</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 DB 이름을 검사하나요?</span>시드는 예시 데이터를 <strong>지우고 다시</strong> 넣습니다. 실수로 운영 DB 주소가 들어 있으면 운영 데이터를 지울 수 있어요. 그래서 이름이 <code>_dev</code>·<code>_test</code> 로 끝나는 DB 에서만 돕니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>홈에 예시 프로젝트 8개, 예시 계정(비밀번호 <code>moa-dev-1234</code>)으로 로그인 가능 (7주차부터)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>화면을 만들기 전에 "보여 줄 데이터"를 준비했습니다. 여러 번 실행해도 같은 결과가 나옵니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t6-s4-seed"><span>npm run db:seed</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>SQL 을 직접 써 보기 → Drizzle 함수로 (+ 시간대 함정)</summary>
+      <div class="step-body">
+        <figure class="code" data-src="sql/week6-stats.sql" data-tag="tumblbug-week6-step5" data-lines="1-23">
+          <figcaption><span class="label">sql/week6-stats.sql</span></figcaption>
+          <pre><code>-- 6주차 5단계: 대시보드 통계를 SQL로 직접 써 보기
+-- Neon SQL Editor (tumblbug_dev) 에서 한 덩어리씩 실행한다. 시드 데이터(npm run db:seed)가 있어야 결과가 나온다.
+
+-- ① 프로젝트별 모인 금액·후원자 수·달성률
+--    LEFT JOIN: 후원이 0건인 프로젝트도 빠지지 않게 / FILTER: 결제 완료(paid)만 센다
+select
+  p.id,
+  p.title,
+  p.goal_amount,
+  coalesce(sum(f.amount) filter (where f.status = 'paid'), 0) as raised,
+  count(distinct f.supporter_id) filter (where f.status = 'paid') as supporters,
+  floor(100.0 * coalesce(sum(f.amount) filter (where f.status = 'paid'), 0) / p.goal_amount) as rate
+from project p
+left join funding f on f.project_id = p.id
+group by p.id
+order by rate desc;
+
+-- ② 목표를 넘긴 프로젝트만 (집계 결과로 거를 때는 WHERE 가 아니라 HAVING)
+select p.title, sum(f.amount) as raised, p.goal_amount
+from project p
+join funding f on f.project_id = p.id and f.status = 'paid'
+group by p.id
+having sum(f.amount) &gt;= p.goal_amount;</code></pre>
+        </figure>
+        <p>Neon SQL Editor 에 한 덩어리씩 붙여 실행해 봅니다. 결과를 눈으로 확인한 뒤 코드(Drizzle)로 옮깁니다:</p>
+        <figure class="code" data-src="lib/queries/stats.ts" data-tag="tumblbug-week6-step5">
+          <figcaption><span class="label">lib/queries/stats.ts</span></figcaption>
+          <pre><code>import { and, eq, inArray, sql } from "drizzle-orm";
+import type { Db } from "@/db";
+import { funding, project } from "@/db/schema";
+
+// 프로젝트별 모인 금액·후원자 수 (sql/week6-stats.sql ①을 Drizzle로 옮긴 것).
+// 달성률은 lib/format.ts 의 achievementRate 로 계산한다 — 규칙(소수점 버림)을 한 곳에 두기 위해.
+// 진행률·후원자 수는 DB에 저장하지 않고 매번 후원에서 계산한다 (정규화 — templates/07-data-model.md ③)
+
+export type ProjectStats = {
+  projectId: number;
+  goalAmount: number;
+  raised: number; // 결제 완료된 후원 금액 합계
+  supporters: number; // 결제 완료한 서로 다른 후원자 수
+};
+
+export async function getProjectStats(db: Db, projectIds: number[]): Promise&lt;ProjectStats[]&gt; {
+  if (projectIds.length === 0) return [];
+  return db
+    .select({
+      projectId: project.id,
+      goalAmount: project.goalAmount,
+      // sum·count 결과는 PostgreSQL에서 큰 정수(bigint)라 글자로 온다 → ::int 로 바꿔서 숫자로 받는다
+      raised: sql&lt;number&gt;`coalesce(sum(${funding.amount}), 0)::int`,
+      supporters: sql&lt;number&gt;`count(distinct ${funding.supporterId})::int`,
+    })
+    .from(project)
+    // LEFT JOIN: 후원이 0건인 프로젝트도 빠지지 않게. 조건에 status='paid'를 넣어 결제 완료만 붙인다
+    .leftJoin(funding, and(eq(funding.projectId, project.id), eq(funding.status, "paid")))
+    .where(inArray(project.id, projectIds))
+    .groupBy(project.id);
+}</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">⚠️ 시간대 함정 (작성자가 실제로 겪음)</span>DB 서버는 <strong>UTC</strong>, 사용자는 <strong>한국 시간(UTC+9)</strong>. 시각 칸을 시간대 없는 <code>timestamp</code> 로 두면 "오늘 후원"이 9시간 어긋납니다. 그래서 모든 시각 칸을 <code>timestamptz</code>(시간대 포함)로 바꾸고(마이그레이션 0002), 날짜별 통계는 <code>Asia/Seoul</code> 기준으로 셉니다.</div>
+        <div class="box why"><span class="box-title">💡 왜 SQL 을 먼저 손으로 쓰나요?</span>Drizzle 은 SQL 을 대신 만들어 줄 뿐입니다. SQL 을 모르면 느린 쿼리나 틀린 집계를 알아볼 수 없어요. <code>LEFT JOIN</code>(0건도 빠지지 않게), <code>FILTER</code>(결제 완료만), <code>HAVING</code>(집계 결과로 거르기)을 직접 써 봅니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm test</code> → stats 테스트 (결제 완료만, 같은 후원자는 한 명, 0건도 0)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>SQL 로 먼저 답을 확인하고, 같은 계산을 코드로 옮겨 테스트로 고정했습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>후원이 0건인 프로젝트가 목록에서 빠지지 않게 하려면 JOIN 을 어떻게?</summary><p>LEFT JOIN 을 쓰고, 합계는 coalesce(sum(...), 0) 으로 0 을 채웁니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t6-s5-sql"><span>week6-stats.sql 을 SQL Editor 에서 실행</span></label></li>
+          <li><label><input type="checkbox" data-task="t6-s5-code"><span>getProjectStats + 테스트, timestamptz</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>인덱스와 실행 계획 (EXPLAIN ANALYZE)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 책에서 단어 찾기</span>
+<div class="flow">
+  <div class="node"><strong>Seq Scan</strong><small>첫 쪽부터 끝까지 넘기며 찾기 — 데이터가 늘면 비례해서 느려짐</small></div>
+  <span class="arrow" data-label="인덱스 추가"></span>
+  <div class="node"><strong>Index Scan</strong><small>책 뒤 찾아보기로 쪽수 바로 찾기 — 데이터가 늘어도 거의 그대로</small></div>
+</div>
+        </div>
+        <p>데이터가 적으면 차이가 안 보이므로, 프로젝트 2만 개·후원 30만 건을 잠깐 넣고(<code>sql/week6-bulk.sql</code>) 인덱스 전후를 비교합니다.</p>
+        <figure class="code" data-src="sql/week6-explain.sql" data-tag="tumblbug-week6-step6">
+          <figcaption><span class="label">sql/week6-explain.sql</span></figcaption>
+          <pre><code>-- 6주차 6단계: 실행 계획 보기. 인덱스를 넣기 전과 후에 똑같이 실행해서 비교한다.
+-- EXPLAIN ANALYZE = 실제로 실행해 보고 "어떤 방법으로, 몇 ms 걸렸는지" 보여준다
+--   Seq Scan   = 표 전체를 처음부터 끝까지 훑음 (책을 첫 쪽부터 넘기며 찾기)
+--   Index Scan = 인덱스(색인)로 바로 찾아감 (책 뒤의 찾아보기로 쪽수 바로 찾기)
+
+-- ① 목록 첫 화면: 모금 중인 프로젝트를 마감 임박순으로 20개
+explain analyze
+select id, title, deadline
+from project
+where status = 'funding' and hidden = false
+  and deadline &gt;= (now() at time zone 'Asia/Seoul')::date
+order by deadline
+limit 20;
+
+-- ② 상세 화면: 한 프로젝트의 모인 금액 (결제 완료만)
+explain analyze
+select coalesce(sum(amount), 0)
+from funding
+where project_id = (select max(id) from project) and status = 'paid';</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm run db:sql -- sql/week6-explain.sql</code></pre>
+        </figure>
+        <figure class="code" data-src="db/schema.ts" data-tag="tumblbug-week6-step6" data-lines="56-62">
+          <figcaption><span class="label">db/schema.ts (추가한 인덱스)</span></figcaption>
+          <pre><code>  (t) =&gt; [
+    index("project_creator_idx").on(t.creatorId),
+    // 목록: "모금 중인 것만, 마감 임박순" — 거르는 칸(status)을 앞에, 정렬하는 칸(deadline)을 뒤에 (6주차 6단계)
+    index("project_status_deadline_idx").on(t.status, t.deadline),
+    check("project_category_check", sql`${t.category} in (${inList(CATEGORY_VALUES)})`),
+    check("project_status_check", sql`${t.status} in (${inList(PROJECT_STATUSES)})`),
+    check("project_goal_check", sql`${t.goalAmount} between 10000 and 100000000`),</code></pre>
+        </figure>
+        <div class="table-wrap"><table><thead><tr><th>쿼리</th><th>인덱스 전</th><th>인덱스 후</th></tr></thead><tbody><tr><td>① 목록: 모금 중, 마감 임박순 20개</td><td>Seq Scan · <strong>12.146ms</strong> · 514 블록</td><td>Index Scan · <strong>0.103ms</strong> · 22 블록 (약 118배)</td></tr><tr><td>② 상세: 한 프로젝트의 모인 금액</td><td>Parallel Seq Scan · <strong>40.930ms</strong> · 5,097 블록</td><td>Bitmap Index Scan · <strong>0.159ms</strong> · 22 블록 (약 257배)</td></tr></tbody></table></div>
+        <p class="muted">작성자 측정 [실제]: 2026-09-26, Neon PostgreSQL 18.6 — <code>docs/explain.md</code></p>
+        <div class="box why"><span class="box-title">💡 그럼 모든 칸에 인덱스를 달면 되나요?</span>아니요. 인덱스도 저장 공간을 쓰고, 후원이 들어올 때마다 인덱스도 함께 고쳐야 해서 <strong>쓰기가 느려집니다</strong>. "자주, 많이 읽는 조건"에만 답니다. 거르는 칸(status)을 앞에, 정렬하는 칸(deadline)을 뒤에 두면 정렬 단계까지 사라져요.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>인덱스 전후로 같은 SQL 을 실행해 계획(Seq → Index)과 시간이 바뀌는 것을 본다. 끝나면 <code>sql/week6-bulk-cleanup.sql</code> 로 대량 데이터 정리</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>느린 이유를 "감"이 아니라 실행 계획으로 확인했고, 인덱스 하나로 100배 넘게 빨라지는 것을 숫자로 남겼습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>인덱스 (status, deadline) 에서 칸의 순서가 중요한 이유는?</summary><p>먼저 status 로 거른 뒤 그 안에서 deadline 순서로 정렬돼 있어서, 조건에 맞는 것을 마감 순서대로 20개만 읽고 끝낼 수 있습니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t6-s6-explain"><span>대량 데이터로 EXPLAIN ANALYZE 전후 비교 → 정리</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 7단계 ======================= -->
+    <details class="step" id="step-7">
+      <summary><span class="step-num">7</span>트랜잭션: 조건부 차감 · 원자성 · 동시성</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — "확인하고 줄이기"를 두 번에 나누면 생기는 일</span>
+<div class="flow">
+  <div class="node"><strong>A: 남았나? → 1개</strong><small></small></div>
+  <div class="node warn"><strong>B: 남았나? → 1개</strong><small>(A 가 줄이기 전에 끼어듦)</small></div>
+  <span class="arrow"></span>
+  <div class="node warn"><strong>둘 다 구매</strong><small>초과 판매!</small></div>
+</div>
+<p class="flow-note">해결: 확인과 차감을 UPDATE 한 문장에 넣는다 — DB 가 한 줄씩 잠그며 처리해서 한 명만 성공한다 (조건부 차감, ADR-003)</p>
+        </div>
+        <figure class="code" data-src="lib/reward-stock.ts" data-tag="tumblbug-week6-step7" data-lines="5-22">
+          <figcaption><span class="label">lib/reward-stock.ts</span></figcaption>
+          <pre><code>// 리워드 재고를 "남아 있을 때만" 줄인다 (ADR-003 조건부 차감).
+// 확인(SELECT)과 차감(UPDATE)을 따로 하면, 그 사이에 다른 사람이 끼어들어 둘 다 "남았다"고 보고 사 버릴 수 있다.
+// UPDATE 한 문장 안에 조건을 넣으면 DB가 한 줄씩 잠그며 처리하므로, 동시에 와도 한 명만 성공한다.
+// 반환: 차감했으면 true, 품절이라 못 했으면 false
+export async function takeRewardStock(db: Db, rewardId: number, quantity: number): Promise&lt;boolean&gt; {
+  const updated = await db
+    .update(reward)
+    .set({ soldQty: sql`${reward.soldQty} + ${quantity}` })
+    .where(
+      and(
+        eq(reward.id, rewardId),
+        // 무제한이거나, 늘린 뒤에도 한정 수량 이하일 때만
+        or(isNull(reward.limitQty), sql`${reward.soldQty} + ${quantity} &lt;= ${reward.limitQty}`),
+      ),
+    )
+    .returning({ id: reward.id });
+  return updated.length === 1;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="tests/db/transaction.test.ts" data-tag="tumblbug-week6-step7" data-lines="64-94">
+          <figcaption><span class="label">tests/db/transaction.test.ts</span></figcaption>
+          <pre><code>describe("트랜잭션: 둘 다 되거나, 둘 다 안 되거나", () =&gt; {
+  it("트랜잭션이 없으면: 두 번째 작업이 실패해도 첫 번째 작업(재고 차감)은 남는다 ← 문제", async () =&gt; {
+    const { rewardId, projectId, creatorId } = await setup(10);
+    await takeRewardStock(db, rewardId, 1); // ① 재고 차감 — 바로 저장됨
+    // ② 후원 저장 — 금액이 규칙(1,000원 이상)에 어긋나 실패
+    await expect(db.insert(funding).values({ projectId, supporterId: creatorId, amount: 10, orderId: `tx-a-${rewardId}` })).rejects.toThrow();
+    expect(await soldQtyOf(rewardId)).toBe(1); // 후원은 없는데 재고만 줄어 있다
+  });
+
+  it("트랜잭션 안에서는: 두 번째 작업이 실패하면 첫 번째 작업도 되돌아간다", async () =&gt; {
+    const { rewardId, projectId, creatorId } = await setup(10);
+    await expect(
+      db.transaction(async (tx) =&gt; {
+        await takeRewardStock(tx, rewardId, 1); // ①
+        await tx.insert(funding).values({ projectId, supporterId: creatorId, amount: 10, orderId: `tx-b-${rewardId}` }); // ② 실패
+      }),
+    ).rejects.toThrow();
+    expect(await soldQtyOf(rewardId)).toBe(0); // ①도 함께 취소됨
+  });
+});
+
+describe("동시성: 남은 1개를 여러 명이 동시에", () =&gt; {
+  it("⭐ 10명이 동시에 사도 딱 1명만 성공하고, 판매 수량은 1", async () =&gt; {
+    const { rewardId } = await setup(1);
+    const results = await Promise.all(
+      Array.from({ length: 10 }, () =&gt; db.transaction((tx) =&gt; takeRewardStock(tx, rewardId, 1))),
+    );
+    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(await soldQtyOf(rewardId)).toBe(1);
+  });
+});</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 트랜잭션이 뭔가요?</span>"<strong>둘 다 되거나, 둘 다 안 되거나</strong>". 재고 차감과 후원 저장을 한 트랜잭션으로 묶으면, 후원 저장이 실패할 때 재고 차감도 함께 취소됩니다. 묶지 않으면 후원은 없는데 재고만 줄어 있어요 (테스트의 첫 번째 경우).</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm test</code> → transaction 테스트: 트랜잭션 없으면 재고만 줄어듦(문제) / 있으면 함께 취소 / <strong>10명이 동시에 사도 1명만 성공</strong></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>11주차 결제에서 쓸 핵심 부품(조건부 차감)을 먼저 만들고, 동시에 몰려도 초과 판매가 없다는 것을 테스트로 확인했습니다. 16주차에는 50명으로 다시 확인합니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>DB CHECK(sold ≤ limit)가 있는데 조건부 차감이 또 필요한 이유는?</summary><p>CHECK 만 있으면 초과 판매 시도가 "에러"로 끝나서 처리하기 어렵습니다. 조건부 차감은 "품절이면 0줄 바뀜"으로 조용히 알려 줘서, 결제를 승인하지 않고 품절 안내를 할 수 있습니다. CHECK 는 그래도 코드가 실수할 때의 마지막 벽입니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t6-s7-tx"><span>takeRewardStock + 트랜잭션·동시성 테스트</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">6주차 회고</h2>
+    <div class="retro card">
+      <label for="t6-note-1">잘된 것</label>
+      <textarea id="t6-note-1" data-note="t6-good" placeholder="예: 인덱스 하나로 100배 빨라지는 걸 직접 봤다"></textarea>
+      <label for="t6-note-2">막힌 것 (어디서, 왜 — 그림의 어느 부분이었나?)</label>
+      <textarea id="t6-note-2" data-note="t6-stuck" placeholder="예: 시간대(UTC/한국) 때문에 날짜 집계가 어긋나 헤맸다"></textarea>
+      <label for="t6-note-3">다음에 다르게 할 것</label>
+      <textarea id="t6-note-3" data-note="t6-next" placeholder="예: 규칙은 코드와 DB 두 곳에 두겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t6-retro"><span>6주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week5.html"><small>이전</small>← 5주차 · 프로젝트 준비</a>
+      <a class="card next" href="week7.html"><small>다음</small>7주차 · 인증·등록 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · PostgreSQL 18.6 (Neon) · pg 8.23.0 · Drizzle ORM 0.45.3 · drizzle-kit 0.31.11 · Better Auth 1.7.6 · Vitest 5.0.2</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>12주차 찜하기 · 모아 교재</title>
+  <meta name="description" content="찜 API, TanStack Query 낙관적 업데이트와 되돌리기, 서버에서 첫 값 채우기(hydration), 토스트(React Context), 창작자 스튜디오 자동 새로고침">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week12">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12" aria-current="page">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">12주차 · 5단계 · 구현</span>
+    <h1>찜하기: 누르자마자 바뀌고, 실패하면 되돌아가기</h1>
+    <p class="lead">
+      하트를 누르면 <strong>서버 대답을 기다리지 않고</strong> 화면부터 바꿉니다(낙관적 업데이트). 서버가 실패하면 조용히 되돌리고 알려 줍니다.
+      카드·상세·헤더·내 찜이 <strong>같은 값을 함께 보게</strong> 하는 도구가 TanStack Query 입니다.
+      덤으로, 창작자 스튜디오가 새 후원을 스스로 확인하게 만듭니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 찜 캐시 하나를 네 곳이 함께 본다</span>
+      <div class="flow">
+        <div class="node"><strong>서버 (레이아웃)</strong><small>내 찜 목록을 미리 읽어 캐시에 채워 보낸다</small></div>
+        <span class="arrow" data-label="hydration"></span>
+        <div class="node warn"><strong>찜 캐시 ["likes"]</strong><small>브라우저의 TanStack Query 캐시</small></div>
+      </div>
+      <div class="flow">
+        <div class="node ext"><strong>카드의 하트</strong><small>목록·홈</small></div>
+        <div class="node ext"><strong>상세의 하트</strong><small>+ 찜 개수</small></div>
+        <div class="node ext"><strong>헤더의 ♡ 3</strong><small>내 찜 개수</small></div>
+        <div class="node ext"><strong>내 찜 화면</strong><small>/me/likes</small></div>
+      </div>
+      <p class="flow-note">어디서 누르든 캐시가 바뀌고 → 네 곳이 동시에 바뀐다. 서버가 실패하면 캐시를 이전 값으로 되돌린다.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead>
+        <tbody>
+          <tr><td><strong>TanStack Query</strong></td><td>서버에서 가져온 값을 브라우저에 캐시하고, 여러 컴포넌트가 함께 보게 하고, 다시 가져오는 때를 관리해 주는 도구</td></tr>
+          <tr><td><strong>낙관적 업데이트</strong></td><td>"성공하겠지" 하고 화면부터 바꾸는 것. 실패하면 되돌린다</td></tr>
+          <tr><td><strong>hydration</strong></td><td>서버가 만든 값을 브라우저가 이어받아 쓰는 것. 여기서는 서버가 채운 찜 캐시를 브라우저 캐시로 되살린다</td></tr>
+          <tr><td><strong>React Context</strong></td><td>앱 전체에서 쓰는 도구(여기서는 토스트)를 어느 컴포넌트에서든 꺼내 쓰게 하는 React 기능</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>찜 API: GET · POST · DELETE</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 서버 액션이 아니라 API(Route Handler)로?</span>찜은 목록·상세·헤더 여러 곳에서 브라우저가 직접 부르고, TanStack Query 가 "가져오기(GET)"와 "바꾸기(POST·DELETE)"를 나눠 관리합니다. 9주차 API 설계 규칙(응답 코드, 에러 모양)을 그대로 씁니다.</div>
+        <figure class="code" data-src="app/api/likes/route.ts" data-tag="tumblbug-week12-step1">
+          <figcaption><span class="label">app/api/likes/route.ts</span></figcaption>
+          <pre><code>import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { apiError } from "@/lib/api";
+import { PRIVATE, requireLikeUser } from "@/lib/likes-api";
+import { addLike, getMyLikeIds } from "@/lib/queries/likes";
+import { toFieldErrors } from "@/lib/validation/auth";
+import { likeBodySchema } from "@/lib/validation/likes";
+
+// GET /api/likes — 내가 찜한 프로젝트 번호들. 응답: { projectIds: [3, 1] }
+export async function GET() {
+  const auth = await requireLikeUser();
+  if (auth.error) return auth.error;
+  return NextResponse.json({ projectIds: await getMyLikeIds(db, auth.user.id) }, { headers: PRIVATE });
+}
+
+// POST /api/likes { projectId } — 찜하기. 새로 찜하면 201, 이미 찜해 있으면 200 (두 번 보내도 결과가 같다)
+export async function POST(request: Request) {
+  const auth = await requireLikeUser();
+  if (auth.error) return auth.error;
+
+  const parsed = likeBodySchema.safeParse(await request.json().catch(() =&gt; null));
+  if (!parsed.success) return apiError("INVALID_BODY", "요청 값이 올바르지 않아요", { fields: toFieldErrors(parsed.error) });
+
+  const result = await addLike(db, auth.user.id, parsed.data.projectId);
+  if (result === "not_found") return apiError("NOT_FOUND", "프로젝트를 찾을 수 없어요");
+  return NextResponse.json({ projectId: parsed.data.projectId, liked: true }, { status: result === "created" ? 201 : 200, headers: PRIVATE });
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/api/likes/[projectId]/route.ts" data-tag="tumblbug-week12-step1">
+          <figcaption><span class="label">app/api/likes/[projectId]/route.ts</span></figcaption>
+          <pre><code>import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { apiError } from "@/lib/api";
+import { PRIVATE, requireLikeUser } from "@/lib/likes-api";
+import { removeLike } from "@/lib/queries/likes";
+import { projectIdSchema } from "@/lib/validation/likes";
+
+// DELETE /api/likes/3 — 찜 취소. 찜하지 않았던 프로젝트여도 200 (결과는 어차피 "찜 안 한 상태")
+export async function DELETE(_request: Request, { params }: { params: Promise&lt;{ projectId: string }&gt; }) {
+  const auth = await requireLikeUser();
+  if (auth.error) return auth.error;
+
+  const parsed = projectIdSchema.safeParse((await params).projectId);
+  if (!parsed.success) return apiError("INVALID_QUERY", "프로젝트 번호가 올바르지 않아요", { fields: { projectId: parsed.error.issues[0]?.message } });
+
+  await removeLike(db, auth.user.id, parsed.data);
+  return NextResponse.json({ projectId: parsed.data, liked: false }, { headers: PRIVATE });
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li><code>npx vitest run tests/db/likes.test.ts</code> — 찜하기 두 번째는 "이미 있음", 취소는 여러 번 해도 같은 결과</li>
+            <li>로그인 없이 <code>/api/likes</code> → 401, 잘못된 번호 → 400</li>
+          </ul>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>찜을 "몇 번을 보내도 결과가 같은" API 로 만들었습니다 (새로 찜하면 201, 이미 찜해 있으면 200). 빠르게 두 번 눌러도 찜이 두 줄 생기지 않습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t12-s1-api"><span>찜 API 세 개 + DB 테스트</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>찜 버튼: 낙관적 업데이트와 되돌리기 + 토스트</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 하트를 누른 뒤 0.5초 동안 일어나는 일</span>
+          <div class="flow">
+            <div class="node"><strong>onMutate</strong><small>① 진행 중인 요청 멈추기 ② 지금 값 기억 ③ 캐시를 "성공한 셈"으로 바꾸기 → 하트가 바로 채워짐</small></div>
+            <span class="arrow" data-label="서버 요청"></span>
+            <div class="node warn"><strong>onError</strong><small>실패면 ②의 값으로 되돌리고 토스트</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>onSettled</strong><small>성공이든 실패든 서버의 진짜 목록으로 다시 맞추기</small></div>
+          </div>
+        </div>
+        <p class="muted">TanStack Query 는 9주차(무한 스크롤)에 이미 설치했습니다 (<code>@tanstack/react-query@5.104.0</code>). 이번에는 "가져오기"(<code>useQuery</code>)에 더해 "바꾸기"(<code>useMutation</code>)를 씁니다.</p>
+        <figure class="code" data-src="lib/likes-key.ts" data-tag="tumblbug-week12-step2">
+          <figcaption><span class="label">lib/likes-key.ts</span></figcaption>
+          <pre><code>// 찜 캐시의 이름표(queryKey) — 서버(레이아웃이 첫 값을 채움)와 브라우저(useLikes)가 같은 이름을 써야 해서 따로 둔다
+export const LIKES_KEY = ["likes"] as const;
+
+// 내가 찜한 프로젝트 번호들. null = 로그인하지 않음
+export type LikesData = number[] | null;</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/likes-client.ts" data-tag="tumblbug-week12-step2">
+          <figcaption><span class="label">lib/likes-client.ts</span></figcaption>
+          <pre><code>"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/providers/ToastProvider";
+import { LIKES_KEY, type LikesData } from "./likes-key";
+
+// 찜 목록 가져오기. 로그인하지 않았으면(401) null
+async function fetchLikes(): Promise&lt;LikesData&gt; {
+  const res = await fetch("/api/likes");
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(`찜 목록을 불러오지 못했어요 (${res.status})`);
+  return ((await res.json()) as { projectIds: number[] }).projectIds;
+}
+
+// 카드·상세·헤더가 모두 이 훅으로 "같은 캐시"를 본다 → 한 곳에서 찜하면 모든 곳이 동시에 바뀐다
+// 첫 값은 레이아웃이 서버에서 채워 준다(HydrationBoundary) → 처음 그릴 때 깜빡이지 않는다
+export function useLikes() {
+  return useQuery({ queryKey: LIKES_KEY, queryFn: fetchLikes });
+}
+
+type Toggle = { projectId: number; like: boolean };
+
+async function sendToggle({ projectId, like }: Toggle) {
+  const res = like
+    ? await fetch("/api/likes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ projectId }) })
+    : await fetch(`/api/likes/${projectId}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(res.status === 429 ? "너무 자주 눌렀어요. 잠시 후 다시 시도해 주세요" : "찜하지 못했어요. 다시 시도해 주세요");
+}
+
+// 찜하기·취소 — 낙관적 업데이트: 서버 대답을 기다리지 않고 화면부터 바꾼다 (누르자마자 하트가 채워진다)
+//  onMutate  : ① 진행 중인 찜 목록 요청을 멈추고 ② 지금 값을 기억해 두고 ③ 캐시를 "성공했다 치고" 바꾼다
+//  onError   : 서버가 실패하면 ②에서 기억한 값으로 되돌리고 토스트로 알린다
+//  onSettled : 성공이든 실패든 서버의 진짜 목록을 다시 가져와 맞춘다
+export function useToggleLike() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: sendToggle,
+    onMutate: async ({ projectId, like }: Toggle) =&gt; {
+      await queryClient.cancelQueries({ queryKey: LIKES_KEY }); // ① 늦게 도착한 옛 목록이 낙관적 값을 덮어쓰지 않게
+      const previous = queryClient.getQueryData&lt;LikesData&gt;(LIKES_KEY); // ②
+      queryClient.setQueryData&lt;LikesData&gt;(LIKES_KEY, (ids) =&gt; {
+        if (!ids) return ids;
+        return like ? [projectId, ...ids.filter((id) =&gt; id !== projectId)] : ids.filter((id) =&gt; id !== projectId); // ③
+      });
+      return { previous };
+    },
+    onError: (error, _toggle, context) =&gt; {
+      queryClient.setQueryData(LIKES_KEY, context?.previous ?? null);
+      toast.show(error.message, "error");
+    },
+    onSettled: () =&gt; queryClient.invalidateQueries({ queryKey: LIKES_KEY }),
+  });
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="components/like/LikeButton.tsx" data-tag="tumblbug-week12-step2">
+          <figcaption><span class="label">components/like/LikeButton.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import { Heart } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useLikes, useToggleLike } from "@/lib/likes-client";
+import styles from "./LikeButton.module.css";
+
+// 찜 버튼 (Figma LikeButton: Default / Liked).
+//  - overlay: 카드 사진 위 동그란 하트
+//  - labeled: 상세 화면 하단의 하트 + 찜 개수
+// count: 서버가 그린 찜 개수. likedAtRender: 그때 내가 찜해 있었는지.
+//   → 지금 찜 상태가 바뀌면 개수를 ±1 해서 보여 준다 (개수를 따로 다시 가져오지 않아도 즉시 맞는다)
+export function LikeButton({
+  projectId,
+  title,
+  variant = "overlay",
+  count,
+  likedAtRender = false,
+}: {
+  projectId: number;
+  title: string;
+  variant?: "overlay" | "labeled";
+  count?: number;
+  likedAtRender?: boolean;
+}) {
+  const { data: likes } = useLikes();
+  const toggle = useToggleLike();
+  const router = useRouter();
+  const pathname = usePathname();
+  const liked = likes?.includes(projectId) ?? false;
+
+  function onClick() {
+    // 로그인하지 않았으면 로그인 화면으로 (로그인 후 지금 화면으로 돌아온다)
+    if (likes === null) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+    toggle.mutate({ projectId, like: !liked });
+  }
+
+  const shownCount = count === undefined ? undefined : count - (likedAtRender ? 1 : 0) + (liked ? 1 : 0);
+  return (
+    &lt;button
+      type="button"
+      className={`${styles.button} ${styles[variant]}`}
+      aria-pressed={liked}
+      aria-label={`${title} 찜하기`}
+      onClick={onClick}
+    &gt;
+      &lt;Heart size={variant === "overlay" ? 20 : 22} className={liked ? styles.filled : undefined} aria-hidden="true" /&gt;
+      {shownCount !== undefined &amp;&amp; &lt;span className={styles.count}&gt;{shownCount}&lt;/span&gt;}
+    &lt;/button&gt;
+  );
+}</code></pre>
+        </figure>
+        <p>첫 화면부터 하트가 채워져 있게, 레이아웃(서버)이 내 찜 목록을 캐시에 미리 채워 보냅니다.</p>
+        <figure class="code" data-src="app/layout.tsx" data-tag="tumblbug-week12-step2" data-lines="20-42">
+          <figcaption><span class="label">app/layout.tsx (일부)</span></figcaption>
+          <pre><code>export default async function RootLayout({ children }: Readonly&lt;{ children: React.ReactNode }&gt;) {
+  // 찜 목록의 첫 값을 서버에서 채워 보낸다 (TanStack Query hydration).
+  // 서버에서 만든 캐시를 dehydrate(글자로 바꿈) → 브라우저의 HydrationBoundary 가 다시 캐시로 되살린다
+  // → 첫 화면부터 하트가 채워져 있고, 브라우저가 /api/likes 를 따로 부를 때까지 기다리지 않는다
+  const user = await getCurrentUser();
+  const queryClient = new QueryClient();
+  queryClient.setQueryData&lt;LikesData&gt;(LIKES_KEY, user ? await getMyLikeIds(db, user.id) : null);
+
+  return (
+    &lt;html lang="ko"&gt;
+      &lt;body&gt;
+        &lt;QueryProvider&gt;
+          &lt;HydrationBoundary state={dehydrate(queryClient)}&gt;
+            &lt;ToastProvider&gt;
+              &lt;AppHeader /&gt;
+              {children}
+            &lt;/ToastProvider&gt;
+          &lt;/HydrationBoundary&gt;
+        &lt;/QueryProvider&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 토스트는 Zustand 가 아니라 Context?</span>토스트는 "값"이라기보다 앱 전체가 쓰는 <strong>도구</strong>(<code>show("…")</code>)입니다. 저장·복원도 필요 없고 자주 바뀌지도 않습니다. 이럴 때는 React 에 들어 있는 Context 로 충분합니다 — 도구는 필요한 만큼만.</div>
+        <figure class="code" data-src="components/providers/ToastProvider.tsx" data-tag="tumblbug-week12-step5">
+          <figcaption><span class="label">components/providers/ToastProvider.tsx (4·5단계에서 고친 뒤의 모습)</span></figcaption>
+          <pre><code>"use client";
+
+import { CircleAlert, CircleCheck } from "lucide-react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import styles from "./ToastProvider.module.css";
+
+// 토스트 알림 (상태 관리 지도: "앱 전체 공유 값" → React Context)
+// 어느 화면의 어느 컴포넌트든 useToast().show("…") 한 줄로 화면 아래에 잠깐 알림을 띄운다.
+// Zustand 가 아니라 Context 인 이유: 값이 자주 바뀌지 않고(알림 몇 개), 저장·복원도 필요 없는 "앱 전체의 도구"라서
+type Tone = "info" | "error";
+type Toast = { id: number; message: string; tone: Tone };
+type ToastApi = { show: (message: string, tone?: Tone) =&gt; void };
+
+const ToastContext = createContext&lt;ToastApi | null&gt;(null);
+const DURATION_MS = 4_000;
+
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [toasts, setToasts] = useState&lt;Toast[]&gt;([]);
+  const nextId = useRef(1);
+
+  const show = useCallback((message: string, tone: Tone = "info") =&gt; {
+    const id = nextId.current++;
+    setToasts((list) =&gt; [...list.slice(-2), { id, message, tone }]); // 한꺼번에 최대 3개
+    setTimeout(() =&gt; setToasts((list) =&gt; list.filter((t) =&gt; t.id !== id)), DURATION_MS);
+  }, []);
+
+  // 값 객체를 한 번만 만든다 — 그러지 않으면 알림이 뜰 때마다(=이 컴포넌트가 다시 그려질 때마다) 새 객체가 되어,
+  // useToast() 를 useEffect 의존성에 넣은 컴포넌트가 "바뀌었다"고 보고 효과를 또 실행한다 (같은 알림이 여러 번 뜨는 버그)
+  const api = useMemo(() =&gt; ({ show }), [show]);
+
+  return (
+    &lt;ToastContext.Provider value={api}&gt;
+      {children}
+      {/* aria-live: 화면 낭독기가 새 알림을 읽어 준다 (화면을 보지 못해도 결과를 알 수 있게) */}
+      &lt;div className={styles.region} role="status" aria-live="polite" aria-label="알림"&gt;
+        {toasts.map((t) =&gt; {
+          const Icon = t.tone === "error" ? CircleAlert : CircleCheck;
+          return (
+            &lt;p key={t.id} className={`${styles.toast} ${styles[t.tone]}`}&gt;
+              &lt;Icon size={18} aria-hidden="true" /&gt;
+              {t.message}
+            &lt;/p&gt;
+          );
+        })}
+      &lt;/div&gt;
+    &lt;/ToastContext.Provider&gt;
+  );
+}
+
+export function useToast(): ToastApi {
+  const api = useContext(ToastContext);
+  if (!api) throw new Error("useToast 는 &lt;ToastProvider&gt; 안에서만 쓸 수 있어요");
+  return api;
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>예시 계정으로 로그인 → 목록 카드의 하트를 누르면 <strong>즉시</strong> 채워지고, 헤더의 ♡ 숫자도 함께 +1</li>
+            <li>상세로 가면 하트가 채워져 있고 찜 개수도 맞다 (새로 가져오지 않았는데도)</li>
+            <li>로그아웃 상태에서 하트 → 로그인 화면으로, 로그인하면 원래 화면으로</li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>하트가 바뀌었다가 잠깐 뒤 원래대로 깜빡여요</summary><p>진행 중이던 "찜 목록 가져오기"가 늦게 도착해 낙관적 값을 덮어쓴 경우입니다. <code>onMutate</code> 첫 줄의 <code>cancelQueries</code> 가 그걸 막습니다.</p></details>
+          <details><summary>첫 화면에 하트가 비었다가 채워져요</summary><p>서버에서 첫 값을 채우지 않은 경우입니다. 레이아웃의 <code>setQueryData</code> + <code>HydrationBoundary</code>, 그리고 서버와 브라우저가 <strong>같은 이름표</strong>(<code>LIKES_KEY</code>)를 쓰는지 확인하세요.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>찜 상태를 브라우저 캐시 한 곳에 두고, 누르면 캐시부터 바꾸고(낙관적), 실패하면 되돌리게 했습니다. 서버가 첫 값을 채워 보내서 처음부터 깜빡임이 없습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>낙관적 업데이트를 결제에도 쓰면 안 되는 이유는?</summary><p>찜은 실패해도 되돌리면 그만이지만, 결제는 "성공한 척" 보여 줬다가 되돌리면 사용자가 크게 혼란스럽고 돈 문제가 됩니다. 되돌려도 괜찮은, 실패가 드문 동작에만 씁니다.</p></details>
+          <details><summary>카드·헤더·상세가 따로 API 를 부르지 않는데도 같이 바뀌는 이유는?</summary><p>모두 <code>useLikes()</code> 로 같은 캐시(<code>["likes"]</code>)를 보기 때문입니다. 캐시가 바뀌면 그 캐시를 보는 모든 컴포넌트가 다시 그려집니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t12-s2-code"><span>useLikes · useToggleLike · LikeButton · 레이아웃 첫 값 · 토스트</span></label></li>
+          <li><label><input type="checkbox" data-task="t12-s2-check"><span>즉시 반영 · 헤더 숫자 · 로그인 안내 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>내 찜 (/me/likes)</summary>
+      <div class="step-body">
+        <figure class="code" data-src="app/me/likes/page.tsx" data-tag="tumblbug-week12-step3">
+          <figcaption><span class="label">app/me/likes/page.tsx</span></figcaption>
+          <pre><code>import type { Metadata } from "next";
+import { LikedProjectGrid } from "@/components/like/LikedProjectGrid";
+import { db } from "@/db";
+import { listLikedProjects } from "@/lib/queries/listing";
+import { requireUser } from "@/lib/session";
+
+export const metadata: Metadata = { title: "내 찜 — 모아" };
+
+// 내 찜 (/me/likes) — 로그인 필요 (proxy + requireUser)
+export default async function MyLikesPage() {
+  const me = await requireUser("/me/likes");
+  const projects = await listLikedProjects(db, me.id);
+
+  return (
+    &lt;main className="container" style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-xl)", paddingBlock: "var(--spacing-xl) var(--spacing-3xl)" }}&gt;
+      &lt;h1 className="text-heading-l"&gt;내 찜&lt;/h1&gt;
+      &lt;LikedProjectGrid projects={projects} nowIso={new Date().toISOString()} /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="components/like/LikedProjectGrid.tsx" data-tag="tumblbug-week12-step3">
+          <figcaption><span class="label">components/like/LikedProjectGrid.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import Link from "next/link";
+import { ProjectCard } from "@/components/project/ProjectCard";
+import grid from "@/components/project/ProjectGrid.module.css";
+import { useLikes } from "@/lib/likes-client";
+import type { ProjectCardData } from "@/lib/queries/listing";
+
+// 내 찜 목록. 서버가 그린 목록을 "찜 캐시"로 한 번 더 거른다
+// → 여기서 하트를 눌러 취소하면 카드가 바로 사라지고, 서버가 실패하면 되돌아온다 (같은 캐시를 보므로)
+export function LikedProjectGrid({ projects, nowIso }: { projects: ProjectCardData[]; nowIso: string }) {
+  const { data: likes } = useLikes();
+  const now = new Date(nowIso);
+  const visible = projects.filter((p) =&gt; likes?.includes(p.id));
+
+  if (visible.length === 0) {
+    return (
+      &lt;p className="text-body-m text-muted"&gt;
+        아직 찜한 프로젝트가 없어요. &lt;Link href="/projects"&gt;프로젝트 둘러보기&lt;/Link&gt;
+      &lt;/p&gt;
+    );
+  }
+  return (
+    &lt;div className={grid.grid}&gt;
+      {visible.map((p, i) =&gt; (
+        &lt;ProjectCard key={p.id} project={p} now={now} compact priority={i &lt; 4} /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>/me/likes</code> 에서 하트를 눌러 취소하면 카드가 <strong>바로 사라지고</strong>, 헤더 숫자도 −1</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>서버가 그린 "내 찜" 목록을 찜 캐시로 한 번 더 걸러 보여 줍니다. 그래서 여기서 취소해도 새로고침 없이 사라지고, 실패하면 다시 나타납니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t12-s3-code"><span>내 찜 화면 + 즉시 사라짐 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>창작자 스튜디오: 새 후원 자동 확인 + 토스트 중복 버그</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 15초마다 조용히 다시 묻기</span>
+          <div class="flow">
+            <div class="node"><strong>서버가 첫 목록</strong><small>initialData — 화면이 바로 보인다</small></div>
+            <span class="arrow" data-label="15초마다"></span>
+            <div class="node"><strong>/api/projects/[id]/fundings</strong><small>탭을 보고 있을 때만</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>새 후원?</strong><small>토스트 "새 후원 1건" + 새 줄 강조</small></div>
+          </div>
+        </div>
+        <figure class="code" data-src="components/studio/RecentFundings.tsx" data-tag="tumblbug-week12-step4">
+          <figcaption><span class="label">components/studio/RecentFundings.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useToast } from "@/components/providers/ToastProvider";
+import { formatWon } from "@/lib/format";
+import type { RecentFunding } from "@/lib/queries/studio";
+import styles from "./RecentFundings.module.css";
+
+const REFRESH_MS = 15_000;
+const timeFormat = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+async function fetchFundings(projectId: number): Promise&lt;RecentFunding[]&gt; {
+  const res = await fetch(`/api/projects/${projectId}/fundings`);
+  if (!res.ok) throw new Error(`후원 목록을 불러오지 못했어요 (${res.status})`);
+  return ((await res.json()) as { items: RecentFunding[] }).items;
+}
+
+// 새 후원 자동 확인 (상태 관리 지도: TanStack Query ③ refetchInterval)
+//  - 첫 목록은 서버가 그려서 넘긴다(initialData) → 화면이 바로 보인다
+//  - 그 뒤 15초마다 조용히 다시 가져온다. 탭을 보고 있지 않으면 멈춘다 (refetchIntervalInBackground: false 가 기본)
+//  - 새 후원이 생기면 토스트로 알리고, 새 줄을 잠깐 강조한다
+export function RecentFundings({ projectId, initial }: { projectId: number; initial: RecentFunding[] }) {
+  const toast = useToast();
+  const { data = [], dataUpdatedAt, isError } = useQuery({
+    queryKey: ["fundings", projectId],
+    queryFn: () =&gt; fetchFundings(projectId),
+    initialData: initial,
+    refetchInterval: REFRESH_MS,
+  });
+
+  // 지금까지 본 가장 최근 "결제 완료 시각". 이보다 늦게 결제된 후원 = "새 후원"
+  // (후원 번호로 비교하지 않는 이유: 먼저 만든 후원이 나중에 결제될 수도 있다 — 결제창에 오래 머문 경우)
+  const [seenAt, setSeenAt] = useState(initial[0]?.paidAt ?? "");
+  const latestAt = data[0]?.paidAt ?? "";
+  const newIds = data.filter((f) =&gt; f.paidAt &gt; seenAt).map((f) =&gt; f.id); // ISO 시각 글자는 사전 순서 = 시간 순서
+  const newCount = newIds.length;
+
+  useEffect(() =&gt; {
+    if (newCount === 0) return;
+    toast.show(`새 후원 ${newCount}건이 들어왔어요`);
+    const timer = setTimeout(() =&gt; setSeenAt(latestAt), 3_000); // 3초 동안 강조한 뒤 "본 것"으로
+    return () =&gt; clearTimeout(timer);
+  }, [latestAt, newCount, toast]);
+
+  return (
+    &lt;section className={styles.section} aria-labelledby="recent-title"&gt;
+      &lt;div className={styles.head}&gt;
+        &lt;h2 id="recent-title" className="text-heading-m"&gt;
+          최근 후원
+        &lt;/h2&gt;
+        &lt;p className="text-caption text-muted"&gt;
+          {isError ? "새로고침 실패 — 잠시 후 다시 시도해요" : `15초마다 자동 새로고침 · ${timeFormat.format(dataUpdatedAt)} 확인`}
+        &lt;/p&gt;
+      &lt;/div&gt;
+      {data.length === 0 ? (
+        &lt;p className="text-body-s text-muted"&gt;아직 결제 완료된 후원이 없어요.&lt;/p&gt;
+      ) : (
+        &lt;ul className={styles.list}&gt;
+          {data.map((f) =&gt; (
+            &lt;li key={f.id} className={`${styles.item} ${newIds.includes(f.id) ? styles.fresh : ""}`}&gt;
+              &lt;div className={styles.row}&gt;
+                &lt;span className="text-body-m-strong"&gt;{f.supporterName}&lt;/span&gt;
+                &lt;span className="text-body-m-strong"&gt;{formatWon(f.amount)}&lt;/span&gt;
+              &lt;/div&gt;
+              &lt;p className="text-body-s text-muted"&gt;
+                {f.rewardTitle ? `${f.rewardTitle} × ${f.quantity}` : "리워드 없이 후원"} · {timeFormat.format(new Date(f.paidAt))}
+              &lt;/p&gt;
+              {f.message &amp;&amp; &lt;p className="text-body-s"&gt;“{f.message}”&lt;/p&gt;}
+            &lt;/li&gt;
+          ))}
+        &lt;/ul&gt;
+      )}
+    &lt;/section&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">🆘 작성자가 겪은 버그: 토스트가 세 번 떠요</span>
+          <p>새 후원이 1건인데 "새 후원 1건" 토스트가 여러 번 떴습니다. 원인: 토스트를 띄우면 ToastProvider 가 다시 그려지고, 그때 <code>value={{ show }}</code> 가 <strong>매번 새 객체</strong>가 되어 <code>useToast()</code> 값이 "바뀐 것"으로 보입니다. 그 값을 의존성에 넣은 <code>useEffect</code> 가 다시 돌아 토스트를 또 띄우는 거죠.</p>
+          <p>해결: <code>const api = useMemo(() =&gt; ({ show }), [show])</code> — 값 객체를 한 번만 만들어서 계속 같은 객체를 넘깁니다 (2단계 ToastProvider 코드의 주석).</p>
+        </div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>창작자 계정(<code>ohneul_workshop@seed.moa.test</code>)으로 스튜디오를 열어 두고, 다른 브라우저에서 그 프로젝트에 테스트 결제 → 15초 안에 목록에 나타나고 토스트가 <strong>한 번</strong></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>같은 TanStack Query 로 "주기적으로 다시 가져오기"를 붙였습니다. 서버가 알려 주는(푸시) 기술 없이도, 작은 서비스에서는 이 정도로 충분합니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>새 후원을 "후원 번호"가 아니라 "결제 완료 시각"으로 판단하는 이유는?</summary><p>먼저 만든 후원(결제 대기)이 결제창에 오래 머물다 나중에 결제될 수 있습니다. 번호가 작아도 "새로 결제된" 후원이에요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t12-s4-code"><span>스튜디오 자동 새로고침 + 토스트 한 번만</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>흐름 테스트 + 운영 빌드에서만 나는 문제 (prefetch)</summary>
+      <div class="step-body">
+        <figure class="code" data-src="e2e/likes.spec.ts" data-tag="tumblbug-week12-step5" data-lines="65-82">
+          <figcaption><span class="label">e2e/likes.spec.ts (되돌리기 테스트)</span></figcaption>
+          <pre><code>  test("서버가 실패하면 하트가 되돌아가고 토스트로 알린다", async ({ page }) =&gt; {
+    await login(page, LIKER, "/projects");
+    const headerCount = page.getByTestId("header-like-count");
+    const before = await headerCount.textContent();
+
+    // 찜 요청만 일부러 늦게 실패시킨다 (목록 가져오기 GET 은 그대로) → "먼저 바뀌었다가 되돌아가는" 모습을 확인
+    await page.route(/\/api\/likes/, async (route) =&gt; {
+      if (route.request().method() === "GET") return route.continue();
+      await new Promise((r) =&gt; setTimeout(r, 500));
+      await route.fulfill({ status: 500, contentType: "application/json", body: "{}" });
+    });
+    const heart = page.getByRole("button", { name: `${CAT} 찜하기` });
+    await heart.click();
+    await expect(heart).toHaveAttribute("aria-pressed", "true"); // 낙관적 업데이트: 서버 대답 전
+    await expect(page.getByRole("status", { name: "알림" })).toContainText("찜하지 못했어요");
+    await expect(heart).toHaveAttribute("aria-pressed", "false"); // 되돌림
+    await expect(headerCount).toHaveText(before ?? "");
+  });</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 서버 실패를 어떻게 테스트하나요?</span><code>page.route</code> 로 찜 요청만 가로채 0.5초 뒤 500 을 돌려줍니다. "먼저 채워졌다가(낙관적) → 되돌아가고 → 토스트"를 차례로 확인합니다. 토스트 영역은 <code>role="status"</code> + 이름 <code>"알림"</code> 이라 다른 status 와 헷갈리지 않습니다.</div>
+        <div class="box help"><span class="box-title">🆘 작성자가 겪은 문제: 개발 서버에서는 되는데 운영 빌드에서만 내 찜이 비어요</span>
+          <p>운영 빌드의 <code>Link</code> 는 화면에 보이는 순간 다음 페이지를 <strong>미리 받아 둡니다</strong>(prefetch). 헤더의 "내 찜" 링크가 <strong>찜하기 전</strong>에 <code>/me/likes</code> 를 받아 두었다가, 찜한 <strong>뒤</strong>에 그 옛 화면을 보여 준 겁니다.</p>
+          <figure class="code" data-src="components/like/HeaderLikes.tsx" data-tag="tumblbug-week12-step5">
+            <figcaption><span class="label">components/like/HeaderLikes.tsx</span></figcaption>
+            <pre><code>"use client";
+
+import { Heart } from "lucide-react";
+import Link from "next/link";
+import { useLikes } from "@/lib/likes-client";
+import styles from "@/components/layout/AppHeader.module.css";
+
+// 헤더의 "내 찜" — 카드·상세와 같은 찜 캐시를 읽으므로, 어디서 찜하든 숫자가 바로 바뀐다
+export function HeaderLikes() {
+  const { data: likes } = useLikes();
+  if (!likes) return null; // 로그인하지 않음
+  return (
+    // prefetch={false}: 운영 빌드의 Link 는 화면에 보이는 순간 다음 페이지를 미리 받아 둔다.
+    // 찜하기 "전"에 받아 둔 /me/likes 를 찜한 "뒤"에 보여 주면 방금 찜한 프로젝트가 빠져 있다 → 누를 때 새로 받게 한다
+    &lt;Link href="/me/likes" prefetch={false} className={styles.link} aria-label={`내 찜 ${likes.length}개`}&gt;
+      &lt;Heart size={18} aria-hidden="true" /&gt;
+      &lt;span data-testid="header-like-count"&gt;{likes.length}&lt;/span&gt;
+    &lt;/Link&gt;
+  );
+}</code></pre>
+          </figure>
+          <p>교훈: CI 는 운영 빌드(<code>npm run start</code>)로 흐름 테스트를 돌리기 때문에 이 문제를 잡았습니다. 개발 서버만 믿지 마세요.</p>
+        </div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npx playwright test e2e/likes.spec.ts</code> — 로그인 안내 · API 401/400/403 · 네 곳 동시 반영 · 실패 시 되돌림 · 스튜디오 15초 안에 새 후원</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"실패하면 되돌린다"는 약속을 일부러 실패를 만들어 확인했고, 운영 빌드에서만 나는 미리 받기(prefetch) 문제를 찾아 고쳤습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t12-s5-e2e"><span>찜·토스트·스튜디오 흐름 테스트 통과</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">12주차 회고</h2>
+    <div class="retro card">
+      <label for="t12-note-1">잘된 것</label>
+      <textarea id="t12-note-1" data-note="t12-good" placeholder="예: 하트가 즉시 바뀌는 게 기분 좋았다"></textarea>
+      <label for="t12-note-2">막힌 것 (그림의 어느 부분이었나?)</label>
+      <textarea id="t12-note-2" data-note="t12-stuck" placeholder="예: onMutate·onError·onSettled 순서가 헷갈렸다"></textarea>
+      <label for="t12-note-3">다음에 다르게 할 것</label>
+      <textarea id="t12-note-3" data-note="t12-next" placeholder="예: 운영 빌드로도 한 번 확인하는 습관"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t12-retro"><span>12주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week11.html"><small>이전</small>← 11주차 · 결제와 초과 판매 방지</a>
+      <a class="card next" href="week13.html"><small>다음</small>13주차 · 대시보드·관리자·예약 작업 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Next.js 16.3.6 · TanStack Query 5.104.0 · Drizzle ORM 0.45.3 · Playwright 1.63.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

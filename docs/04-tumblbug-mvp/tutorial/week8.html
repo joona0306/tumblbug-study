@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>8주차 리워드·홈·상세·모금 상태 · 모아 교재</title>
+  <meta name="description" content="모금 상태 순수 함수와 경계값 테스트, 리워드 관리, 상태를 SQL로(같은 규칙 감시), 홈·목록·상세 화면, 흐름 테스트 안정화">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week8">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8" aria-current="page">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">8주차 · 5단계</span>
+    <h1>리워드와 모금 상태, 그리고 첫 화면들</h1>
+    <p class="lead">창작자는 리워드를 붙이고, 후원자는 홈·목록·상세에서 프로젝트를 둘러봅니다. 이번 주의 중심은 "<strong>언제 끝나고, 성공인가</strong>"를 정하는 함수 하나입니다.</p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 후원자가 볼 화면이 생긴다</span>
+<div class="flow">
+  <div class="node"><strong>리워드 관리</strong><small>창작자</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>모금 상태 함수</strong><small>언제 끝나고, 성공인가</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>목록·상세 조회</strong><small>SQL 로 같은 규칙</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>홈·목록·상세</strong><small>후원자</small></div>
+</div>
+        </div>
+
+        <div class="table-wrap"><table><thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead><tbody><tr><td><strong>순수 함수</strong></td><td>같은 입력이면 늘 같은 결과, 바깥(DB·현재 시각)을 몰래 읽지 않는 함수</td></tr><tr><td><strong>경계값</strong></td><td>규칙이 바뀌는 바로 그 지점 (23:59:59 / 00:00:00, 목표 딱 도달)</td></tr><tr><td><strong>URL 상태</strong></td><td>주소(?category=)에 담긴 화면 상태 — 공유·새로고침해도 유지</td></tr></tbody></table></div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>모금 상태 순수 함수 getProjectStatus + 경계값 테스트</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 상태는 "저장"하지 않고 "계산"한다 (ADR-001)</span>
+<div class="flow">
+  <div class="node"><strong>입력</strong><small>목표 금액 · 모인 금액 · 마감일 · 지금 시각</small></div>
+  <span class="arrow" data-label="순수 함수"></span>
+  <div class="node"><strong>getProjectStatus</strong><small>funding / success / failed</small></div>
+  <span class="arrow" data-label="같은 규칙"></span>
+  <div class="node"><strong>화면 · 예약 작업 · SQL</strong><small>모두 이 규칙을 따른다</small></div>
+</div>
+<p class="flow-note">상태를 DB 에 저장만 해 두면, 마감 시각이 지나도 누가 바꿔 주기 전까지 "모금중"으로 남는다 → 볼 때마다 계산한다.</p>
+        </div>
+        <figure class="code" data-src="lib/project-status.ts" data-tag="tumblbug-week8-step1" data-lines="1-23">
+          <figcaption><span class="label">lib/project-status.ts</span></figcaption>
+          <pre><code>import { addDays } from "@/lib/dates";
+
+// 모금 상태 계산 — ADR-001: 이 "순수 함수" 하나로 정의하고, 화면·예약 작업·SQL이 모두 같은 규칙을 따른다.
+// 순수 함수 = 같은 입력이면 항상 같은 결과, 바깥(DB·현재 시각)을 몰래 읽지 않는다 → 테스트하기 쉽다.
+// 그래서 "지금 시각(now)"도 인자로 받는다.
+
+export type ProjectStatus = "funding" | "success" | "failed";
+
+// 마감 시각: 마감일의 23:59:59(한국 시간)까지 후원할 수 있다
+// = 다음 날 00:00 한국 시간 = 그날 15:00 UTC 가 되는 "순간"부터 마감
+export function deadlineEnd(deadline: string): Date {
+  return new Date(`${addDays(deadline, 1)}T00:00:00+09:00`);
+}
+
+export function isEnded(deadline: string, now: Date): boolean {
+  return now.getTime() &gt;= deadlineEnd(deadline).getTime();
+}
+
+export function getProjectStatus(input: { goalAmount: number; raised: number; deadline: string; now: Date }): ProjectStatus {
+  if (!isEnded(input.deadline, input.now)) return "funding";
+  // 목표에 "딱" 닿아도 성공 (이상, ≥)
+  return input.raised &gt;= input.goalAmount ? "success" : "failed";
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/project-status.test.ts" data-tag="tumblbug-week8-step1" data-lines="4-40">
+          <figcaption><span class="label">lib/project-status.test.ts</span></figcaption>
+          <pre><code>// 한국 시간으로 시각 만들기 (테스트를 읽기 쉽게)
+const kst = (dateTime: string) =&gt; new Date(`${dateTime}+09:00`);
+const DEADLINE = "2026-10-08";
+const base = { goalAmount: 2_000_000, deadline: DEADLINE };
+
+describe("deadlineEnd", () =&gt; {
+  it("마감일 다음 날 00:00 한국 시간 = 그날 15:00 UTC", () =&gt; {
+    expect(deadlineEnd(DEADLINE).toISOString()).toBe("2026-10-08T15:00:00.000Z");
+  });
+});
+
+describe("getProjectStatus — 경계값", () =&gt; {
+  it("마감일 23:59:59 (한국 시간)까지는 모금중", () =&gt; {
+    expect(getProjectStatus({ ...base, raised: 0, now: kst("2026-10-08T23:59:59") })).toBe("funding");
+  });
+
+  it("다음 날 00:00:00 (한국 시간)이 되는 순간 끝난다", () =&gt; {
+    expect(getProjectStatus({ ...base, raised: 0, now: kst("2026-10-09T00:00:00") })).toBe("failed");
+  });
+
+  it("목표를 넘겨도 마감 전이면 아직 모금중 (성공은 마감 뒤에 확정)", () =&gt; {
+    expect(getProjectStatus({ ...base, raised: 3_000_000, now: kst("2026-10-01T12:00:00") })).toBe("funding");
+  });
+
+  it("목표에 '딱' 닿으면 성공", () =&gt; {
+    expect(getProjectStatus({ ...base, raised: 2_000_000, now: kst("2026-10-09T00:00:00") })).toBe("success");
+  });
+
+  it("1원 모자라면 실패", () =&gt; {
+    expect(getProjectStatus({ ...base, raised: 1_999_999, now: kst("2026-10-09T00:00:00") })).toBe("failed");
+  });
+
+  it("UTC로는 아직 10월 8일이지만 한국은 9일 새벽 — 끝난 것으로 본다", () =&gt; {
+    // UTC 10월 8일 16:00 = 한국 10월 9일 01:00
+    expect(getProjectStatus({ ...base, raised: 0, now: new Date("2026-10-08T16:00:00Z") })).toBe("failed");
+  });
+});</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 "지금 시각"까지 인자로 받는 이유는?</span>함수 안에서 <code>new Date()</code> 를 부르면 테스트할 때마다 결과가 달라집니다. 시각을 인자로 받으면 "마감일 23:59:59", "다음 날 00:00:00" 같은 <strong>경계값</strong>을 정확히 넣어 볼 수 있어요. 이런 함수를 <strong>순수 함수</strong>(같은 입력 → 늘 같은 결과)라고 합니다.</div>
+        <div class="box help"><span class="box-title">⚠️ 시간대 함정</span>마감은 "마감일 23:59:59 <strong>한국 시간</strong>"까지. UTC 로는 그날 15:00 에 끝납니다. 테스트의 마지막 경우(UTC 로는 아직 8일인데 한국은 9일 새벽)가 바로 이 함정을 지킵니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm test</code> → 경계값 테스트 통과 (23:59:59 모금중 · 00:00:00 끝 · 목표 딱 도달 성공 · 1원 모자라면 실패)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>앱에서 가장 중요한 규칙(언제 끝나고, 성공인지 실패인지)을 함수 하나로 정하고, 헷갈리기 쉬운 경계를 테스트로 못 박았습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>목표를 넘겼는데도 "모금중"인 경우는?</summary><p>마감 전이면 목표를 넘겨도 아직 모금중입니다. 성공은 마감 뒤에 확정됩니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t8-s1-status"><span>getProjectStatus + 경계값 테스트</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>리워드 추가·수정·삭제</summary>
+      <div class="step-body">
+        <figure class="code" data-src="lib/validation/reward.ts" data-tag="tumblbug-week8-step2" data-lines="3-40">
+          <figcaption><span class="label">lib/validation/reward.ts</span></figcaption>
+          <pre><code>// 리워드 입력 검사 (PRD C-4). DB의 CHECK(가격 1,000~1,000,000, 한정 수량 &gt; 0)와 같은 규칙.
+export const REWARD_LIMITS = { titleMax: 40, descriptionMax: 200, priceMin: 1_000, priceMax: 1_000_000, qtyMax: 10_000, perProject: 10 } as const;
+
+const toNumber = (value: unknown) =&gt; (typeof value === "string" ? Number(value.replaceAll(",", "").trim() || Number.NaN) : value);
+
+// thisMonth = "YYYY-MM" (한국 시간 이번 달) — 지난달에 전달하겠다는 약속은 막는다
+export function rewardSchema(thisMonth: string) {
+  return z.object({
+    title: z.string().trim().min(1, { error: "리워드 이름을 입력해 주세요" }).max(REWARD_LIMITS.titleMax, { error: `${REWARD_LIMITS.titleMax}자 이하로 써 주세요` }),
+    description: z.string().trim().max(REWARD_LIMITS.descriptionMax, { error: `${REWARD_LIMITS.descriptionMax}자 이하로 써 주세요` }),
+    price: z.preprocess(
+      toNumber,
+      z
+        .number({ error: "숫자로 입력해 주세요" })
+        .int({ error: "원 단위 정수로 입력해 주세요" })
+        .min(REWARD_LIMITS.priceMin, { error: "1,000원 이상 입력해 주세요" })
+        .max(REWARD_LIMITS.priceMax, { error: "1,000,000원 이하로 입력해 주세요" }),
+    ),
+    // 비워 두면 무제한(null)
+    limitQty: z.preprocess(
+      (value) =&gt; (value === "" || value === undefined ? null : toNumber(value)),
+      z
+        .number({ error: "숫자로 입력해 주세요" })
+        .int({ error: "개수는 정수로 입력해 주세요" })
+        .min(1, { error: "1개 이상 입력하거나, 비워서 무제한으로 두세요" })
+        .max(REWARD_LIMITS.qtyMax, { error: `${REWARD_LIMITS.qtyMax.toLocaleString()}개 이하로 입력해 주세요` })
+        .nullable(),
+    ),
+    // &lt;input type="month"&gt; 값 "YYYY-MM" → DB에는 그달 1일로 저장
+    deliveryMonth: z
+      .string()
+      .regex(/^\d{4}-\d{2}$/, { error: "전달 예정 달을 골라 주세요" })
+      .refine((m) =&gt; m &gt;= thisMonth, { error: "이번 달 이후로 골라 주세요" })
+      .transform((m) =&gt; `${m}-01`),
+    // 체크박스: 체크하면 "on", 안 하면 값이 없다
+    needsShipping: z.preprocess((value) =&gt; value === "on" || value === true, z.boolean()),
+  });
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/actions/rewards.ts" data-tag="tumblbug-week8-step2" data-lines="24-54">
+          <figcaption><span class="label">app/actions/rewards.ts</span></figcaption>
+          <pre><code>// 이 프로젝트가 "내 것"인지 먼저 확인한다 (남의 프로젝트에 리워드를 붙이거나 고치지 못하게)
+async function requireMyProject(formData: FormData) {
+  const projectId = Number(formData.get("projectId"));
+  const me = await requireUser(`/projects/${projectId}/edit`);
+  const project = await findMyProject(db, projectId, me.id);
+  if (!project) notFound();
+  return project;
+}
+
+// 이 리워드로 들어온 후원(결제 대기 포함)이 있는가 → 있으면 금액 변경·삭제 불가
+async function hasFundings(rewardId: number) {
+  const [row] = await db.select({ n: count() }).from(funding).where(eq(funding.rewardId, rewardId));
+  return row.n &gt; 0;
+}
+
+export async function createReward(_prev: RewardFormState, formData: FormData): Promise&lt;RewardFormState&gt; {
+  const project = await requireMyProject(formData);
+  const values = readForm(formData);
+  const parsed = rewardSchema(kstToday().slice(0, 7)).safeParse(values);
+  if (!parsed.success) return { fields: toFieldErrors(parsed.error), values };
+
+  const existing = await db.select({ sortOrder: reward.sortOrder }).from(reward).where(eq(reward.projectId, project.id)).orderBy(asc(reward.sortOrder));
+  if (existing.length &gt;= REWARD_LIMITS.perProject) {
+    return { error: `리워드는 프로젝트당 ${REWARD_LIMITS.perProject}개까지 만들 수 있어요`, values };
+  }
+
+  await db.insert(reward).values({ ...parsed.data, projectId: project.id, sortOrder: existing.length });
+  revalidatePath(`/projects/${project.id}`);
+  revalidatePath(`/projects/${project.id}/edit`);
+  return { ok: true, values: {} };
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 서버 액션마다 "내 프로젝트인지"를 먼저 확인하나요?</span>폼의 <code>projectId</code> 는 브라우저가 보내는 값이라 누구나 고칠 수 있습니다. 남의 프로젝트 번호로 바꿔 보내도 리워드가 붙지 않도록, <strong>서버에서 소유자를 확인</strong>합니다 (<code>requireMyProject</code>).</div>
+        <p>후원이 들어온 리워드는 <strong>가격 변경·삭제를 막습니다</strong> — 이미 산 사람이 있는 물건의 가격을 바꾸면 안 되니까요.</p>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>수정 화면 아래에서 리워드 추가 → 목록에 나타남, 수정·삭제 가능 · 11개째는 "10개까지" 안내</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>창작자가 리워드(가격·한정 수량·전달 예정 달·배송 여부)를 관리할 수 있게 됐습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t8-s2-reward"><span>리워드 추가·수정·삭제 (내 프로젝트만)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>목록·상세 조회 — 상태를 SQL 로, 함수와 같은 규칙으로</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 규칙이 두 곳에 있으면 감시한다</span>
+<div class="flow">
+  <div class="node"><strong>getProjectStatus (TypeScript)</strong><small>상세·카드 표시</small></div>
+  <div class="node"><strong>statusSql (SQL)</strong><small>목록에서 "모금중만" 거르기</small></div>
+  <span class="arrow" data-label="비교"></span>
+  <div class="node warn"><strong>tests/db/listing.test.ts</strong><small>두 결과가 다르면 실패</small></div>
+</div>
+<p class="flow-note">목록에서 "모금중인 것만 12개"를 가져오려면 DB 안에서 상태를 알아야 한다. 그래서 같은 규칙을 SQL 로도 쓰고, 테스트가 둘을 비교한다.</p>
+        </div>
+        <figure class="code" data-src="lib/queries/listing.ts" data-tag="tumblbug-week8-step3" data-lines="11-30">
+          <figcaption><span class="label">lib/queries/listing.ts</span></figcaption>
+          <pre><code>// 결제 완료 후원만 모은 프로젝트별 합계 (서브쿼리)
+const stats = (db: Db) =&gt;
+  db
+    .select({
+      projectId: funding.projectId,
+      raised: sql&lt;number&gt;`sum(${funding.amount})::int`.as("raised"),
+      supporters: sql&lt;number&gt;`count(distinct ${funding.supporterId})::int`.as("supporters"),
+    })
+    .from(funding)
+    .where(eq(funding.status, "paid"))
+    .groupBy(funding.projectId)
+    .as("stats");
+
+// 마감 = 마감일 다음 날 00:00 한국 시간.  (deadline + 1)::timestamp at time zone 'Asia/Seoul' = 그 순간(timestamptz)
+function statusSql(s: ReturnType&lt;typeof stats&gt;): SQL&lt;ProjectStatus&gt; {
+  return sql&lt;ProjectStatus&gt;`case
+    when now() &lt; (${project.deadline} + 1)::timestamp at time zone 'Asia/Seoul' then 'funding'
+    when coalesce(${s.raised}, 0) &gt;= ${project.goalAmount} then 'success'
+    else 'failed' end`;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="tests/db/listing.test.ts" data-tag="tumblbug-week8-step3" data-lines="16-44">
+          <figcaption><span class="label">tests/db/listing.test.ts</span></figcaption>
+          <pre><code>describe("SQL로 계산한 상태 = getProjectStatus (규칙이 두 곳에 있으니 어긋나지 않게 감시)", () =&gt; {
+  it("어제 마감·오늘 마감·내일 마감 × 목표 달성·미달·딱 도달", () =&gt;
+    withRollback(async (db) =&gt; {
+      const creator = await makeUser(db);
+      const today = kstToday();
+      const cases = [
+        { deadline: addDays(today, -1), raised: 1_000_000 }, // 어제 끝남, 딱 도달 → 성공
+        { deadline: addDays(today, -1), raised: 999_000 }, // 어제 끝남, 미달 → 실패
+        { deadline: today, raised: 1_000_000 }, // 오늘 마감 → 목표를 채웠어도 아직 모금중
+        { deadline: addDays(today, 1), raised: 0 }, // 내일 마감 → 모금중
+      ];
+      const ids: number[] = [];
+      for (const [i, c] of cases.entries()) {
+        const id = await makeProject(db, creator);
+        await db.update(project).set({ deadline: c.deadline, title: `상태 비교 ${i}` }).where(eq(project.id, id));
+        if (c.raised) await pay(db, id, c.raised, i);
+        ids.push(id);
+      }
+
+      const rows = await listProjects(db, { limit: 1000 });
+      for (const [i, id] of ids.entries()) {
+        const row = rows.find((r) =&gt; r.id === id)!;
+        const expected = getProjectStatus({ goalAmount: 1_000_000, raised: cases[i].raised, deadline: cases[i].deadline, now: new Date() });
+        expect(row.status, `경우 ${i}`).toBe(expected);
+      }
+      expect(rows.find((r) =&gt; r.id === ids[0])!.status).toBe("success");
+      expect(rows.find((r) =&gt; r.id === ids[1])!.status).toBe("failed");
+      expect(rows.find((r) =&gt; r.id === ids[2])!.status).toBe("funding");
+    }));</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 규칙을 한 곳에 두지 못하나요?</span>가능하면 한 곳이 좋지만, 목록은 DB 에서 걸러야 빠릅니다(모든 프로젝트를 가져와 코드로 거르면 느려짐). 대신 "<strong>두 곳이 같다</strong>"를 테스트로 계속 감시합니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm test</code> → listing 테스트 (어제·오늘·내일 마감 × 달성·미달·딱 도달)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>목록은 SQL 로 빠르게, 규칙은 함수와 똑같이. 둘이 어긋나는 순간 테스트가 알려 줍니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t8-s3-query"><span>listProjects · getProjectDetail + DB 테스트</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>홈·목록·상세 화면 (Figma M01·M02·M03·D02)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 필터는 주소에 산다 (URL 상태)</span>
+<div class="flow">
+  <div class="node"><strong>칩·탭 클릭</strong><small>링크</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>/projects?category=living&status=success</strong><small>주소가 바뀜</small></div>
+  <span class="arrow" data-label="서버"></span>
+  <div class="node"><strong>zod 로 주소 검사</strong><small>이상한 값 → 기본값</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>목록 화면</strong><small>새로고침·공유·뒤로가기해도 그대로</small></div>
+</div>
+        </div>
+        <figure class="code" data-src="lib/validation/list-params.ts" data-tag="tumblbug-week8-step4">
+          <figcaption><span class="label">lib/validation/list-params.ts</span></figcaption>
+          <pre><code>import { z } from "zod";
+import { CATEGORY_VALUES } from "@/lib/categories";
+
+// 목록 주소의 ?뒤 값(URL 상태) 검사. 주소는 누구나 고쳐서 보낼 수 있으므로 믿지 않는다.
+// 잘못된 값이면 에러 대신 "없는 것"으로 보고 기본값을 쓴다 (?category=food → 전체)
+const optionalEnum = &lt;T extends readonly [string, ...string[]]&gt;(values: T) =&gt; z.enum(values).optional().catch(undefined);
+
+export const listParamsSchema = z.object({
+  category: optionalEnum(CATEGORY_VALUES as unknown as readonly [string, ...string[]]),
+  status: optionalEnum(["funding", "success", "failed"] as const).transform((v) =&gt; v ?? "funding"),
+  sort: optionalEnum(["deadline", "popular", "new"] as const).transform((v) =&gt; v ?? "deadline"),
+});
+
+export type ListParams = z.infer&lt;typeof listParamsSchema&gt;;
+
+// 지금 조건에서 한 가지만 바꾼 주소 만들기 (칩·탭 링크용). 기본값은 주소에서 뺀다
+export function listHref(current: ListParams, change: Partial&lt;Record&lt;keyof ListParams, string | undefined&gt;&gt;) {
+  const next = { ...current, ...change };
+  const params = new URLSearchParams();
+  if (next.category) params.set("category", next.category);
+  if (next.status &amp;&amp; next.status !== "funding") params.set("status", next.status);
+  if (next.sort &amp;&amp; next.sort !== "deadline") params.set("sort", next.sort);
+  const query = params.toString();
+  return query ? `/projects?${query}` : "/projects";
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="components/project/ProjectCard.tsx" data-tag="tumblbug-week8-step4">
+          <figcaption><span class="label">components/project/ProjectCard.tsx</span></figcaption>
+          <pre><code>import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "@/components/ui/Badge";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { CATEGORIES } from "@/lib/categories";
+import { achievementRate, formatWon } from "@/lib/format";
+import { remainingLabel, urgentLabel } from "@/lib/project-status";
+import type { ProjectCardData } from "@/lib/queries/listing";
+import styles from "./ProjectCard.module.css";
+
+// Figma ProjectCard: 사진(4:3) + 카테고리·창작자 + (배지) + 제목 + 진행률 + %·금액·남은 기간
+// compact: 좁은 2열 카드에서는 금액을 숨긴다 (Figma "Show amount")
+export function ProjectCard({ project, now, compact = false, priority = false }: { project: ProjectCardData; now: Date; compact?: boolean; priority?: boolean }) {
+  const rate = achievementRate(project.raised, project.goalAmount);
+  const urgent = urgentLabel(project.deadline, now);
+  return (
+    &lt;article className={styles.card}&gt;
+      &lt;Link href={`/projects/${project.id}`} className={styles.link}&gt;
+        &lt;div className={styles.image}&gt;
+          &lt;Image src={project.imageUrl} alt="" fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 270px" priority={priority} /&gt;
+        &lt;/div&gt;
+        &lt;p className="text-caption text-muted"&gt;
+          {CATEGORIES[project.category]} · {project.creatorName}
+        &lt;/p&gt;
+        {project.status !== "funding" ? (
+          &lt;Badge status={project.status} /&gt;
+        ) : (
+          urgent &amp;&amp; &lt;Badge status="urgent"&gt;{urgent}&lt;/Badge&gt;
+        )}
+        &lt;h3 className={`text-heading-m ${styles.title}`}&gt;{project.title}&lt;/h3&gt;
+      &lt;/Link&gt;
+      &lt;ProgressBar percent={rate} label={`${project.title} 달성률`} /&gt;
+      &lt;p className={styles.stats}&gt;
+        &lt;span className={styles.rate}&gt;{rate}%&lt;/span&gt;
+        {!compact &amp;&amp; &lt;span className="text-body-s text-muted"&gt;{formatWon(project.raised)}&lt;/span&gt;}
+        &lt;span className={`text-body-s text-muted ${styles.days}`}&gt;{remainingLabel(project.deadline, now)}&lt;/span&gt;
+      &lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 주소의 이상한 값(<code>?category=food</code>)을 에러로 보여 주지 않는 이유는?</span>주소는 사람이 손으로 고치기도 하고, 옛 링크일 수도 있습니다. 화면에서는 친절하게 "<strong>기본값으로</strong>" 보여 줍니다. (9주차 API 는 반대로 400 으로 알려요 — 프로그램이 실수를 바로 알아야 하니까)</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li>홈: 마감 임박·인기 프로젝트, 3일 이내면 D-3 배지</li><li>목록: 칩을 누르면 주소가 바뀌고, 새로고침해도 유지</li><li>상세: 모인 금액·후원자 수·남은 기간·리워드(남은 수량)</li></ul></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>Figma 시안이 실제 화면이 됐습니다. 필터를 주소에 담아서 공유·새로고침·뒤로가기가 모두 자연스럽게 동작합니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>카드 사진의 alt 를 빈 값(alt="")으로 둔 이유는?</summary><p>바로 아래에 같은 내용의 제목이 있어서, 화면 낭독기가 같은 말을 두 번 읽지 않게 하려는 것입니다 (장식 사진).</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t8-s4-pages"><span>홈 · 목록(칩·탭·정렬) · 상세 화면</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>둘러보기 흐름 테스트 + 테스트 안정화</summary>
+      <div class="step-body">
+        <figure class="code" data-src="e2e/helpers.ts" data-tag="tumblbug-week8-step5">
+          <figcaption><span class="label">e2e/helpers.ts</span></figcaption>
+          <pre><code>import { expect, type Page } from "@playwright/test";
+
+// 흐름 테스트 공용 도우미
+export const SEED_PASSWORD = "moa-dev-1234"; // scripts/seed.mts 의 예시 계정 비밀번호
+
+// 로그인 화면에서 로그인하고, "정확히 그 주소"로 돌아올 때까지 기다린다.
+// (정규식으로 "/"를 기다리면 아무 주소에나 맞아 버린다. 여러 테스트가 동시에 로그인하면 느려질 수 있어 15초까지 기다린다)
+export async function login(page: Page, email: string, redirect = "/", password = SEED_PASSWORD) {
+  await page.goto(`/login?redirect=${encodeURIComponent(redirect)}`);
+  await page.getByRole("textbox", { name: "이메일" }).fill(email);
+  await page.getByLabel("비밀번호").fill(password);
+  await page.getByRole("button", { name: "로그인" }).click();
+  await expect(page).toHaveURL((url) =&gt; url.pathname + url.search === redirect, { timeout: 15_000 });
+}</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">🆘 작성자가 겪은 "가끔 실패하는 테스트"</span>로그인 뒤 <code>toHaveURL(/\//)</code> 처럼 정규식으로 기다리면 <strong>아무 주소에나 맞아</strong> 로그인이 끝나기 전에 다음 줄로 넘어갔습니다. "정확히 그 주소"를 기다리는 공용 도우미로 바꾸고, 원격 DB 를 고려해 화면 대기를 10초로 늘렸습니다. 사진 업로드 테스트는 실패해도 <code>try/finally</code> 로 만든 데이터를 정리합니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm run test:e2e</code> → browse·projects·auth 모두 통과, 여러 번 돌려도 같은 결과</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>테스트가 가끔 실패하면 "다시 돌리면 되겠지"가 아니라 원인(기다리는 조건)을 고쳤습니다. 믿을 수 없는 테스트는 없는 것보다 나쁩니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t8-s5-e2e"><span>둘러보기 흐름 테스트 + 공용 login 도우미</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">8주차 회고</h2>
+    <div class="retro card">
+      <label for="t8-note-1">잘된 것</label>
+      <textarea id="t8-note-1" data-note="t8-good" placeholder="예: 경계값 테스트로 시간대 함정을 잡았다"></textarea>
+      <label for="t8-note-2">막힌 것 (어디서, 왜 — 그림의 어느 부분이었나?)</label>
+      <textarea id="t8-note-2" data-note="t8-stuck" placeholder="예: 가끔 실패하는 테스트 원인을 찾느라 오래 걸렸다"></textarea>
+      <label for="t8-note-3">다음에 다르게 할 것</label>
+      <textarea id="t8-note-3" data-note="t8-next" placeholder="예: 규칙이 두 곳에 생기면 비교 테스트부터 쓰겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t8-retro"><span>8주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week7.html"><small>이전</small>← 7주차 · 인증·등록</a>
+      <a class="card next" href="week9.html"><small>다음</small>9주차 · API →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Next.js 16.3.6 · TypeScript 5.9.3 · zod 4.6.5 · Drizzle ORM 0.45.3 · Vitest 5.0.2 · Playwright 1.63.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

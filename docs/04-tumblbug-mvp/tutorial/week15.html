@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>15주차 운영 준비 · 모아 교재</title>
+  <meta name="description" content="문제가 생기면 내가 먼저 안다: 퍼널 기록, 운영 점검, Sentry 알림, 가동 감시, 매일 아침 자동 점검, 백업·복구 연습">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week15">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15" aria-current="page">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">15주차 · 7단계 · 운영 준비</span>
+    <h1>운영 준비: 문제가 생기면 내가 먼저 안다</h1>
+    <p class="lead">
+      사용자가 "안 돼요"라고 알려 주기 전에 <strong>알림이 먼저 오게</strong> 만듭니다. 그리고 "사람들이 어디서 후원을 포기하나"를 셀 수 있게 하고,
+      실수로 데이터를 지웠을 때 <strong>되살릴 수 있는지</strong> 미리 연습합니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 무엇이 잘못되면, 누가 알려 주나</span>
+<div class="flow">
+  <div class="node warn"><strong>코드 에러</strong><small>화면이 깨짐, 500</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>Sentry 알림 메일</strong><small>1단계</small></div>
+</div>
+<div class="flow">
+  <div class="node warn"><strong>사이트가 아예 안 열림</strong><small>서버·DB 장애</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>가동 감시 메일</strong><small>바깥에서 5분마다 두드림 · 2단계</small></div>
+</div>
+<div class="flow">
+  <div class="node warn"><strong>데이터가 조용히 어긋남</strong><small>재고·결제 상태·예약 작업</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>매일 아침 운영 점검</strong><small>GitHub Actions 실패 메일 · 3~4단계</small></div>
+</div>
+<div class="flow">
+  <div class="node warn"><strong>실수로 데이터를 지움</strong><small>잘못된 SQL 등</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>과거 시점 복구</strong><small>Neon 브랜치 · 6단계</small></div>
+</div>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>퍼널 기록 — 어디서 가장 많이 포기하나</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 다섯 단계, 누가 기록하나</span>
+<div class="flow">
+  <div class="node"><strong>상세 보기</strong><small>브라우저가 알림</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>후원 시작(리워드)</strong><small>브라우저</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>배송지</strong><small>브라우저</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>결제 요청</strong><small>서버가 직접</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>결제 완료</strong><small>서버가 직접</small></div>
+</div>
+<p class="flow-note">결제 요청·완료는 서버가 기록한다 — 브라우저가 "결제 완료"를 꾸며 보낼 수 없게.</p>
+        </div>
+        <figure class="code" data-src="lib/funnel.ts" data-tag="tumblbug-week15-step1" data-lines="1-26">
+          <figcaption><span class="label">lib/funnel.ts (기록 부분)</span></figcaption>
+          <pre><code>import { sql } from "drizzle-orm";
+import type { Db } from "@/db";
+import { FUNNEL_STEPS, type FunnelStep, funnelEvent, project } from "@/db/schema";
+
+// 퍼널 기록·집계 (15주차) — PLAN 성공 지표: 상세 → 후원 시작(리워드) → 배송지 → 결제 요청 → 결제 완료
+export const VISITOR_COOKIE = "moa-vid";
+export const VISITOR_COOKIE_OPTIONS = { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax", httpOnly: true } as const;
+export const FUNNEL_LABEL: Record&lt;FunnelStep, string&gt; = {
+  view: "상세 보기",
+  reward: "후원 시작 (리워드)",
+  shipping: "배송지",
+  payment_request: "결제 요청",
+  paid: "결제 완료",
+};
+
+// 한 단계 기록. 같은 방문자·프로젝트·단계는 처음 한 번만 남는다 (기본 키 + ON CONFLICT DO NOTHING)
+// 없거나 숨긴 프로젝트면 아무것도 넣지 않는다 (INSERT ... SELECT ... WHERE EXISTS)
+// 반환: 넣었으면 true
+export async function recordFunnelStep(db: Db, visitorId: string, projectId: number, step: FunnelStep): Promise&lt;boolean&gt; {
+  const result = await db.execute(sql`
+    insert into ${funnelEvent} (visitor_id, project_id, step)
+    select ${visitorId}, ${projectId}, ${step}
+    where exists (select 1 from ${project} where ${project.id} = ${projectId} and ${project.hidden} = false)
+    on conflict do nothing`);
+  return (result.rowCount ?? 0) &gt; 0;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="components/funnel/TrackFunnel.tsx" data-tag="tumblbug-week15-step1">
+          <figcaption><span class="label">components/funnel/TrackFunnel.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import { useEffect } from "react";
+
+// 이 화면에 도착했다고 서버에 알린다 (퍼널 기록, 15주차). 화면에는 아무것도 그리지 않는다
+// keepalive: 곧바로 다른 화면으로 넘어가도 요청이 끊기지 않게. 실패해도 사용자에게는 영향 없음 (기록만 빠진다)
+export function TrackFunnel({ projectId, step }: { projectId: number; step: "view" | "reward" | "shipping" }) {
+  useEffect(() =&gt; {
+    fetch("/api/funnel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId, step }),
+      keepalive: true,
+    }).catch(() =&gt; {});
+  }, [projectId, step]);
+  return null;
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 개인정보 없이 사람을 세는 법</span>방문자는 브라우저 쿠키(<code>moa-vid</code>)의 <strong>무작위 값</strong>으로만 구분합니다. 로그인 계정·IP 와 연결하지 않아요. 같은 방문자·프로젝트·단계는 기본 키 + <code>ON CONFLICT DO NOTHING</code> 으로 <strong>한 번만</strong> 셉니다 (새로고침해도 한 번). 창작자가 자기 프로젝트를 보는 것은 세지 않습니다.</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>후원 흐름의 다섯 지점에 "여기까지 왔다"는 발자국을 남기게 했습니다. 18주차에 이 발자국으로 "가장 많이 빠지는 곳"을 찾습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t15-s1-funnel"><span>퍼널 기록 (표·마이그레이션·브라우저/서버 기록)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>운영 점검 — 데이터가 조용히 어긋나지 않았나</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 가장 찾기 어려운 문제</span>에러도 없고 사이트도 열리는데 <strong>데이터만 틀어진</strong> 경우입니다. 예: 결제는 실패했는데 재고를 안 되돌려서 "품절이 아닌데 품절"로 보임. 아무도 알려 주지 않으니 매일 스스로 확인합니다.</div>
+        <figure class="code" data-src="lib/ops/checks.ts" data-tag="tumblbug-week15-step2">
+          <figcaption><span class="label">lib/ops/checks.ts — 점검 4가지 (문제가 있는 줄을 돌려준다, 빈 배열이면 정상)</span></figcaption>
+          <pre><code>import { sql } from "drizzle-orm";
+import type { Db } from "@/db";
+
+// 운영 점검 (15주차) — PLAN 운영 루프의 "점검 SQL" 을 함수로. `npm run ops:check` 가 모두 돌려 보여 준다
+// 모든 점검은 "문제가 있는 줄"을 돌려준다 → 빈 배열이면 정상 ✅
+// (같은 SQL 을 Neon SQL Editor 에서 직접 돌려 볼 수 있게 sql/week15-ops.sql 에도 적어 두었다)
+
+// ① 재고 어긋남: 리워드의 판매 수(sold_qty) = 재고를 잡고 있는 후원 수량의 합이어야 한다
+//    재고를 잡는 후원 = 결제 완료 + 승인 단계에서 결과를 기다리는 결제 대기 (payment_key 있음, 11주차 confirm.ts)
+//    어긋나면: 실패했는데 재고를 안 되돌렸거나(초과 판매 위험), 두 번 되돌렸다
+export async function findStockMismatches(db: Db) {
+  const result = await db.execute&lt;{ reward_id: number; title: string; sold_qty: number; held_qty: number }&gt;(sql`
+    select r.id as reward_id, r.title, r.sold_qty,
+           coalesce(sum(f.quantity) filter (where f.status = 'paid' or (f.status = 'pending' and f.payment_key is not null)), 0)::int as held_qty
+    from reward r
+    left join funding f on f.reward_id = r.id
+    group by r.id
+    having r.sold_qty &lt;&gt; coalesce(sum(f.quantity) filter (where f.status = 'paid' or (f.status = 'pending' and f.payment_key is not null)), 0)
+    order by r.id`);
+  return result.rows;
+}
+
+// ② 결제 상태 어긋남: 토스가 "승인 완료(DONE)"라고 기록했는데 우리 DB 후원은 결제 완료가 아니다
+//    (웹훅·승인 결과를 반영하지 못했다 → 돈은 나갔는데 후원 내역에 없는 사람이 있다)
+export async function findPaymentMismatches(db: Db) {
+  const result = await db.execute&lt;{ order_id: string; funding_status: string; received_at: string }&gt;(sql`
+    select f.order_id, f.status as funding_status, max(e.received_at)::text as received_at
+    from payment_event e
+    join funding f on f.order_id = e.order_id
+    where e.status = 'DONE' and f.status &lt;&gt; 'paid'
+    group by f.order_id, f.status
+    order by 3 desc`);
+  return result.rows;
+}
+
+// ③ 예약 작업이 돌았나: 마감이 하루 넘게 지났는데 상태가 아직 '모금중' 인 프로젝트 (매일 자정에 확정돼야 한다)
+export async function findUnfinalizedProjects(db: Db) {
+  const result = await db.execute&lt;{ id: number; title: string; deadline: string }&gt;(sql`
+    select id, title, deadline::text
+    from project
+    where status = 'funding' and now() &gt;= (deadline + 2)::timestamp at time zone 'Asia/Seoul'
+    order by deadline`);
+  return result.rows;
+}
+
+// ④ 오래된 결제 대기: 하루 넘게 결제 대기로 남은 후원 (예약 작업이 1시간 지난 것을 정리하므로, 하루 넘게 남았으면 예약 작업이 멈췄다)
+export async function findStalePendings(db: Db) {
+  const result = await db.execute&lt;{ order_id: string; created_at: string; approving: boolean }&gt;(sql`
+    select order_id, created_at::text, payment_key is not null as approving
+    from funding
+    where status = 'pending' and created_at &lt; now() - interval '1 day'
+    order by created_at`);
+  return result.rows;
+}</code></pre>
+        </figure>
+        <div class="table-wrap"><table>
+          <thead><tr><th>점검</th><th>무엇이 잘못됐다는 뜻</th></tr></thead>
+          <tbody>
+            <tr><td>① 재고 어긋남</td><td>판매 수 ≠ 결제 완료·승인 중 수량 → 품절 오표시 또는 초과 판매 위험</td></tr>
+            <tr><td>② 결제 상태 어긋남</td><td>토스는 결제 완료인데 우리 DB 는 아님 → <strong>돈은 나갔는데 후원 내역에 없는 사람</strong> (가장 급함)</td></tr>
+            <tr><td>③ 예약 작업 미실행</td><td>마감 하루가 지났는데 모금중 → 매일 자정 예약 작업이 안 돌았다</td></tr>
+            <tr><td>④ 오래된 결제 대기</td><td>하루 넘게 결제 대기 → 정리 작업이 안 돌았다</td></tr>
+          </tbody>
+        </table></div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 — 개발 DB 로 먼저 (읽기만 한다)</span></figcaption>
+          <pre><code>npm run ops:check</code></pre>
+        </figure>
+        <p class="muted">Neon SQL Editor 에서 직접 보고 싶으면 같은 점검을 적어 둔 <code>sql/week15-ops.sql</code> 을 붙여 넣어 하나씩 실행합니다.</p>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>에러도 없고 사이트도 열리는데 <strong>데이터가 조용히 틀어지는</strong> 경우(재고·결제 상태·예약 작업·오래된 결제 대기)를 SQL 로 찾는 점검을 만들었습니다. 읽기만 하고, 문제가 있으면 종료 코드 1 로 알려 줍니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t15-s2-check"><span><code>npm run ops:check</code> — 퍼널 + 점검 4가지 ✅</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>매일 아침 자동 점검 (운영 DB)</summary>
+      <div class="step-body">
+        <figure class="code" data-src=".github/workflows/ops-check.yml" data-tag="tumblbug-week15-step3">
+          <figcaption><span class="label">.github/workflows/ops-check.yml</span></figcaption>
+          <pre><code># 운영 점검 자동 실행 (15주차) — 매일 아침 운영 DB 에 `npm run ops:check` 를 돌린다
+# 문제가 있으면 이 작업이 실패하고 → GitHub 가 저장소 주인에게 실패 메일을 보낸다 (알림)
+# 읽기만 한다 (DB 를 바꾸지 않는다). 운영 DB 주소는 GitHub "production" 환경의 DATABASE_URL 을 쓴다
+name: Ops check
+
+on:
+  schedule:
+    - cron: "0 22 * * *" # 매일 22:00 UTC = 한국 시간 아침 7시 (예약 작업이 자정에 돈 뒤)
+  workflow_dispatch: # Actions 화면에서 "Run workflow" 로 바로 돌려 볼 수도 있다
+
+jobs:
+  check:
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run ops:check
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}</code></pre>
+        </figure>
+        <p>매일 한국 시간 아침 7시에 운영 DB 로 점검을 돌리고, 문제가 있으면 작업이 <strong>실패</strong> → GitHub 가 저장소 주인에게 실패 메일을 보냅니다. 설정할 것 없음 — 운영 DB 주소는 14주차에 만든 <code>production</code> 환경에 이미 있습니다.</p>
+        <div class="box help"><span class="box-title">🆘 "내 터미널에서 npm run ops:check 를 하라는 건가요?"</span><p>아닙니다 (작성자가 실제로 헷갈린 부분). 내 터미널에서 하면 <code>.env.local</code> 의 <strong>개발 DB</strong>를 봅니다. 운영 DB 점검은 운영 DB 주소를 가진 <strong>GitHub Actions</strong> 가 합니다. 바로 돌려 보려면 Actions → <strong>Ops check</strong> → <strong>Run workflow</strong>. 운영 DB 주소는 내 컴퓨터에 두지 않습니다.</p></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>Run workflow → 초록불, 로그에 "점검 ✅ 4개"와 운영 퍼널 <span class="muted">(작성자 기록: 운영 테스트 후원 1건이 퍼널에 1·1·0·1·1 로 잡힘 — 배송이 없는 리워드라 배송지 0 은 정상)</span></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>그 점검을 <strong>사람 대신 GitHub 이 매일 아침</strong> 운영 DB 에 돌리게 했습니다. 문제가 있으면 작업이 실패하고 실패 메일이 옵니다 — 내 컴퓨터에 운영 DB 주소를 둘 필요가 없습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t15-s3-ops"><span>Actions → Ops check → Run workflow 성공</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>Sentry 알림 — 새 에러가 생기면 메일</summary>
+      <div class="step-body">
+        <p>5주차에 연결한 Sentry 는 에러를 <strong>모아 두기만</strong> 합니다. 프로젝트를 만들 때 "Send a notification for high priority issues" 알림이 하나 있지만(중요해 보이는 것만), <strong>처음 보는 에러는 전부</strong> 받는 알림을 하나 더 만듭니다.</p>
+        <ol>
+          <li>왼쪽 <strong>Monitors → Alerts</strong> → 오른쪽 위 <strong>+ Create Alert</strong> (예전 화면의 "Issues 고르기" 단계는 없어졌습니다)</li>
+          <li><strong>Source</strong>: Alert on all issues in selected projects → 내 프로젝트 · <strong>Filter Issues</strong>: Environment = <code>production</code></li>
+          <li><strong>WHEN</strong>: A new issue is created + <strong>A resolved issue regresses</strong> (고친 에러가 다시 생김)</li>
+          <li><strong>IF</strong>: Any event 그대로 · <strong>Throttling</strong>: 기본 "Notify on every trigger" 그대로 (두 조건 모두 에러 하나당 한 번이라 메일이 쏟아지지 않는다)</li>
+          <li><strong>THEN</strong>: Notify → 이메일 → 나 · <strong>Send Test Notification</strong> → 이름 <code>모아 운영 — 새 에러</code> → Create Alert</li>
+        </ol>
+        <h3>진짜로 울리는지 확인</h3>
+        <ol>
+          <li>Issues 에서 <code>Sentry</code> 로 검색 → 5·13주차 확인 때 생긴 <strong>테스트 이슈를 모두 Resolve</strong></li>
+          <li>운영 주소 <code>/debug/sentry?throw=render</code></li>
+          <li>이슈가 <strong>Regressed</strong>(처음이면 New) → 알림의 <strong>History</strong> 에 1줄 → 메일 → 확인 뒤 다시 Resolve</li>
+        </ol>
+        <div class="box help"><span class="box-title">🆘 작성자가 실제로 막힌 곳</span>
+          <details><summary>테스트 에러를 냈는데 알림이 안 와요</summary><p>테스트 이슈가 이미 있고 Resolve 되지 않은 상태라, 새 에러가 "이미 있는 이슈에 1건 더"로 붙기만 했습니다. 새 이슈도 재발도 아니라서 알림이 울리지 않아요 → 먼저 Resolve.</p></details>
+          <details><summary>알림 메일의 시간이 한국 시간이 아니에요</summary><p>Sentry 는 기본이 UTC(한국 −9시간)입니다. 내 프로필 → User Settings → Preferences → <strong>Timezone</strong> → (UTC+09:00) Asia/Seoul.</p></details>
+        </div>
+        <div class="box check"><span class="box-title">✅ 실제 사례 [실제] — 알림을 켜자마자 온 Fatal</span>
+          <p><code>Error: Connection terminated unexpectedly</code> — Neon 이 한동안 쉬던 DB 연결을 끊었는데, 앱에 "연결이 끊겼을 때"를 받는 코드가 없어서 <strong>서버 프로세스가 통째로 멈췄습니다</strong>. 고친 코드:</p>
+          <figure class="code" data-src="db/pool.ts" data-tag="week16-step1">
+            <figcaption><span class="label">db/pool.ts</span></figcaption>
+            <pre><code>import { Pool } from "pg";
+
+// DB 연결 보관함(Pool) 만들기 — 앱(db/index.ts)과 테스트가 같은 설정을 쓰도록 한 곳에 둔다
+//
+// ⚠️ pool.on("error") 는 반드시 붙인다 (15주차 — Sentry 가 잡은 실제 장애)
+//   보관함 속에서 "쉬고 있는" 연결을 DB 쪽이 끊으면(Neon 이 오래 쉰 연결을 정리할 때 등) Pool 이 error 이벤트를 낸다.
+//   받는 코드가 없으면 Node 는 이것을 처리 안 된 에러로 보고 **프로세스를 통째로 끝낸다** → 그 순간의 요청이 모두 실패
+//   받아 두기만 하면 Pool 은 끊긴 연결을 버리고, 다음 요청에 새 연결을 만든다 (pg 공식 문서가 권하는 방법)
+export function createPool(connectionString: string, max = 5): Pool {
+  const pool = new Pool({ connectionString, max });
+  pool.on("error", (error) =&gt; {
+    console.error(`[db] 쉬고 있던 DB 연결이 끊겼어요 — 다음 요청은 새 연결로 처리해요: ${error.message}`);
+  });
+  return pool;
+}</code></pre>
+          </figure>
+          <figure class="code" data-src="tests/db/pool.test.ts" data-tag="week16-step1">
+            <figcaption><span class="label">tests/db/pool.test.ts — 장애를 재현하는 테스트</span></figcaption>
+            <pre><code>import { afterAll, describe, expect, it } from "vitest";
+import { createPool } from "@/db/pool";
+
+// 15주차 장애 재현: 쉬고 있는 DB 연결을 DB 쪽이 끊어도 앱이 죽지 않고, 다음 쿼리는 새 연결로 된다
+// (Sentry: "Error: Connection terminated unexpectedly" — Fatal. pool 의 error 를 받는 코드가 없어 프로세스가 끝났다)
+// 받는 코드가 없으면 Vitest 가 "Unhandled Error" 로 이 테스트를 실패시킨다 → 이 테스트가 곧 재발 방지 장치
+// Neon 의 "-pooler" 주소는 중간 관리자(PgBouncer)가 실제 DB 연결을 여러 손님에게 돌려 쓴다
+// → "이 연결을 끊어" 가 엉뚱한 연결(끊으라고 시킨 쪽)을 끊을 수 있어서, 이 테스트만 DB 에 직접 연결한다 (CI 의 주소에는 없어서 그대로)
+const directUrl = process.env.DATABASE_URL!.replace("-pooler.", ".");
+const admin = createPool(directUrl, 1);
+afterAll(() =&gt; admin.end());
+
+describe("DB 연결 보관함 (createPool)", () =&gt; {
+  it("쉬고 있는 연결을 DB 가 끊어도 프로세스가 죽지 않고, 다음 쿼리는 성공한다", async () =&gt; {
+    const pool = createPool(directUrl, 1);
+    const { rows: [{ pid }] } = await pool.query&lt;{ pid: number }&gt;("select pg_backend_pid() as pid"); // 연결 1개가 보관함에서 쉬게 된다
+    await admin.query("select pg_terminate_backend($1)", [pid]); // DB 쪽에서 그 연결을 끊는다 (Neon 이 쉬는 연결을 정리하는 상황)
+    await new Promise((r) =&gt; setTimeout(r, 1_000)); // 끊겼다는 알림(error 이벤트)이 도착할 시간
+
+    const { rows } = await pool.query&lt;{ ok: number }&gt;("select 1 as ok"); // 끊긴 연결은 버리고 새로 연결
+    expect(rows[0].ok).toBe(1);
+    await pool.end();
+  });
+});</code></pre>
+          </figure>
+          <p class="muted">테스트가 DB 에 직접 연결(<code>-pooler</code> 를 뺀 주소)하는 이유: pooling 주소는 중간 관리자(PgBouncer)가 실제 연결을 돌려 써서, "그 연결을 끊어"가 엉뚱하게 명령한 쪽 연결을 끊었습니다. 처리 코드를 빼면 테스트가 "처리되지 않은 에러"로 실패하는 것까지 확인 → 재발 방지 장치.</p>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>처음 보는 에러와 고친 에러의 재발이 생기면 메일이 오게 했습니다. 그리고 알림이 실제로 진짜 장애를 잡아냈고, 재현 테스트와 함께 고쳤습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>"A resolved issue regresses" 를 추가하는 이유는?</summary><p>고쳤다고 Resolve 한 에러가 다시 생기면 알려 줍니다. 고친 게 제대로 안 됐거나, 다른 변경이 다시 망가뜨렸다는 신호예요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t15-s4-alert"><span>Sentry 알림 만들기 (production · 새 이슈 + 재발 · 이메일)</span></label></li>
+          <li><label><input type="checkbox" data-task="t15-s4-test"><span>테스트 이슈 Resolve → 테스트 에러 → History·메일 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>가동 감시 — 사이트가 안 열리면 메일</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 Sentry 로는 부족한 이유</span>Sentry 는 "앱이 돌면서 낸 에러"만 압니다. 서버가 아예 멈추거나 DB 가 끊기면 에러를 보낼 수조차 없어요. 그래서 <strong>바깥에서</strong> 몇 분마다 두드려 보는 서비스가 필요합니다.</div>
+        <ol>
+          <li><strong>UptimeRobot</strong> 가입 (화면이 단순함. Better Stack 도 되지만 팀용 기능이 많아 처음엔 복잡) — 가입 화면 <strong>Website to monitor</strong> 에 <code>https://운영주소/api/health</code></li>
+          <li>가입 뒤: 설문은 아무거나, <strong>소식 메일 스위치는 꺼도 됨</strong>(장애 알림은 따로 온다), "Upgrade by …" 유료 홍보 알림은 닫기</li>
+          <li>감시 설정: HTTP(s) · <strong>5분</strong> · Alert contacts = 내 이메일 (가입 확인 메일의 인증 링크를 눌러야 알림이 온다). 무료로 되면 Keyword <code>"ok":true</code> 가 없으면 실패로</li>
+        </ol>
+        <p class="muted">첫 화면이 아니라 <code>/api/health</code> 를 감시하는 이유: DB 까지 확인하고, 끊기면 <strong>503</strong> 을 줍니다 (14주차).</p>
+        <div class="box term"><span class="box-title">📌 알림이 오면</span>사이트를 직접 열어 본다 → <strong>업체 쪽 장애인지 먼저</strong>: Vercel 상태 https://www.vercel-status.com · Neon 상태 https://neonstatus.com → Vercel Deployments·Logs, Neon Monitoring, Sentry 순서로 → 끝나면 장애 회고(<code>templates/08-incident-review.md</code>)</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>감시 화면 <strong>Up</strong>(초록), 5분 간격</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>Sentry 는 "앱이 돌면서 낸 에러"만 압니다. 그래서 <strong>바깥에서 5분마다 <code>/api/health</code> 를 두드리는</strong> 감시를 달았습니다. 서버가 멈추거나 DB 가 끊기면(503) 메일이 옵니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t15-s5-uptime"><span>UptimeRobot 감시 Up · 5분 · 이메일 알림</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>백업·복구 연습 — "지웠다"를 되돌릴 수 있나</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 운영 DB 는 건드리지 않고 과거를 꺼내 본다</span>
+<div class="flow">
+  <div class="node"><strong>① 지금 개수 세기</strong><small>시각은 SQL Editor History 에</small></div>
+  <span class="arrow"></span>
+  <div class="node warn"><strong>② 테스트 프로젝트 만들기</strong><small>"사라지게" 할 대상</small></div>
+  <span class="arrow"></span>
+  <div class="node ext"><strong>③ 과거 시점 브랜치</strong><small>①의 시각으로</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>④ 개수 비교</strong><small>①과 같으면 복구 성공</small></div>
+</div>
+        </div>
+        <div class="box why"><span class="box-title">💡 복구해 본 적 없는 백업은 백업이 아니다</span>사고는 대부분 사람이 냅니다 (잘못된 SQL, 잘못된 마이그레이션). 사고 난 날 처음 해 보면 당황해서 더 큰 사고가 납니다.</div>
+        <ol>
+          <li>Neon 운영 프로젝트 → SQL Editor → <code>select count(*) from project;</code> → 결과와 <strong>왼쪽 History 의 실행 시각</strong>을 적는다</li>
+          <li>운영 사이트에서 테스트 프로젝트를 하나 만든다</li>
+          <li><strong>Branches → New Branch</strong> → 이름 <code>restore-drill</code> · 부모 = 기본 브랜치 · 데이터 범위 <strong>Branch data and schema from a past point in time</strong> → ①의 시각 (Beta 선택지는 고르지 않는다)</li>
+          <li><code>restore-drill</code> 의 SQL Editor 에서 같은 쿼리 → ①의 숫자와 같으면 성공</li>
+          <li><code>restore-drill</code> 브랜치 <strong>삭제</strong> (이름을 꼭 확인 — 기본 브랜치는 지우지 않는다)</li>
+        </ol>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>숫자가 다르게 나와요</summary><p>시각 입력칸의 시간대(한국 시간 / UTC)를 확인하세요. History 가 한국 시간인데 입력칸이 UTC 면 9시간을 빼야 합니다.</p></details>
+          <details><summary>"Branch data and schema" 를 골랐어요</summary><p>그건 "지금" 복사라 ②의 프로젝트까지 들어가서 연습이 안 됩니다. 과거 시점(past point in time)을 골라야 해요.</p></details>
+        </div>
+        <div class="box check"><span class="box-title">✅ 작성자 기록 [실제]</span>15:03 시점 복사본 1개 · 운영 2개(= 원래 1 + 테스트 1) → 복구 성공</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>운영 DB 를 전혀 바꾸지 않고, 과거 모습을 따로 꺼내 봤습니다. 실제 사고 때는 사고 직전 시점 브랜치에서 <strong>필요한 줄만</strong> 꺼내 운영에 되살립니다 (전체를 과거로 되돌리면 그 뒤의 정상 후원까지 사라지므로 마지막 수단).</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t15-s6-restore"><span>복구 연습 성공, restore-drill 삭제, 장애 회고 양식에 "연습"으로 기록</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 7단계 ======================= -->
+    <details class="step" id="step-7">
+      <summary><span class="step-num">7</span>토스 웹훅 등록 (알려진 한계 포함)</summary>
+      <div class="step-body">
+        <p>결제창에서 돌아오지 못한 결제(브라우저를 닫음 등)는 <strong>웹훅</strong>이 마무리합니다 (11주차). 운영 주소가 생겼으니 등록합니다: 토스 개발자센터 → <strong>웹훅</strong> → 등록 → URL <code>https://운영주소/api/webhooks/toss</code> · 이벤트 <strong>PAYMENT_STATUS_CHANGED</strong>.</p>
+        <div class="box help"><span class="box-title">🆘 테스트 결제를 했는데 전송 기록이 비어 있어요 (작성자 실제 경험 — 알려진 한계)</span><p>전자결제 신청 전에 쓰는 <strong>문서 예제용 공용 테스트 키</strong>(<code>test_gck_docs_…</code>)는 내 상점과 연결돼 있지 않아서, 결제는 되지만 <strong>내 상점에 등록한 웹훅은 불리지 않습니다</strong>. 주소가 살아 있는지는 가짜 알림으로 확인할 수 있어요 — 우리 웹훅은 토스에 결제를 다시 조회하므로, 없는 결제면 <code>{"result":"ignored"}</code> 로 200 을 줍니다 (정상). 내 상점 키를 받으면 전송 기록이 생깁니다.</p></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>결제창에서 돌아오지 못한 결제를 마무리할 <strong>웹훅 주소</strong>를 토스에 등록했습니다. 다만 문서 예제용 공용 테스트 키로는 내 상점 웹훅이 불리지 않는다는 한계를 확인하고 기록했습니다 — 코드는 테스트로 검증되어 있습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t15-s7-webhook"><span>웹훅 등록 (공용 키의 한계 이해)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">15주차 회고</h2>
+    <div class="retro card">
+      <label for="t15-note-1">잘된 것</label>
+      <textarea id="t15-note-1" data-note="t15-good"></textarea>
+      <label for="t15-note-2">막힌 것</label>
+      <textarea id="t15-note-2" data-note="t15-stuck"></textarea>
+      <label for="t15-note-3">다음에 다르게 할 것</label>
+      <textarea id="t15-note-3" data-note="t15-next"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t15-retro"><span>15주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week14.html"><small>이전</small>← 14주차 · CD 파이프라인</a>
+      <a class="card next" href="week16.html"><small>다음</small>16주차 · Docker와 AWS EC2 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-27 · @sentry/nextjs 11.0.0 · pg 8.23.0 · Neon PostgreSQL 18 · UptimeRobot (무료) · Next.js 16.3.6</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>
