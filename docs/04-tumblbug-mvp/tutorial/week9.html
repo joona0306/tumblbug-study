@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>9주차 API 설계 · 모아 교재</title>
+  <meta name="description" content="Route Handler와 응답 코드 규칙, 커서 페이지네이션, CDN 캐시, 요청 수 제한(429), TanStack Query 무한 스크롤, 테스트 간섭 없애기">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week9">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9" aria-current="page">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">9주차 · 4단계</span>
+    <h1>API 설계와 무한 스크롤</h1>
+    <p class="lead">이번 주에는 화면이 아니라 <strong>데이터를 주는 주소(API)</strong>를 설계합니다. 누가 어떻게 불러도 같은 모양으로 답하고, 너무 많이 부르면 막고, 끝없는 목록을 빠짐없이 나눠 줍니다.</p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 화면 말고 "데이터 주소"를 만든다</span>
+<div class="flow">
+  <div class="node"><strong>GET /api/projects</strong><small>JSON · 커서 · 응답 규칙</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>요청 수 제한</strong><small>1분 60번 · 429</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>CDN 캐시</strong><small>30초</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>무한 스크롤</strong><small>TanStack Query</small></div>
+</div>
+        </div>
+
+        <div class="table-wrap"><table><thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead><tbody><tr><td><strong>API</strong></td><td>프로그램끼리 데이터를 주고받는 약속된 주소 (여기서는 JSON 을 돌려주는 Route Handler)</td></tr><tr><td><strong>응답 코드</strong></td><td>200 성공 · 400 잘못된 입력 · 401 로그인 필요 · 403 권한 없음 · 404 없음 · 429 너무 많음</td></tr><tr><td><strong>커서 페이지네이션</strong></td><td>"마지막으로 본 항목 다음부터" 가져오는 방식</td></tr><tr><td><strong>TanStack Query</strong></td><td>브라우저에서 서버 데이터를 가져오고 기억(캐시)하는 도구</td></tr></tbody></table></div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>GET /api/projects — 응답 규칙 · 커서 페이지네이션 · 캐시</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — offset 과 cursor</span>
+<div class="flow">
+  <div class="node warn"><strong>offset (몇 번째부터)</strong><small>중간에 새 프로젝트가 생기면 같은 항목이 두 번 나오거나 빠짐 · 뒤로 갈수록 느림</small></div>
+  <span class="arrow" data-label="대신"></span>
+  <div class="node"><strong>cursor (이 항목 다음부터)</strong><small>정렬 기준값 + id 로 "다음"을 정확히 · 인덱스를 타서 늘 빠름</small></div>
+</div>
+        </div>
+        <p><strong>Route Handler</strong> = 화면이 아니라 데이터(JSON)를 돌려주는 주소 (<code>app/api/…/route.ts</code>). 먼저 모든 API 가 같은 모양으로 답하게 규칙을 정합니다:</p>
+        <figure class="code" data-src="lib/api.ts" data-tag="tumblbug-week9-step1">
+          <figcaption><span class="label">lib/api.ts</span></figcaption>
+          <pre><code>import { NextResponse } from "next/server";
+
+// API 응답 규칙 (9주차) — 모든 API가 같은 모양으로 답한다
+//   성공: 200 { ...데이터 } / 만들었으면 201
+//   실패: { error: { code, message, fields? } } + 알맞은 상태 코드
+//     400 입력이 잘못됨 · 401 로그인 필요 · 403 권한 없음 · 404 없음 · 409 충돌(예: 이미 처리됨) · 429 요청이 너무 많음
+export type ApiErrorCode = "INVALID_QUERY" | "INVALID_BODY" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "RATE_LIMITED";
+
+const STATUS: Record&lt;ApiErrorCode, number&gt; = {
+  INVALID_QUERY: 400,
+  INVALID_BODY: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  RATE_LIMITED: 429,
+};
+
+export function apiError(code: ApiErrorCode, message: string, options: { fields?: Record&lt;string, string | undefined&gt;; headers?: HeadersInit } = {}) {
+  return NextResponse.json({ error: { code, message, ...(options.fields ? { fields: options.fields } : {}) } }, { status: STATUS[code], headers: options.headers });
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/api/projects/route.ts" data-tag="tumblbug-week9-step1">
+          <figcaption><span class="label">app/api/projects/route.ts</span></figcaption>
+          <pre><code>import { type NextRequest, NextResponse } from "next/server";
+import { db } from "@/db";
+import { apiError } from "@/lib/api";
+import type { Category } from "@/lib/categories";
+import { decodeCursor } from "@/lib/cursor";
+import { listProjectsPage } from "@/lib/queries/listing";
+import { toFieldErrors } from "@/lib/validation/auth";
+import { apiListQuerySchema } from "@/lib/validation/api-list";
+
+// GET /api/projects?category=&amp;status=&amp;sort=&amp;limit=&amp;cursor=
+// 목록 무한 스크롤용 공개 API. 응답: { items: [...], nextCursor: "…" | null }
+export async function GET(request: NextRequest) {
+  const parsed = apiListQuerySchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
+  if (!parsed.success) {
+    return apiError("INVALID_QUERY", "요청 값이 올바르지 않아요", { fields: toFieldErrors(parsed.error) });
+  }
+  const { cursor: rawCursor, category, ...options } = parsed.data;
+  const cursor = decodeCursor(rawCursor);
+  if (rawCursor &amp;&amp; !cursor) {
+    return apiError("INVALID_QUERY", "커서가 올바르지 않아요", { fields: { cursor: "처음부터 다시 불러와 주세요" } });
+  }
+
+  const page = await listProjectsPage(db, { ...options, category: category as Category | undefined, cursor });
+
+  return NextResponse.json(page, {
+    headers: {
+      // 누구에게나 같은 공개 데이터 → CDN(Vercel)이 30초 동안 저장해 두고 대신 답한다.
+      // 30초가 지나면 60초 동안은 저장본을 먼저 주고 뒤에서 새로 받아온다 (stale-while-revalidate)
+      "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+    },
+  });
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/cursor.ts" data-tag="tumblbug-week9-step1">
+          <figcaption><span class="label">lib/cursor.ts</span></figcaption>
+          <pre><code>// 커서(cursor) = "마지막으로 본 항목"을 가리키는 표. 다음 페이지는 "이 항목 다음부터" 가져온다.
+//   offset(몇 번째부터) 방식: 중간에 새 프로젝트가 생기면 같은 항목이 두 번 나오거나 빠진다, 뒤로 갈수록 느리다
+//   cursor 방식: 정렬 기준값 + id 로 "다음"을 정확히 찾는다, 인덱스를 타서 항상 빠르다
+// 브라우저에는 내용을 알 필요 없는 글자(base64url)로 준다
+
+export type Cursor = { v: string | number; id: number };
+
+export function encodeCursor(cursor: Cursor): string {
+  return Buffer.from(JSON.stringify(cursor)).toString("base64url");
+}
+
+// 잘못된 커서는 undefined (누구나 주소를 고쳐 보낼 수 있으므로 믿지 않는다)
+export function decodeCursor(value: string | undefined | null): Cursor | undefined {
+  if (!value) return undefined;
+  try {
+    const parsed: unknown = JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+    if (
+      typeof parsed === "object" &amp;&amp;
+      parsed !== null &amp;&amp;
+      "id" in parsed &amp;&amp;
+      "v" in parsed &amp;&amp;
+      Number.isInteger(parsed.id) &amp;&amp;
+      (typeof parsed.v === "string" || typeof parsed.v === "number")
+    ) {
+      return { v: parsed.v, id: parsed.id as number };
+    }
+  } catch {
+    // 아래로
+  }
+  return undefined;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/queries/listing.ts" data-tag="tumblbug-week9-step1" data-lines="72-81">
+          <figcaption><span class="label">lib/queries/listing.ts (커서 조건)</span></figcaption>
+          <pre><code>  // 커서 조건: 정렬 순서에서 "커서 항목보다 뒤"인 것만. (a, b) &gt; (x, y) = 행 비교 — a가 크거나, 같으면 b가 큰 것
+  const after = !cursor
+    ? undefined
+    : sort === "popular"
+      ? sql`(${supporters} &lt; ${Number(cursor.v)} or (${supporters} = ${Number(cursor.v)} and ${project.id} &gt; ${cursor.id}))`
+      : sort === "new"
+        ? sql`(${project.createdAt}, ${project.id}) &lt; (${String(cursor.v)}::timestamptz, ${cursor.id})`
+        : deadlineDesc
+          ? sql`(${project.deadline}, ${project.id}) &lt; (${String(cursor.v)}::date, ${cursor.id})`
+          : sql`(${project.deadline}, ${project.id}) &gt; (${String(cursor.v)}::date, ${cursor.id})`;</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/queries/listing.ts" data-tag="tumblbug-week9-step1" data-lines="114-125">
+          <figcaption><span class="label">lib/queries/listing.ts (한 페이지 + 다음 커서)</span></figcaption>
+          <pre><code>// 한 페이지 + 다음 페이지 커서. limit+1개를 가져와서 하나가 더 있으면 "다음이 있다"
+export async function listProjectsPage(db: Db, options: ListOptions &amp; { limit: number }) {
+  const rows = await listProjects(db, { ...options, limit: options.limit + 1 });
+  const items = rows.slice(0, options.limit);
+  const last = items.at(-1);
+  const hasMore = rows.length &gt; options.limit &amp;&amp; last !== undefined;
+  const sort = options.sort ?? "deadline";
+  const nextCursor = hasMore
+    ? encodeCursor({ v: sort === "popular" ? last.supporters : sort === "new" ? last.createdAt : last.deadline, id: last.id })
+    : null;
+  return { items, nextCursor };
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 화면 주소는 이상한 값을 기본값으로 바꾸는데, API 는 왜 400 으로 거절하나요?</span>화면은 사람이 보니 친절하게, API 는 <strong>프로그램</strong>(우리 무한 스크롤 등)이 쓰니 실수를 바로 알 수 있게 거절합니다. 응답 코드는 약속입니다: 400 입력이 잘못됨 · 401 로그인 필요 · 403 권한 없음 · 404 없음 · 409 충돌 · 429 요청이 너무 많음.</div>
+        <div class="box why"><span class="box-title">💡 Cache-Control 은 무엇을 하나요?</span>누구에게나 같은 공개 데이터라서 Vercel(CDN)이 30초 동안 저장해 두고 대신 답합니다. 그 뒤 60초는 저장본을 먼저 주고 뒤에서 새로 받아옵니다(stale-while-revalidate). DB 에 가는 요청이 크게 줄어요.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li>http://localhost:3000/api/projects?limit=2 → <code>{"items":[…2개],"nextCursor":"…"}</code></li><li>그 nextCursor 를 <code>&cursor=</code> 로 붙이면 다음 2개</li><li><code>?limit=abc</code> → 400 과 칸마다 이유</li></ul></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>목록을 "조각조각" 가져갈 수 있는 공개 API 를 만들었습니다. 커서가 "마지막으로 본 항목"을 가리켜서, 중간에 새 프로젝트가 생겨도 빠짐·중복이 없습니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>limit+1 개를 가져오는 이유는?</summary><p>하나를 더 가져와 보면 "다음 페이지가 있는지"를 쿼리 한 번으로 알 수 있습니다. 있으면 마지막 항목으로 커서를 만들고, 더 가져온 하나는 버립니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t9-s1-api"><span>GET /api/projects · 커서 · 400 규칙</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>요청 수 제한 (429 Too Many Requests)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 1분짜리 칸에 요청 수를 센다</span>
+<div class="flow">
+  <div class="node"><strong>요청</strong><small>IP + API 이름</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>rate_limit 표</strong><small>(키, 1분 칸) → 횟수 +1</small></div>
+  <span class="arrow" data-label="60번 넘으면"></span>
+  <div class="node warn"><strong>429</strong><small>Retry-After: 몇 초 뒤 다시</small></div>
+</div>
+<p class="flow-note">서버리스는 서버가 여러 대로 나뉘어 돌아서 메모리로는 셀 수 없다 → 모두가 보는 DB 에 센다.</p>
+        </div>
+        <figure class="code" data-src="db/schema.ts" data-tag="tumblbug-week9-step2" data-lines="159-169">
+          <figcaption><span class="label">db/schema.ts (rate_limit)</span></figcaption>
+          <pre><code>// 요청 수 제한 기록 (9주차): "이 키(예: IP+API)가 이 시간 칸(1분)에 몇 번 요청했나"
+// 서버리스는 서버가 여러 대로 나뉘어 돌아서 메모리로는 셀 수 없다 → 모두가 보는 DB에 센다
+export const rateLimit = pgTable(
+  "rate_limit",
+  {
+    key: text("key").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (t) =&gt; [primaryKey({ columns: [t.key, t.windowStart] })],
+);</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/rate-limit.ts" data-tag="tumblbug-week9-step2" data-lines="5-25">
+          <figcaption><span class="label">lib/rate-limit.ts</span></figcaption>
+          <pre><code>// 요청 수 제한 (고정 시간 칸 방식): 1분을 한 칸으로 보고, 칸마다 요청 수를 센다.
+// INSERT ... ON CONFLICT DO UPDATE = "없으면 1로 넣고, 있으면 +1" 을 한 문장으로 (동시에 와도 정확히 센다)
+// 지난 시간 칸의 기록은 13주차 예약 작업이 하루 한 번 지운다
+export type RateLimitResult = { allowed: boolean; limit: number; remaining: number; resetAt: Date };
+
+export async function consumeRateLimit(db: Db, key: string, limit: number, windowSeconds: number): Promise&lt;RateLimitResult&gt; {
+  // 지금이 속한 시간 칸의 시작 시각: 예) 1분 칸이면 12:34:56 → 12:34:00
+  const windowStart = sql`to_timestamp(floor(extract(epoch from now()) / ${windowSeconds}) * ${windowSeconds})`;
+  const [row] = await db
+    .insert(rateLimit)
+    .values({ key, windowStart, count: 1 })
+    .onConflictDoUpdate({ target: [rateLimit.key, rateLimit.windowStart], set: { count: sql`${rateLimit.count} + 1` } })
+    .returning({ count: rateLimit.count, windowStart: rateLimit.windowStart });
+
+  return {
+    allowed: row.count &lt;= limit,
+    limit,
+    remaining: Math.max(0, limit - row.count),
+    resetAt: new Date(row.windowStart.getTime() + windowSeconds * 1000),
+  };
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/api/projects/route.ts" data-tag="tumblbug-week9-step2" data-lines="11-20">
+          <figcaption><span class="label">app/api/projects/route.ts</span></figcaption>
+          <pre><code>// GET /api/projects?category=&amp;status=&amp;sort=&amp;limit=&amp;cursor=
+// 목록 무한 스크롤용 공개 API. 응답: { items: [...], nextCursor: "…" | null }
+// 같은 IP는 1분에 60번까지 (무한 스크롤은 한 번에 1~2번이면 충분 — 그 이상은 자동화된 긁어가기일 가능성)
+const RATE_LIMIT = { limit: 60, windowSeconds: 60 };
+
+export async function GET(request: NextRequest) {
+  const rate = await consumeRateLimit(db, `api:projects:${clientIp(request.headers)}`, RATE_LIMIT.limit, RATE_LIMIT.windowSeconds);
+  if (!rate.allowed) {
+    return apiError("RATE_LIMITED", "요청이 너무 많아요. 잠시 후 다시 시도해 주세요", { headers: rateLimitHeaders(rate) });
+  }</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 "없으면 1, 있으면 +1"을 한 문장(upsert)으로 하는 이유는?</span>먼저 읽고 나중에 쓰면, 동시에 온 요청 둘이 같은 숫자를 읽고 둘 다 +1 해서 하나를 놓칩니다 (6주차 조건부 차감과 같은 문제). <code>INSERT … ON CONFLICT DO UPDATE</code> 한 문장이면 DB 가 정확히 셉니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>응답 헤더에 <code>X-RateLimit-Limit: 60</code>, <code>X-RateLimit-Remaining</code>. 같은 IP 로 1분에 61번째 요청부터는 429 (흐름 테스트는 헤더의 60 을 확인)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>공개 API 를 누군가 자동으로 긁어 가거나 실수로 무한 반복해도 DB 가 버티게 했습니다. 지난 칸 기록은 13주차 예약 작업이 하루 한 번 지웁니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t9-s2-rate"><span>rate_limit 표 · 429 · 헤더</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>TanStack Query 로 무한 스크롤</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 첫 페이지는 서버가, 나머지는 브라우저가</span>
+<div class="flow">
+  <div class="node"><strong>서버 컴포넌트</strong><small>첫 12개를 그려서 보냄 (initialPage)</small></div>
+  <span class="arrow" data-label="화면 끝에 닿으면"></span>
+  <div class="node"><strong>useInfiniteQuery</strong><small>/api/projects?cursor= 로 다음 12개</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>캐시(기억)</strong><small>조건별로 따로 · 30초 신선</small></div>
+</div>
+<p class="flow-note">상태 관리 지도: "서버 데이터를 브라우저에서 이어서 가져온다" → TanStack Query. 서버 데이터를 useState 에 복사해 두지 않는다.</p>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm i @tanstack/react-query@5.104.0</code></pre>
+        </figure>
+        <figure class="code" data-src="components/providers/QueryProvider.tsx" data-tag="tumblbug-week9-step3">
+          <figcaption><span class="label">components/providers/QueryProvider.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
+
+// TanStack Query: 브라우저가 서버 데이터를 가져와 "기억(캐시)"하는 도구 (상태 관리 지도: 서버 상태를 브라우저에서 다룰 때)
+// QueryClient = 그 기억 저장소. 컴포넌트가 다시 그려져도 같은 저장소를 쓰도록 useState 로 한 번만 만든다.
+export function QueryProvider({ children }: { children: React.ReactNode }) {
+  const [client] = useState(
+    () =&gt;
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000, // 30초 안에는 "아직 신선하다"고 보고 다시 가져오지 않는다 (API 캐시 시간과 맞춤)
+            retry: 1, // 실패하면 한 번만 더 시도
+          },
+        },
+      }),
+  );
+  return &lt;QueryClientProvider client={client}&gt;{children}&lt;/QueryClientProvider&gt;;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="components/project/InfiniteProjectGrid.tsx" data-tag="tumblbug-week9-step3" data-lines="28-86">
+          <figcaption><span class="label">components/project/InfiniteProjectGrid.tsx</span></figcaption>
+          <pre><code>// 목록 무한 스크롤 (9주차).
+//  - 첫 페이지는 서버가 그려서 넘겨준다(initialPage) → 화면이 바로 보이고, 같은 데이터를 두 번 받지 않는다
+//  - 끝에 닿으면 다음 페이지를 API로 이어서 가져온다
+export function InfiniteProjectGrid({ params, initialPage, nowIso }: { params: Params; initialPage: Page; nowIso: string }) {
+  const now = new Date(nowIso); // 서버와 같은 "지금"으로 그려야 서버·브라우저 결과가 어긋나지 않는다
+  const query = useInfiniteQuery({
+    queryKey: ["projects", params], // 조건이 다르면 다른 기억 칸
+    queryFn: ({ pageParam }) =&gt; fetchPage(params, pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) =&gt; last.nextCursor, // null 이면 "더 없음"
+    initialData: { pages: [initialPage], pageParams: [null] },
+  });
+
+  // 목록 끝의 보이지 않는 표시(sentinel)가 화면에 들어오면 다음 페이지를 부른다
+  const sentinel = useRef&lt;HTMLDivElement&gt;(null);
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
+  useEffect(() =&gt; {
+    const el = sentinel.current;
+    if (!el || !hasNextPage) return;
+    const observer = new IntersectionObserver((entries) =&gt; {
+      if (entries[0].isIntersecting &amp;&amp; !isFetchingNextPage) fetchNextPage();
+    }, { rootMargin: "400px" }); // 끝에 닿기 조금 전에 미리
+    observer.observe(el);
+    return () =&gt; observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const projects = query.data.pages.flatMap((p) =&gt; p.items);
+  if (projects.length === 0) return &lt;p className={grid.empty}&gt;조건에 맞는 프로젝트가 없어요.&lt;/p&gt;;
+
+  return (
+    &lt;&gt;
+      &lt;div className={grid.grid}&gt;
+        {projects.map((p, i) =&gt; (
+          &lt;ProjectCard key={p.id} project={p} now={now} compact priority={i &lt; 4} /&gt;
+        ))}
+      &lt;/div&gt;
+      &lt;div ref={sentinel} aria-hidden="true" /&gt;
+      &lt;div className={grid.more}&gt;
+        {query.isFetchNextPageError ? (
+          &lt;&gt;
+            &lt;p role="alert" className="text-body-s"&gt;
+              {query.error?.message}
+            &lt;/p&gt;
+            &lt;Button variant="secondary" size="m" onClick={() =&gt; fetchNextPage()}&gt;
+              다시 시도
+            &lt;/Button&gt;
+          &lt;/&gt;
+        ) : hasNextPage ? (
+          // 스크롤 대신 키보드·화면 낭독기로도 더 볼 수 있게 버튼을 함께 둔다
+          &lt;Button variant="secondary" size="m" onClick={() =&gt; fetchNextPage()} disabled={isFetchingNextPage}&gt;
+            {isFetchingNextPage ? "불러오는 중…" : "더 보기"}
+          &lt;/Button&gt;
+        ) : (
+          projects.length &gt; PAGE_SIZE &amp;&amp; &lt;p className="text-caption text-muted"&gt;모든 프로젝트를 봤어요&lt;/p&gt;
+        )}
+      &lt;/div&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 스크롤로 자동으로 불러오는데 "더 보기" 버튼은 왜 두나요?</span>키보드나 화면 낭독기로는 "스크롤해서 끝에 닿기"가 어렵습니다. 같은 동작을 <strong>버튼으로도</strong> 할 수 있게 둡니다. 실패하면 이유와 "다시 시도" 버튼을 보여 주고요.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>목록을 끝까지 내리면 다음 12개가 이어서 나온다 · 칩을 바꾸면 처음부터 · 다 보면 "모든 프로젝트를 봤어요"</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>서버와 브라우저 결과가 다르다는 hydration 경고</summary><p>"지금 시각"을 브라우저에서 새로 만들면 서버가 그린 "N일 남음"과 어긋날 수 있습니다. 서버가 쓴 시각(<code>nowIso</code>)을 넘겨받아 같은 시각으로 그립니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>목록이 끝없이 이어집니다. 첫 화면은 서버가 바로 그려서 빠르고, 이어지는 부분만 API 로 가져오며, 이미 받은 것은 기억해 둡니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>queryKey 에 필터 조건(params)을 넣는 이유는?</summary><p>조건이 다르면 다른 목록이므로 다른 "기억 칸"을 써야 합니다. 안 넣으면 리빙 목록 뒤에 공예 목록이 섞여 이어 붙습니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t9-s3-infinite"><span>QueryProvider + 무한 스크롤 (+ 더 보기 버튼)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>API·무한 스크롤 흐름 테스트 + 테스트 간섭 없애기</summary>
+      <div class="step-body">
+        <figure class="code" data-src="e2e/infinite.spec.ts" data-tag="tumblbug-week9-step4" data-lines="4-46">
+          <figcaption><span class="label">e2e/infinite.spec.ts</span></figcaption>
+          <pre><code>// 9주차 흐름 테스트: /api/projects (커서 페이지네이션·응답 규칙) + 목록 무한 스크롤(TanStack Query)
+// 시드 데이터는 한 페이지(12개)를 넘지 않으므로, "게임" 카테고리에 임시 프로젝트 30개를 넣고 끝나면 지운다.
+// API·무한 스크롤은 기기와 무관하므로 desktop 에서만 실행한다.
+// (mobile·desktop 이 동시에 돌면 둘 다 30개씩 넣어서 "게임" 카테고리가 60개가 되어 개수 확인이 어긋난다)
+test.describe.configure({ mode: "serial" });
+test.skip(({ isMobile }) =&gt; isMobile, "기기와 무관한 테스트 — desktop 에서만");
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+const TAG = `[무한스크롤 테스트 ${Date.now()}-${Math.random().toString(36).slice(2, 6)}]`;
+const COUNT = 30;
+
+test.beforeAll(async () =&gt; {
+  await pool.query(
+    `insert into project (creator_id, title, summary, category, goal_amount, deadline, image_url)
+     select (select id from "user" where email = 'ohneul_workshop@seed.moa.test'), $1 || ' ' || g, '요약', 'game', 100000,
+            (now() at time zone 'Asia/Seoul')::date + (g % 20) + 1,
+            'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=1200&amp;q=80&amp;fm=jpg'
+     from generate_series(1, $2::int) g`,
+    [TAG, COUNT],
+  );
+});
+test.afterAll(async () =&gt; {
+  await pool.query("delete from project where title like $1", [`${TAG}%`]);
+  await pool.end();
+});
+
+test("API: 커서로 끝까지 넘기면 빠짐·중복 없이 전부 나온다", async ({ request }) =&gt; {
+  const seen: number[] = [];
+  let cursor: string | null = null;
+  let pages = 0;
+  do {
+    const res: APIResponse = await request.get(`/api/projects?category=game&amp;limit=7${cursor ? `&amp;cursor=${cursor}` : ""}`);
+    expect(res.status()).toBe(200);
+    expect(res.headers()["x-ratelimit-limit"]).toBe("60");
+    const body: { items: { id: number; title: string }[]; nextCursor: string | null } = await res.json();
+    seen.push(...body.items.filter((p) =&gt; p.title.startsWith(TAG)).map((p) =&gt; p.id));
+    cursor = body.nextCursor;
+    pages += 1;
+  } while (cursor &amp;&amp; pages &lt; 20);
+  expect(seen).toHaveLength(COUNT);
+  expect(new Set(seen).size).toBe(COUNT); // 중복 없음
+  expect(pages).toBe(Math.ceil(COUNT / 7)); // 30개 ÷ 7 = 5페이지
+});</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">🆘 같은 DB 를 쓰는 테스트끼리 서로 흔든다</span>흐름 테스트는 여러 파일이 <strong>동시에</strong> 같은 DB 를 씁니다. 다른 테스트가 프로젝트를 만들고 지우는 사이에 "전체 개수가 N개"를 확인하면 가끔 틀려요. 그래서 ① 내 테스트만의 표식(TAG)을 붙인 데이터만 세고 ② 기기와 무관한 테스트는 desktop 에서만 ③ 전체 개수 대신 "성공·실패 배지 0개"처럼 흔들리지 않는 것을 확인합니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm run test:e2e</code> → 커서로 끝까지: 빠짐·중복 없이 30개, 5페이지 · 잘못된 값 400 · 무한 스크롤 30개 + 끝 안내</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>API 의 약속(빠짐·중복 없음, 400, 요청 제한 헤더)과 무한 스크롤을 테스트로 고정하고, 테스트끼리 서로 흔들지 않게 했습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t9-s4-e2e"><span>API·무한 스크롤 흐름 테스트</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">9주차 회고</h2>
+    <div class="retro card">
+      <label for="t9-note-1">잘된 것</label>
+      <textarea id="t9-note-1" data-note="t9-good" placeholder="예: 커서 방식이 왜 빠짐·중복이 없는지 이해했다"></textarea>
+      <label for="t9-note-2">막힌 것 (어디서, 왜 — 그림의 어느 부분이었나?)</label>
+      <textarea id="t9-note-2" data-note="t9-stuck" placeholder="예: 테스트끼리 같은 DB를 써서 개수가 가끔 틀렸다"></textarea>
+      <label for="t9-note-3">다음에 다르게 할 것</label>
+      <textarea id="t9-note-3" data-note="t9-next" placeholder="예: API 응답 코드 표를 먼저 정하고 만들겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t9-retro"><span>9주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week8.html"><small>이전</small>← 8주차 · 리워드·상태</a>
+      <a class="card next" href="week10.html"><small>다음</small>10주차 · 후원 단계 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Next.js 16.3.6 · TypeScript 5.9.3 · zod 4.6.5 · Drizzle ORM 0.45.3 · @tanstack/react-query 5.104.0 · Playwright 1.63.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

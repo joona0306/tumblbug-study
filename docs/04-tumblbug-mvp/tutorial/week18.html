@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>18주차 무엇을 먼저 고칠까 · 모아 교재</title>
+  <meta name="description" content="숫자와 사용자의 말이 겹치는 곳 찾기: 사람 단위 퍼널 SQL, 설문 묶기, 코드로 확인, 영향·확신·노력, 성공 기준, 장애 회고">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week18">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18" aria-current="page">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">18주차 · 5단계 · 강의 뒤 직접 (교재는 가상 사례로)</span>
+    <h1>무엇을 먼저 고칠까</h1>
+    <p class="lead">
+      17주차에 쌓인 숫자와 사용자의 말로 <strong>개선 우선순위</strong>를 정합니다. 숫자는 가상 사례의 값이지만, 분석하는 방법(SQL·표)은 여러분의 데이터에 그대로 씁니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 우선순위를 정하는 길</span>
+<div class="flow">
+  <div class="node"><strong>숫자</strong><small>어디서 빠지나</small></div>
+  <div class="node"><strong>말</strong><small>어디서 막혔나</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>겹치는 곳</strong><small>가장 확실한 문제</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>영향·확신·노력</strong><small>줄 세우기</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>19주차</strong><small>1~2개만 고친다</small></div>
+</div>
+<p class="flow-note">숫자만 보면 "어디서"는 알지만 "왜"를 모른다. 말만 들으면 목소리 큰 한 명에 끌려간다 → 둘이 겹치는 곳부터.</p>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>숫자 — 단계 개수로 보면 속는다</summary>
+      <div class="step-body">
+        <p>17주차 퍼널에서 "결제 요청"은 앞 단계(배송지)의 <strong>70%</strong> 입니다. 그런데 배송이 없는 리워드(응원 엽서)는 배송지를 <strong>건너뛰고</strong> 바로 결제 요청으로 갑니다. 그러면 "결제 요청 14명" 안에 배송지를 거치지 않은 사람이 섞여 있어요. → 사람 한 명씩 따라가 봅니다.</p>
+        <figure class="code" data-src="sql/week18-funnel-paths.sql" data-tag="week18-step1">
+          <figcaption><span class="label">sql/week18-funnel-paths.sql</span></figcaption>
+          <pre><code>-- 18주차: 퍼널을 "사람 한 명씩" 따라가 보기 — 단계별 개수만으로는 안 보이는 것
+-- 실행: npm run db:sql -- sql/week18-funnel-paths.sql   (Neon SQL Editor 에 붙여 넣어도 된다, 읽기만 한다)
+-- 대상 프로젝트: 가상 사례(npm run ops:simulate). 내 프로젝트를 보려면 아래 target 의 조건을 "where id = 내 프로젝트 번호" 로 바꾼다
+
+-- ① 방문자마다 어느 단계까지 갔는지 한 줄로 모은다 (bool_or = 그 단계 기록이 하나라도 있으면 true)
+--    그다음 "배송이 필요한 길"과 "배송 없이 가는 길"을 나눠서 센다
+with target as (
+  select id from project where title like '[가상 사례]%' order by id desc limit 1
+), visitor as (
+  select visitor_id,
+         bool_or(step = 'reward') as reward,
+         bool_or(step = 'shipping') as shipping,
+         bool_or(step = 'payment_request') as payment_request,
+         bool_or(step = 'paid') as paid
+  from funnel_event
+  where project_id = (select id from target)
+  group by visitor_id
+)
+select
+  count(*) filter (where shipping)                                   as "배송지 도착",
+  count(*) filter (where shipping and payment_request)               as "배송지 통과(결제 요청)",
+  round(100.0 * count(*) filter (where shipping and payment_request)
+        / nullif(count(*) filter (where shipping), 0), 1)            as "배송지 통과율 %",
+  count(*) filter (where reward and not shipping)                    as "배송 없는 리워드",
+  count(*) filter (where reward and not shipping and payment_request) as "배송 없이 결제 요청"
+from visitor;
+
+-- ② 단계별 개수로 본 "결제 요청 ÷ 배송지" (ops:check 가 보여 주는 값) — ①과 비교해 보자
+with target as (
+  select id from project where title like '[가상 사례]%' order by id desc limit 1
+)
+select
+  count(*) filter (where step = 'shipping')        as "배송지 (단계 개수)",
+  count(*) filter (where step = 'payment_request') as "결제 요청 (단계 개수)",
+  round(100.0 * count(*) filter (where step = 'payment_request')
+        / nullif(count(*) filter (where step = 'shipping'), 0), 1) as "단순 비율 %"
+from funnel_event
+where project_id = (select id from target);</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Neon SQL Editor 에 붙여 넣어도 된다 — 읽기만 한다)</span></figcaption>
+          <pre><code>npm run db:sql -- sql/week18-funnel-paths.sql</code></pre>
+        </figure>
+        <div class="table-wrap"><table>
+          <thead><tr><th>[가상] 배송지 도착</th><th>배송지 통과</th><th>배송지 통과율</th><th>배송 없이 결제 요청</th><th>단계 개수로 본 비율</th></tr></thead>
+          <tbody><tr><td>20</td><td>10</td><td><strong>50.0%</strong></td><td>4</td><td>70.0% (틀림)</td></tr></tbody>
+        </table></div>
+        <div class="box why"><span class="box-title">💡 70% 가 틀린 이유</span>분자(결제 요청 14명) 중 4명은 분모(배송지 20명)에 없던 사람입니다. 진짜로는 <strong>배송지 화면에 온 사람의 절반이 거기서 멈췄어요</strong>. 게다가 리워드까지 고른, 후원하려는 마음이 가장 큰 사람들입니다 — 상세만 보고 나간 18명(구경)과 무게가 다릅니다.</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>같은 데이터를 "단계별 개수"와 "사람 한 명씩"으로 세어 보니 다른 이야기가 나왔습니다. 건너뛸 수 있는 단계가 있으면 개수끼리 나눈 비율을 믿으면 안 됩니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t18-s1-sql"><span>사람 단위 퍼널 SQL 로 배송지 통과율 구하기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>말 — 비슷한 것끼리 묶고, 코드로 확인하기</summary>
+      <div class="step-body">
+        <div class="table-wrap"><table>
+          <thead><tr><th>[가상] 묶음</th><th>건수</th></tr></thead>
+          <tbody>
+            <tr><td><strong>배송지: 무엇이 틀렸는지 모르겠다</strong> ("다음을 눌러도 아무 일도 안 일어나는 줄", "연락처를 어떻게 써야 넘어가는지", "칸에 표시가 없어서 다 지우고")</td><td><strong>3</strong></td></tr>
+            <tr><td>배송지: 진짜 주소를 적어야 하나 망설임</td><td>1</td></tr>
+            <tr><td>상세: 리워드가 너무 아래</td><td>1</td></tr>
+            <tr><td>결제 실패 화면: 돈이 나간 줄 알았다</td><td>1</td></tr>
+            <tr><td>좋았던 점 (찜 반응, 스튜디오)</td><td>2</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box why"><span class="box-title">💡 말을 믿기 전에 사실인지 확인</span>배송지 화면 코드(<code>components/fund/ShippingStep.tsx</code>)를 열어 보니, 틀린 입력을 <strong>칸마다 표시하지 않고</strong> 맨 아래에 한 줄로만 알려 줍니다. 그 줄이 화면 아래 고정된 "다음" 버튼 뒤나 화면 밖에 있을 수 있어요 → 설문 1·4번과 맞습니다. (19주차에 실제로 재 보니 데스크톱에서 <strong>정말 가려져 있었습니다</strong>.)</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>설문 응답을 비슷한 것끼리 묶었더니 <strong>배송지</strong>에 대한 말이 가장 많았고, 그 말이 사실인지 <strong>코드와 화면으로 확인</strong>했습니다. 숫자(배송지 통과율 50%)와 말이 같은 곳을 가리킵니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t18-s2-group"><span>설문을 묶고, 가장 큰 묶음을 코드·화면으로 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>줄 세우기 — 영향 · 확신 · 노력, 그리고 성공 기준</summary>
+      <div class="step-body">
+        <div class="table-wrap"><table>
+          <thead><tr><th>후보</th><th>영향</th><th>확신</th><th>노력</th><th>결정</th></tr></thead>
+          <tbody>
+            <tr><td><strong>A.</strong> 배송지 오류를 칸마다, 첫 틀린 칸으로 이동</td><td>높음 — 후원 직전 사람의 50%</td><td>높음 — 숫자 + 말 3건 + 코드</td><td>작음</td><td><strong>19주차 ①</strong></td></tr>
+            <tr><td><strong>B.</strong> 운영 점검이 "배송지 통과율"을 바로 보여 주게</td><td>운영자 — 맞는 숫자</td><td>높음 — 직접 속았다</td><td>작음</td><td><strong>19주차 ②</strong> (재측정하려면 측정 도구가 먼저 맞아야)</td></tr>
+            <tr><td>C. "가짜 주소도 괜찮아요" 한 줄</td><td>낮음~중간</td><td>중간 — 1건</td><td>아주 작음</td><td>A 와 같은 화면이라 함께</td></tr>
+            <tr><td>D. 상세에서 리워드를 위로</td><td>중간</td><td>낮음 — 1건, 숫자로 증명 안 됨</td><td>중간</td><td>다음 후보 — 더 관찰</td></tr>
+            <tr><td>E. 결제 실패 문구 "돈이 나가지 않았어요"를 위로</td><td>낮음</td><td>중간</td><td>아주 작음</td><td>쉬운 개선 목록</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box why"><span class="box-title">💡 한 번에 하나(또는 둘)만, 기준은 먼저</span>여러 개를 한꺼번에 바꾸면 무엇 때문에 좋아졌는지 알 수 없습니다. 그리고 고친 <strong>뒤에</strong> 기준을 정하면 어떤 결과든 "좋아졌다"고 말하게 됩니다 → 지금 적습니다: <strong>배송지 통과율 50% → 70% 이상 (개선 뒤 2주)</strong>. 고르지 않은 후보도 버리지 않고 목록에 남깁니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>"결제 요청 ÷ 배송지 = 70%" 가 왜 틀렸는지 한 문장으로?</summary><p>배송 없는 리워드로 배송지를 건너뛴 사람이 분자에만 들어가서, 배송지에 온 사람의 실제 통과율(50%)보다 부풀려졌다.</p></details>
+          <details><summary>상세에서 나간 18명보다 배송지에서 멈춘 10명을 먼저 챙기는 이유는?</summary><p>배송지까지 온 사람은 리워드를 고른, 후원 의지가 가장 큰 사람들이고, 원인(오류 표시)도 확실하며 고치기 쉽기 때문입니다. 상세에서 나가는 사람은 원래 구경하던 사람이 많습니다.</p></details>
+          <details><summary>후보 D 를 고르려면 무엇이 더 있어야 할까?</summary><p>숫자 근거(상세에서 리워드 영역까지 스크롤한 비율 등)나 여러 사람의 같은 말 — 지금은 한 건뿐입니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>후보를 영향·확신·노력으로 줄 세워 19주차에 할 것 두 가지를 고르고, <strong>고치기 전에</strong> 성공 기준을 적어 두었습니다. 고르지 않은 것도 다음 후보로 남겼습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t18-s3-rank"><span>영향·확신·노력 표 + 19주차 목표·성공 기준을 먼저 적기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>장애 회고 1건</summary>
+      <div class="step-body">
+        <p><code>templates/08-incident-review.md</code> 로, 알림이 온 날마다 1건씩 씁니다. 목적은 <strong>누구 탓인지가 아니라 같은 일이 다시 안 생기게</strong>.</p>
+        <div class="box check"><span class="box-title">✅ 예시 [가상] — 8일째 가동 감시 알림</span>
+          <ul>
+            <li>14:02 UptimeRobot "Down" → 14:04 사이트 직접 열어 봄(안 열림) → 14:05 Vercel·Neon 상태 페이지에 같은 시각 장애 공지 → 14:06 "Up" → 14:07 <code>/api/health</code> 200</li>
+            <li>원인: 호스팅 업체 쪽 · 그 시각 배포 없음 (Actions 기록) · 영향: 퍼널 기록상 0명</li>
+            <li>아쉬운 점: 상태 페이지 주소를 몰라 찾는 데 1분 → <strong>할 일</strong>: 운영 안내서에 Vercel·Neon 상태 페이지 주소 추가 — <strong>[실제] 반영함</strong></li>
+          </ul>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>알림 하나를 "무슨 일이, 언제, 왜, 다음엔 어떻게"로 기록했고, 회고에서 나온 할 일을 실제로 반영했습니다. 회고는 쓰는 것보다 <strong>할 일을 끝내는 것</strong>이 중요합니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t18-s4-incident"><span>장애 회고 1건 (할 일까지)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">18주차 회고</h2>
+    <div class="retro card">
+      <label for="t18-note-1">잘된 것</label>
+      <textarea id="t18-note-1" data-note="t18-good"></textarea>
+      <label for="t18-note-2">막힌 것</label>
+      <textarea id="t18-note-2" data-note="t18-stuck"></textarea>
+      <label for="t18-note-3">다음에 다르게 할 것</label>
+      <textarea id="t18-note-3" data-note="t18-next"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t18-retro"><span>18주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week17.html"><small>이전</small>← 17주차 · 운영 시작</a>
+      <a class="card next" href="week19.html"><small>다음</small>19주차 · 개선 한 바퀴 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-29 · Neon PostgreSQL 18 · Next.js 16.3.6</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

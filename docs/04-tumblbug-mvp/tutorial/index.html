@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>시작하기 전 · 모아(텀블벅 클론) 교재</title>
+  <meta name="description" content="4단계 포트폴리오 프로젝트: 크라우드펀딩 서비스를 기획·디자인·구현·배포·운영·개선까지 20주 동안 만든다">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="index">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index" aria-current="page">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">4단계 · 포트폴리오 프로젝트 · 20주 과정</span>
+    <h1>모아: 크라우드펀딩 서비스를 만들고, 배포하고, 운영하기</h1>
+    <p class="lead">
+      작은 창작자의 프로젝트를 후원하는 서비스(텀블벅 클론)를 <strong>실무 순서 그대로</strong> 만듭니다.
+      인터뷰와 기획 → Figma 디자인 → 구현 → 자동 배포 → 운영 → 개선 → 케이스 스터디까지.
+      1~3단계와 가장 크게 다른 점은 <strong>"만들고 끝"이 아니라 "돌아가게 지키는 법"</strong>까지 배운다는 것입니다.
+    </p>
+
+    <h2 id="how-to-read">이 교재를 읽는 법</h2>
+    <p>4단계는 새로 나오는 개념이 많습니다. 작성자(첫 검증 독자)도 16주차까지 따라 한 뒤 <em>"시키는 대로 따라 했지만, 이해하고 한 것은 아니었다"</em>고 돌아봤습니다. 그래서 모든 단계를 같은 순서로 씁니다.</p>
+    <div class="box picture"><span class="box-title">🗺️ 그림 먼저</span>무엇이 어디서 어디로 가는지를 먼저 봅니다. 명령어보다 이 그림을 기억하는 게 중요합니다.</div>
+    <div class="box why"><span class="box-title">💡 왜?</span>이게 없으면 무엇이 곤란한지. "무엇을 하는지"보다 "왜 필요한지"</div>
+    <p>→ 코드와 따라 하기 → <span class="muted">✅ 확인하는 법 · 🆘 막혔을 때</span></p>
+    <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>따라 한 것을 한두 문장으로 다시 정리합니다. 여기서 막히면 그림으로 돌아가세요.</div>
+    <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+      <details><summary>답을 보기 전에 먼저 말로 설명해 보세요 (눌러서 답 보기)</summary><p>설명이 안 되면 그 부분이 아직 이해가 안 된 곳입니다. 부끄러운 게 아니라, 다시 읽을 곳을 찾은 거예요.</p></details>
+    </div>
+
+    <h2 id="big-picture">큰 그림: 완성하면 이렇게 돌아갑니다</h2>
+    <div class="box picture"><span class="box-title">🗺️ 모아의 전체 구조 (20주차 기준)</span>
+<div class="flow">
+  <div class="node"><strong>브라우저</strong><small>창작자·후원자·관리자</small></div>
+  <span class="arrow" data-label="HTTPS"></span>
+  <div class="node"><strong>Vercel (싱가포르)</strong><small>Next.js 앱: 화면 + 서버 코드</small></div>
+  <span class="arrow"></span>
+  <div class="node ext"><strong>Neon PostgreSQL</strong><small>운영 / 개발 / PR 마다 복사본</small></div>
+</div>
+<div class="flow">
+  <div class="node ext"><strong>Vercel Blob</strong><small>프로젝트 사진</small></div>
+  <div class="node ext"><strong>토스페이먼츠</strong><small>결제 승인·웹훅 (테스트 모드)</small></div>
+  <div class="node ext"><strong>Sentry</strong><small>에러 기록 → 알림 메일</small></div>
+</div>
+<div class="flow">
+  <div class="node"><strong>GitHub PR</strong><small>코드 변경</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>Actions: CI</strong><small>검사·테스트·빌드</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>미리보기 배포</strong><small>PR 마다 주소 + DB</small></div>
+  <span class="arrow" data-label="합치면"></span>
+  <div class="node"><strong>운영 배포</strong><small>+ 연기 테스트, 매일 아침 운영 점검</small></div>
+</div>
+<p class="flow-note">16주차에는 같은 앱을 Docker 이미지로 만들어 AWS EC2 에도 올려 본다.</p>
+    </div>
+
+    <h2 id="new">이번 단계에서 새로 배우는 것</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>파트</th><th>주제</th></tr></thead>
+        <tbody>
+          <tr><td>기획·UX (1~4주)</td><td>인터뷰, PRD, 결정 기록(ADR), 개념 ERD, 사용자 흐름도, 와이어프레임, <strong>Figma 디자인 시스템</strong>(토큰·컴포넌트), 프로토타입</td></tr>
+          <tr><td>구현 (5~13주)</td><td>zod·Vitest·Playwright·CI, <strong>물리 ERD와 SQL 심화</strong>(인덱스·트랜잭션), 역할·권한, API 설계, <strong>여러 단계 후원(Zustand)</strong>, <strong>결제와 초과 판매 방지</strong>, 웹훅, <strong>TanStack Query</strong>, 대시보드, 예약 작업</td></tr>
+          <tr><td>배포·운영 (14~16주)</td><td><strong>CD 파이프라인</strong>(PR 미리보기·DB 브랜치), Sentry 알림, 가동 감시, 운영 점검, 백업·복구 연습, <strong>Docker·AWS EC2·롤백</strong>, 부하 테스트(k6)</td></tr>
+          <tr><td>운영·개선 (17~20주)</td><td>실사용자 운영, 퍼널 분석, 우선순위, 개선 사이클(테스트 먼저), 접근성, 케이스 스터디, 운영 종료(데이터 삭제)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box term"><span class="box-title">📌 17~20주차는 강의 뒤에 여러분이 직접</span>실제 사용자와의 운영은 교재를 마친 뒤 여러분이 직접 합니다 (창작자 1명 + 지인 3~5명). 교재는 그 과정을 <strong>가상 사례</strong>로 끝까지 미리 보여 주고, 코드 개선과 측정처럼 실제로 한 것은 <strong>[실제]</strong>로 따로 표시합니다.</div>
+
+    <h2 id="before-start">시작하기 전</h2>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t-idx-stages"><span>1~3단계를 완료했다 (특히 3단계 TypeScript)</span></label></li>
+      <li><label><input type="checkbox" data-task="t-idx-picture"><span>위의 전체 구조 그림을 위에서 아래로 한 번 따라 읽어봤다</span></label></li>
+      <li><label><input type="checkbox" data-task="t-idx-accounts"><span>계정 준비: GitHub · Vercel · Neon · Figma(무료) · Sentry(무료) · 토스페이먼츠 개발자센터 · (16주차) AWS</span></label></li>
+    </ul>
+
+    <h2 id="weeks">주차별로 이동하기</h2>
+    <p class="muted">파트마다 순서대로 진행하세요. 각 주차의 정답 코드는 <code>projects/04-tumblbug-mvp/</code> 에, 주차별 git 태그(예: <code>tumblbug-week11-step2</code>)로 남아 있습니다.</p>
+
+    <h3>기획·UX (1~4주)</h3>
+    <div class="card-grid">
+      <a class="card week-card" href="week1.html" data-week-card="week1"><span class="now-badge">지금 할 차례</span><span class="week-label">1주차</span><strong>경쟁 분석과 인터뷰</strong><span class="muted">텀블벅·와디즈 분석, 창작자·후원자 인터뷰 3~5명, 인사이트</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week2.html" data-week-card="week2"><span class="now-badge">지금 할 차례</span><span class="week-label">2주차</span><strong>PRD·결정 기록·개념 ERD</strong><span class="muted">문제·범위·지표·위험, ADR, 명사로 개체 찾기</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week3.html" data-week-card="week3"><span class="now-badge">지금 할 차례</span><span class="week-label">3주차</span><strong>흐름도·와이어프레임</strong><span class="muted">여러 단계 후원 흐름, 화면-데이터 매핑표</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week4.html" data-week-card="week4"><span class="now-badge">지금 할 차례</span><span class="week-label">4주차</span><strong>디자인 시스템과 시안</strong><span class="muted">토큰·아이콘·상태별 컴포넌트, 모바일·데스크톱, 프로토타입</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+    </div>
+
+    <h3>구현 (5~13주)</h3>
+    <div class="card-grid">
+      <a class="card week-card" href="week5.html" data-week-card="week5"><span class="now-badge">지금 할 차례</span><span class="week-label">5주차</span><strong>프로젝트 준비</strong><span class="muted">zod, Vitest, Playwright, CI, Sentry, 디자인 토큰을 코드로</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week6.html" data-week-card="week6"><span class="now-badge">지금 할 차례</span><span class="week-label">6주차</span><strong>DB·SQL 심화</strong><span class="muted">물리 ERD, 제약 조건, 인덱스 전후 실행 계획, 트랜잭션</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week7.html" data-week-card="week7"><span class="now-badge">지금 할 차례</span><span class="week-label">7주차</span><strong>인증·역할·프로젝트 등록</strong><span class="muted">proxy, 관리자, 사진, 입력 검사</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week8.html" data-week-card="week8"><span class="now-badge">지금 할 차례</span><span class="week-label">8주차</span><strong>리워드·상세·모금 상태</strong><span class="muted">진행률, 상태 함수와 단위 테스트</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week9.html" data-week-card="week9"><span class="now-badge">지금 할 차례</span><span class="week-label">9주차</span><strong>API 설계</strong><span class="muted">응답 코드, 커서 페이지네이션, 요청 수 제한, 무한 스크롤</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week10.html" data-week-card="week10"><span class="now-badge">지금 할 차례</span><span class="week-label">10주차</span><strong>여러 단계 후원</strong><span class="muted">Zustand + persist, 단계 이동 규칙, 서버 총액 재계산</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week11.html" data-week-card="week11"><span class="now-badge">지금 할 차례</span><span class="week-label">11주차</span><strong>결제와 초과 판매 방지</strong><span class="muted">조건부 차감·트랜잭션, 웹훅, 결제 흐름 테스트</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week12.html" data-week-card="week12"><span class="now-badge">지금 할 차례</span><span class="week-label">12주차</span><strong>찜하기</strong><span class="muted">TanStack Query 낙관적 업데이트, 토스트</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week13.html" data-week-card="week13"><span class="now-badge">지금 할 차례</span><span class="week-label">13주차</span><strong>대시보드·관리자·예약 작업</strong><span class="muted">SQL 집계, 숨김, 상태 확정, 로딩·빈·에러 화면</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+    </div>
+
+    <h3>배포·운영 준비 (14~16주)</h3>
+    <div class="card-grid">
+      <a class="card week-card" href="week14.html" data-week-card="week14"><span class="now-badge">지금 할 차례</span><span class="week-label">14주차</span><strong>CD 파이프라인</strong><span class="muted">Actions 가 지휘하는 배포, PR 미리보기·DB 브랜치, 연기 테스트</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week15.html" data-week-card="week15"><span class="now-badge">지금 할 차례</span><span class="week-label">15주차</span><strong>운영 준비</strong><span class="muted">Sentry 알림, 가동 감시, 운영 점검, 퍼널, 백업·복구 연습</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week16.html" data-week-card="week16">
+        <span class="now-badge">지금 할 차례</span>
+        <span class="week-label">16주차</span>
+        <strong>Docker와 AWS EC2</strong>
+        <span class="muted">이미지·컨테이너, 요금 안전장치, EC2·HTTPS, 자동 배포와 롤백, 부하 테스트, 정리</span>
+        <div class="mini-track"><div class="mini-fill"></div></div>
+        <span class="mini-text"></span>
+      </a>
+    </div>
+
+    <h3>운영·개선 (17~20주) — 강의 뒤 직접</h3>
+    <div class="card-grid">
+      <a class="card week-card" href="week17.html" data-week-card="week17"><span class="now-badge">지금 할 차례</span><span class="week-label">17주차</span><strong>운영 시작</strong><span class="muted">학습용 안내·개인정보 안내·의견 받기, 창작자·후원자 초대</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week18.html" data-week-card="week18"><span class="now-badge">지금 할 차례</span><span class="week-label">18주차</span><strong>무엇을 먼저 고칠까</strong><span class="muted">사람 단위 퍼널, 설문 묶기, 영향·확신·노력, 장애 회고</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week19.html" data-week-card="week19"><span class="now-badge">지금 할 차례</span><span class="week-label">19주차</span><strong>개선 한 바퀴</strong><span class="muted">테스트 먼저 → 고치기 → PR·CI·CD → 재측정</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+      <a class="card week-card" href="week20.html" data-week-card="week20"><span class="now-badge">지금 할 차례</span><span class="week-label">20주차</span><strong>케이스 스터디와 마무리</strong><span class="muted">접근성·키보드, 운영 종료(데이터 삭제), 완료 기준</span><div class="mini-track"><div class="mini-fill"></div></div><span class="mini-text"></span></a>
+    </div>
+
+    <h2 id="done-criteria">이 단계를 끝냈다는 기준</h2>
+    <ul>
+      <li>프로젝트·리워드 등록 → 목록 → 리워드 선택 → 배송지 → 결제 → 진행률·남은 수량 반영까지 끊김 없이 동작한다</li>
+      <li>남은 수량보다 많이 팔리지 않는다 (동시 결제 50건 부하 테스트)</li>
+      <li>모든 PR 에서 CI 가 통과하고, CI 를 통과한 코드만 자동 배포된다 (PR 마다 미리보기 주소와 DB)</li>
+      <li>같은 앱을 Docker 이미지로 AWS EC2 에서 HTTPS 로 돌리고, 롤백을 연습하고, 실습 뒤 정리했다</li>
+      <li>에러가 나면 Sentry 알림이 오고, 사이트가 멈추면 가동 감시 알림이 온다</li>
+      <li>실제 창작자 1명의 프로젝트를 운영하고 개선 전후 지표가 있다 (강의 뒤)</li>
+      <li>키보드로 조작할 수 있고, Lighthouse 접근성 90점 이상</li>
+      <li>케이스 스터디로 포트폴리오에 낼 수 있다</li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="../../03-marketplace-clone/tutorial/index.html"><small>이전 단계</small>← 3단계 당근마켓 미니</a>
+      <a class="card next" href="week1.html"><small>다음</small>1주차 · 경쟁 분석과 인터뷰 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-29 · Next.js 16.3.6 · TypeScript 5.9.3 · Drizzle ORM 0.45.3 · Better Auth 1.7.6 · zod 4.6.5 · Vitest 5.0.2 · Playwright 1.63.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

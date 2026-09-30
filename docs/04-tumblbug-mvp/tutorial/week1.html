@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1주차 경쟁 분석과 인터뷰 · 모아 교재</title>
+  <meta name="description" content="텀블벅·와디즈·킥스타터를 뜯어보고, 창작자·후원자 3~5명을 인터뷰해 인사이트로 정리한다">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week1">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1" aria-current="page">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">1주차 · 4단계 · 기획의 시작</span>
+    <h1>경쟁 서비스를 뜯어보고, 사람에게 묻기</h1>
+    <p class="lead">
+      코드를 한 줄도 쓰기 전에, <strong>이미 있는 서비스는 어떻게 하고 있는지</strong>와 <strong>실제 사람은 지금 어떻게 하고 있고 어디서 불편한지</strong>를 봅니다.
+      이번 주 결과물은 "인사이트 3~5개" 입니다. 다음 주 PRD(무엇을 만들지 정하는 문서)의 근거가 됩니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 기획은 "추측"을 "근거"로 바꾸는 일</span>
+<div class="flow">
+  <div class="node"><strong>① 경쟁 서비스 분석</strong><small>텀블벅·와디즈·킥스타터는 무엇을 보여 주나</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>② 인터뷰 3~5명</strong><small>창작자·후원자의 과거 행동과 불편</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>③ 인용 묶기</strong><small>비슷한 말끼리 모아 이름 붙이기</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>④ 인사이트</strong><small>"[누가]는 [상황]에서 [무엇]을 원한다, 왜냐하면…"</small></div>
+  <span class="arrow" data-label="2주차"></span>
+  <div class="node ext"><strong>PRD</strong><small>무엇을 만들지 정하는 문서</small></div>
+</div>
+<p class="flow-note">모두가 같은 텀블벅 클론을 만들지만, 포트폴리오의 차별점은 여기서 나옵니다 — <strong>내 인터뷰·내 결정·내 운영 숫자</strong>.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead>
+        <tbody>
+          <tr><td><strong>크라우드펀딩</strong></td><td>창작자가 목표 금액과 마감일을 정해 여러 사람에게 조금씩 후원을 받는 방식. 후원자는 보답으로 리워드(물건·경험)를 받는다</td></tr>
+          <tr><td><strong>인터뷰</strong></td><td>기능을 정하기 전에 실제 사람의 경험을 듣는 대화 (설문이 아니라 20~30분 대화)</td></tr>
+          <tr><td><strong>인사이트</strong></td><td>여러 사람의 말에서 찾은 "공통된 이유". 기능 하나하나보다 오래가는 판단 근거</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>경쟁 서비스 분석 (텀블벅·와디즈·킥스타터)</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜?</span>이미 많은 사람이 쓰는 서비스는 수많은 실험 끝에 지금 모양이 됐습니다. 그걸 먼저 보면 "당연히 있어야 할 것"과 "굳이 없어도 되는 것"이 보입니다. 우리 MVP(가장 작은 쓸 만한 버전)의 범위를 정하는 첫 재료예요.</div>
+        <p>세 서비스에서 <strong>같은 순서</strong>로 화면을 따라가며 표를 채웁니다. 캡처를 남겨 두면 4주차 디자인 때 다시 씁니다.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>볼 것</th><th>텀블벅</th><th>와디즈</th><th>킥스타터</th></tr></thead>
+          <tbody>
+            <tr><td>목록 카드에 보이는 것 (사진·진행률·남은 일수…)</td><td></td><td></td><td></td></tr>
+            <tr><td>상세 화면 맨 위에 보이는 숫자</td><td></td><td></td><td></td></tr>
+            <tr><td>후원 단계 수 (리워드 → 배송지 → 결제?)</td><td></td><td></td><td></td></tr>
+            <tr><td>돈은 언제 결제되나 (후원 즉시 / 마감 뒤)</td><td></td><td></td><td></td></tr>
+            <tr><td>목표를 못 채우면?</td><td></td><td></td><td></td></tr>
+            <tr><td>창작자가 보는 화면 (모금 현황)</td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>세 서비스의 공통점 3개, 다른 점 2개를 한 문장씩 적을 수 있다. 예: "셋 다 목록 카드에 진행률 막대가 있다" / "텀블벅은 마감 뒤 성공한 프로젝트만 결제된다".</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>로그인해야 보이는 화면이 있어요</summary><p>후원자 화면은 가입만 하면 대부분 볼 수 있습니다. 결제는 끝까지 하지 않아도 돼요 — 결제 직전 화면까지만 캡처합니다. 창작자 화면은 공개 도움말·소개 페이지의 캡처로 대신합니다.</p></details>
+          <details><summary>기능이 너무 많아서 다 적기 힘들어요</summary><p>이번 주는 "후원 한 번이 끝나기까지"의 흐름에만 집중하세요. 커뮤니티·추천·알림 같은 것은 "제외" 칸에 한 줄로만 적습니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>잘 되는 서비스들이 <strong>공통으로</strong> 보여 주는 것(진행률·남은 일수·후원 단계)을 찾았습니다. 공통점은 "사용자가 기대하는 것", 차이점은 "선택할 수 있는 것"입니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>텀블벅은 "마감 뒤 성공한 프로젝트만 결제"하는데, 우리 MVP 는 후원 즉시 (테스트) 결제한다. 왜 그렇게 정했을까?</summary><p>마감 뒤 결제는 카드 등록·예약 결제·실패 재시도까지 범위가 크게 늘어납니다. 20주 안에 핵심 흐름을 운영 수준으로 끝내려고 단순한 쪽을 고르고, 그 차이는 "알려진 한계"로 기록합니다 (2주차 ADR-002).</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t1-s1-compare"><span>세 서비스 비교표를 채우고 캡처를 모았다</span></label></li>
+          <li><label><input type="checkbox" data-task="t1-s1-summary"><span>공통점 3개 · 다른 점 2개를 적었다</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>인터뷰 준비: 누구를, 무엇을 물을까</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 "미래"가 아니라 "과거"를 묻나?</span>"이런 기능 있으면 쓰실 거예요?" 라고 물으면 대부분 예의상 "네"라고 답합니다. 대신 <strong>"가장 최근에 후원한 건 뭐였어요? 그때 어떻게 하셨어요?"</strong> 처럼 이미 한 행동을 물으면 진짜 불편이 나옵니다.</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>대상</th><th>인원</th><th>찾는 곳 (예)</th></tr></thead>
+          <tbody>
+            <tr><td>창작자 — 펀딩을 해봤거나 해보고 싶은 사람</td><td>2~3명</td><td>굿즈·책·공연을 만드는 지인, 동아리, 온라인 창작 커뮤니티</td></tr>
+            <tr><td>후원자 — 텀블벅·와디즈에서 후원해 본 사람</td><td>2~3명</td><td>친구, 가족, 동료</td></tr>
+          </tbody>
+        </table></div>
+        <p>5명이면 큰 패턴의 대부분이 보입니다. 1명당 20~30분. 질문지·섭외 메시지·기록 양식은 <a href="../templates/01-interview-guide.md">templates/01-interview-guide.md</a> 에 있습니다 — 내 기획 폴더에 복사해서 씁니다.</p>
+        <figure class="code">
+          <figcaption><span class="label">섭외 메시지 예시 (01-interview-guide.md 에서)</span></figcaption>
+          <pre><code>안녕하세요! 크라우드펀딩 서비스를 공부하며 직접 만들고 있는 [이름]입니다.
+[후원해 보신 / 펀딩을 준비해 보신] 경험을 20분 정도 여쭤보고 싶어요.
+정답은 없고, 경험하신 그대로 말씀해 주시면 됩니다. 녹음은 허락해 주실 때만 할게요.
+편하신 시간 알려주시면 맞출게요 🙏</code></pre>
+        </figure>
+        <div class="table-wrap"><table>
+          <thead><tr><th>❌ 유도 질문</th><th>⭕ 열린 질문</th></tr></thead>
+          <tbody>
+            <tr><td>후원할 때 진행률이 중요하죠?</td><td>후원할지 말지 정할 때 뭘 보셨어요?</td></tr>
+            <tr><td>결제가 불편하셨죠?</td><td>결제하는 과정에서 기억나는 게 있나요?</td></tr>
+            <tr><td>이런 대시보드 있으면 좋겠죠?</td><td>펀딩 중에 매일 확인한 게 있다면요?</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>창작자용·후원자용 질문지가 있고, 인터뷰 약속이 3명 이상 잡혔다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>창작자를 못 찾겠어요</summary><p>"펀딩을 해보고 싶은 사람"도 괜찮습니다 (질문지의 "안 해봤다면 이유는?"). 친구의 친구, 온라인 창작 커뮤니티에 섭외 메시지를 올려 보세요. 끝까지 못 찾으면 후원자 4~5명으로 하고, 그 한계를 PRD 에 적습니다.</p></details>
+          <details><summary>녹음을 거절하면요?</summary><p>메모만 합니다. 이름 대신 "창작자 A" 처럼 적고, 인상 깊은 말은 <strong>그대로</strong>(따옴표로) 받아 적어요.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>누구에게 무엇을 물을지 정했습니다. 핵심은 "내 아이디어를 먼저 설명하지 않고, 과거의 행동을 묻는 것" 입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t1-s2-guide"><span>질문지를 내 상황에 맞게 고쳤다</span></label></li>
+          <li><label><input type="checkbox" data-task="t1-s2-recruit"><span>인터뷰 3명 이상 약속을 잡았다</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>인터뷰 하기와 기록</summary>
+      <div class="step-body">
+        <ul>
+          <li>녹음은 <strong>동의를 받고</strong>, 기록에는 이름 대신 코드(창작자 A)</li>
+          <li>"왜요?", "그때 어떻게 하셨어요?", "구체적으로 한 번 보여주실 수 있어요?" 로 깊이 들어간다</li>
+          <li>침묵을 두려워하지 않는다 — 3초 기다리면 더 많은 이야기가 나온다</li>
+          <li>마무리: "오늘 이야기 중에 제가 꼭 기억해야 할 것 하나만 꼽는다면요?"</li>
+        </ul>
+        <figure class="code">
+          <figcaption><span class="label">기록 양식 (1명당 1장)</span></figcaption>
+          <pre><code>## 인터뷰: [창작자 A] · [날짜] · [시간]분
+- 배경: (무엇을 만드는/후원하는 사람인지 한 줄)
+- 인상 깊은 말 (그대로 인용):
+  - "..."
+- 관찰한 행동/순서:
+- 불편·걱정:
+- 이미 쓰고 있는 해결 방법(우회로):
+- 내 생각 (인용과 구분해서):</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 "인용"과 "내 생각"을 왜 나눠 적나?</span>나중에 다시 보면 무엇이 그 사람의 말이고 무엇이 내 해석인지 헷갈립니다. PRD 의 근거는 <strong>인용</strong>이어야 해요. 내 생각은 가설일 뿐입니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>인터뷰 3~5장의 기록이 있고, 한 장에 그대로 옮긴 인용이 2개 이상 있다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>대화가 자꾸 "이런 기능이 있으면…" 으로 흘러가요</summary><p>"좋은 생각이네요. 그런데 지난번엔 실제로 어떻게 하셨어요?" 로 과거로 돌아옵니다. 기능 아이디어는 메모만 해 두세요.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>사람들의 실제 경험을 "그대로" 모았습니다. 아직 결론을 내리지 않은 날것의 재료입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t1-s3-interview"><span>인터뷰 3~5명, 1명당 기록 1장</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>인사이트로 정리하기</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 말 → 묶음 → 인사이트 → 설계</span>
+<div class="flow">
+  <div class="node"><strong>인용 한 줄씩</strong><small>포스트잇 또는 한 줄씩</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>비슷한 것끼리 묶기</strong><small>묶음마다 이름: "진행 상황을 자주 확인한다"</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>인사이트 한 문장</strong><small>[누가]는 [상황]에서 [무엇]을 원한다, 왜냐하면 [이유]</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>설계에 주는 영향</strong><small>어떤 화면·기능·지표로 이어지나</small></div>
+</div>
+        </div>
+        <p>교재의 정리 예시는 <a href="../templates/02-interview-synthesis-example.md">templates/02-interview-synthesis-example.md</a> 입니다. ⚠️ <strong>가상 사례</strong>예요 — 모양만 참고하고, 내 인터뷰로 채웁니다.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>인사이트 (예시·가상)</th><th>설계에 주는 영향</th></tr></thead>
+          <tbody>
+            <tr><td>창작자는 모금 중에 현재 금액과 추세를 자주 확인하고 싶어 한다</td><td>창작자 대시보드 첫 화면에 모인 금액·후원자 수·남은 일수</td></tr>
+            <tr><td>후원자는 진행률이 어느 정도 있는 프로젝트를 더 신뢰한다</td><td>목록 카드에 진행률 막대를 크게, 상세 상단에 % 강조</td></tr>
+            <tr><td>결제 과정이 길면 후원을 포기한다</td><td>입력칸 최소화 + "어디서 빠지나" 퍼널로 측정 (15주차)</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>인사이트 3~5개가 각각 <strong>인용 2개 이상</strong>과 연결되어 있고, 가장 중요한 인사이트 1개를 고를 수 있다 (20주차 케이스 스터디에 씁니다).</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>묶음이 한 명의 말뿐이에요</summary><p>한 명의 말은 "관찰"이지 아직 인사이트가 아닙니다. 두 명 이상이 비슷한 말을 한 묶음을 우선하고, 한 명뿐인 것은 "더 확인할 것" 목록에 둡니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>흩어진 말들을 "왜 그런가"가 담긴 문장으로 바꿨습니다. 다음 주 PRD 의 "근거" 칸은 여기서 가져옵니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>"후원자는 진행률을 본다"와 "후원자는 진행률이 있는 프로젝트를 더 신뢰한다, 0%면 망설여지기 때문에" — 어느 쪽이 인사이트일까?</summary><p>뒤쪽입니다. 앞쪽은 관찰(무엇)이고, 뒤쪽은 이유(왜)까지 있어서 "진행률을 가장 먼저 보이게 하자" 같은 설계 판단으로 이어집니다.</p></details>
+          <details><summary>인터뷰 결과가 교재 예시와 다르면?</summary><p>달라야 정상입니다. 내 인터뷰가 PRD 의 근거가 되고, 그 차이가 곧 내 포트폴리오의 차별점이에요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t1-s4-cluster"><span>인용을 묶고 이름을 붙였다</span></label></li>
+          <li><label><input type="checkbox" data-task="t1-s4-insight"><span>인사이트 3~5개 + 설계 영향 + 가장 중요한 1개</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">1주차 회고</h2>
+    <div class="retro card">
+      <label for="t1-note-1">잘된 것</label>
+      <textarea id="t1-note-1" data-note="t1-good" placeholder="예: 과거 행동을 물으니 구체적인 이야기가 나왔다"></textarea>
+      <label for="t1-note-2">막힌 것 (어디서, 왜)</label>
+      <textarea id="t1-note-2" data-note="t1-stuck" placeholder="예: 창작자를 섭외하기 어려웠다"></textarea>
+      <label for="t1-note-3">다음에 다르게 할 것</label>
+      <textarea id="t1-note-3" data-note="t1-next" placeholder="예: 섭외 메시지를 커뮤니티에 더 일찍 올리겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t1-retro"><span>1주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="index.html"><small>이전</small>← 시작하기 전</a>
+      <a class="card next" href="week2.html"><small>다음</small>2주차 · PRD·결정 기록·개념 ERD →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Figma(무료) · Google 문서/노션 등 메모 도구</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

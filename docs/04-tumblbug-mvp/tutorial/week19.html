@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>19주차 개선 한 바퀴 · 모아 교재</title>
+  <meta name="description" content="테스트 먼저 → 고치기 전 실패 확인 → 고치기 → 통과 → PR·CI·CD → 재측정. 배송지 오류 표시와 배송지 통과율">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week19">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19" aria-current="page">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">19주차 · 4단계 · 개선 사이클</span>
+    <h1>개선 한 바퀴: 테스트 먼저, 증거로 남기기</h1>
+    <p class="lead">
+      18주차에 고른 두 가지를 <strong>실제 코드로</strong> 고칩니다. 이번 주의 전후 측정은 모두 <strong>[실제]</strong>입니다 — 가상 사례로 문제를 찾았지만, 화면 문제는 실제 코드에 있었어요.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 개선 한 바퀴</span>
+<div class="flow">
+  <div class="node"><strong>① 테스트 먼저</strong><small>고친 뒤 이래야 한다</small></div>
+  <span class="arrow"></span>
+  <div class="node warn"><strong>② 지금 코드에서 실패</strong><small>= 개선 전 기록</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>③ 고치기</strong><small></small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>④ 통과</strong><small>= 개선 후 기록</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>⑤ PR → CI → CD</strong><small>커밋은 개선마다 따로</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>⑥ 운영에서 재측정</strong><small>강의 뒤 여러분이</small></div>
+</div>
+<p class="flow-note">고치기 전에 실패하지 않는 테스트는 아무것도 증명하지 못한다.</p>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>개선 ①: 테스트 먼저 쓰기</summary>
+      <div class="step-body">
+        <figure class="code" data-src="e2e/shipping-errors.spec.ts" data-tag="week19-step1">
+          <figcaption><span class="label">e2e/shipping-errors.spec.ts</span></figcaption>
+          <pre><code>import { expect, test } from "@playwright/test";
+import { Pool } from "pg";
+import { login } from "./helpers";
+
+// 19주차 개선 ①: 배송지에서 무엇이 틀렸는지 "그 칸에서" 바로 알게 (18주차 우선순위 A — 가상 사례의 설문 1·2·4번)
+// 먼저 이 테스트를 쓰고 → 고치기 전 코드에서 실패하는 것을 확인 → 고쳐서 통과시킨다 (개선 전후 기록)
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+test.afterAll(() =&gt; pool.end());
+
+async function openShippingStep(page: import("@playwright/test").Page) {
+  const { rows } = await pool.query&lt;{ id: number }&gt;("select id from project where title = $1 order by id desc limit 1", ["산과 들을 담은 수제 머그 2차"]);
+  const id = rows[0].id;
+  await login(page, "supporter_kim@seed.moa.test", `/projects/${id}/fund`);
+  const main = page.getByRole("main");
+  await main.getByText("머그 2개 세트").click();
+  await main.getByRole("button", { name: "다음" }).click();
+  await expect(page).toHaveURL(`/projects/${id}/fund?step=2`);
+  return main;
+}
+
+test("틀린 칸마다 이유가 그 칸 아래에 보이고, 첫 번째 틀린 칸으로 이동한다", async ({ page }) =&gt; {
+  const main = await openShippingStep(page);
+  const name = main.getByRole("textbox", { name: "받는 분" });
+  const phone = main.getByRole("textbox", { name: "연락처" });
+  const address = main.getByRole("textbox", { name: "주소" });
+  await name.fill("김모아");
+  await phone.fill("1234");
+  await address.fill("");
+  await main.getByRole("button", { name: "다음: 확인" }).click();
+
+  // 칸이 "틀렸다"고 표시되고, 그 칸의 설명으로 이유가 연결된다 (화면 낭독기도 이유를 읽는다)
+  await expect(phone).toHaveAttribute("aria-invalid", "true");
+  await expect(phone).toHaveAccessibleDescription(/010-1234-5678 모양/);
+  await expect(address).toHaveAttribute("aria-invalid", "true");
+  await expect(address).toHaveAccessibleDescription(/주소를 입력해 주세요/);
+  await expect(name).not.toHaveAttribute("aria-invalid", "true");
+
+  // 첫 번째 틀린 칸(연락처)으로 이동 → 이유가 화면 안에 보인다 (휴대폰에서 아래쪽에 숨지 않게)
+  await expect(phone).toBeFocused();
+  await expect(main.getByText("연락처는 010-1234-5678 모양으로 입력해 주세요")).toBeInViewport();
+});
+
+test("고치는 대로 표시가 사라지고, 다 고치면 다음 단계로", async ({ page }) =&gt; {
+  const main = await openShippingStep(page);
+  const phone = main.getByRole("textbox", { name: "연락처" });
+  await main.getByRole("textbox", { name: "받는 분" }).fill("김모아");
+  await phone.fill("1234");
+  await main.getByRole("textbox", { name: "주소" }).fill("서울시 중구 세종대로 1");
+  await main.getByRole("button", { name: "다음: 확인" }).click();
+  await expect(phone).toHaveAttribute("aria-invalid", "true");
+
+  await phone.fill("010-1234-5678");
+  await expect(phone).not.toHaveAttribute("aria-invalid", "true"); // 다시 누르지 않아도 바로
+  await main.getByRole("button", { name: "다음: 확인" }).click();
+  await expect(page).toHaveURL(/step=3/);
+});
+
+test("배송지를 누가 보는지와, 테스트 결제라 가짜 주소도 된다는 안내가 있다", async ({ page }) =&gt; {
+  const main = await openShippingStep(page);
+  await expect(main).toContainText("이 프로젝트의 창작자에게만 보여요");
+  await expect(main).toContainText("가짜 주소");
+});</code></pre>
+        </figure>
+        <p>고치기 <strong>전</strong> 코드에서 돌리면:</p>
+        <div class="box check"><span class="box-title">✅ 개선 전 기록 [실제]</span>
+          <ul>
+            <li>새 테스트 <strong>6개(휴대폰·데스크톱 × 3) 모두 실패</strong> — 틀린 칸 표시 없음, 가짜 주소 안내 없음</li>
+            <li>보이는 문장: "받는 분·연락처·주소를 <strong>모두</strong> 입력해 주세요" (연락처가 틀렸는데 그 말은 없음)</li>
+            <li><strong>데스크톱(1280×720)에서 그 문장이 하단 고정 바에 완전히 가려짐</strong> — 가상 설문 1번 "다음을 눌러도 아무 일도 안 일어나는 줄"이 실제로 재현</li>
+            <li>커서는 "다음" 버튼에 그대로</li>
+          </ul>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"고친 뒤에는 이래야 한다"를 테스트로 먼저 쓰고, <strong>고치기 전 코드에서 실패하는 것</strong>을 확인했습니다. 이 실패가 개선 전 기록이자, 나중에 "정말 고쳤다"를 증명할 기준입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t19-s1-test"><span>테스트를 먼저 쓰고, 지금 코드에서 실패하는 것을 확인·기록</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>개선 ①: 고치기 — 칸마다 이유, 첫 틀린 칸으로</summary>
+      <div class="step-body">
+        <figure class="code" data-src="lib/funding/rules.ts" data-tag="week19-step1" data-lines="47-66">
+          <figcaption><span class="label">lib/funding/rules.ts (일부) — 규칙은 한 곳</span></figcaption>
+          <pre><code>// 배송지 칸마다 무엇이 틀렸나 (19주차 개선 — 전에는 "모두 입력해 주세요" 한 줄만 보여 줘서 어느 칸인지 몰랐다)
+// 화면(ShippingStep)은 이 결과를 칸 아래에 하나씩 보여 주고, 서버(quote.ts)는 첫 번째 문장을 쓴다 — 규칙은 여기 한 곳
+export type ShippingField = keyof Draft["shipping"];
+export const SHIPPING_FIELDS: ShippingField[] = ["recipientName", "recipientPhone", "address"]; // 화면 위에서 아래 순서
+export function shippingFieldErrors(draft: Draft): Partial&lt;Record&lt;ShippingField, string&gt;&gt; {
+  const { recipientName, recipientPhone, address } = draft.shipping;
+  const errors: Partial&lt;Record&lt;ShippingField, string&gt;&gt; = {};
+  if (!recipientName.trim()) errors.recipientName = "받는 분 이름을 입력해 주세요";
+  if (!recipientPhone.trim()) errors.recipientPhone = "연락처를 입력해 주세요";
+  else if (!/^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(recipientPhone.trim())) errors.recipientPhone = "연락처는 010-1234-5678 모양으로 입력해 주세요";
+  if (!address.trim()) errors.address = "주소를 입력해 주세요";
+  return errors;
+}
+
+// 배송지 단계를 통과할 수 없는 이유 하나 (없으면 null) — 단계 이동 검사·서버 검사용
+export function shippingStepError(draft: Draft): string | null {
+  const errors = shippingFieldErrors(draft);
+  const first = SHIPPING_FIELDS.find((field) =&gt; errors[field]);
+  return first ? errors[first]! : null;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="components/fund/ShippingStep.tsx" data-tag="week19-step1">
+          <figcaption><span class="label">components/fund/ShippingStep.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { SHIPPING_FIELDS, type ShippingField, shippingFieldErrors } from "@/lib/funding/rules";
+import { useFundingStore } from "@/lib/funding/store";
+import styles from "./FundFlow.module.css";
+
+// ② 배송지 (Figma M05). 입력하는 대로 스토어에 저장 → 뒤로 갔다 와도, 새로고침해도 그대로
+//
+// 19주차 개선 (18주차 우선순위 A): 틀린 입력을 "그 칸에서" 알려 준다
+//  - 전: 맨 아래에 "받는 분·연락처·주소를 모두 입력해 주세요" 한 줄 → 어느 칸인지 모르고, 데스크톱에서는 하단 고정 바에 가려졌다
+//  - 후: 칸마다 이유(aria-invalid + 설명 연결 → 화면 낭독기도 읽는다) + 첫 번째 틀린 칸으로 이동
+//  - "다음"을 한 번 누른 뒤부터는 고치는 대로 바로 표시가 바뀐다 (처음부터 빨간 글씨로 겁주지 않게)
+const INPUT_ID: Record&lt;ShippingField, string&gt; = { recipientName: "shipping-name", recipientPhone: "shipping-phone", address: "shipping-address" };
+
+export function ShippingStep({ onPrev, onNext }: { onPrev: () =&gt; void; onNext: () =&gt; void }) {
+  const draft = useFundingStore();
+  const { shipping, setShipping } = draft;
+  const [tried, setTried] = useState(false);
+  const errors = tried ? shippingFieldErrors(draft) : {};
+
+  function next() {
+    const problems = shippingFieldErrors(useFundingStore.getState());
+    const first = SHIPPING_FIELDS.find((field) =&gt; problems[field]);
+    if (!first) return onNext();
+    setTried(true);
+    document.getElementById(INPUT_ID[first])?.focus(); // 칸으로 이동 — 브라우저가 그 칸이 보이게 스크롤한다
+  }
+
+  return (
+    &lt;section className={styles.step} aria-labelledby="shipping-step-title"&gt;
+      &lt;h1 id="shipping-step-title" className="text-heading-m"&gt;
+        리워드를 받을 곳
+      &lt;/h1&gt;
+      &lt;Field
+        id={INPUT_ID.recipientName}
+        label="받는 분"
+        autoComplete="name"
+        value={shipping.recipientName}
+        onChange={(e) =&gt; setShipping({ recipientName: e.target.value })}
+        error={errors.recipientName}
+      /&gt;
+      &lt;Field
+        id={INPUT_ID.recipientPhone}
+        label="연락처"
+        type="tel"
+        autoComplete="tel"
+        placeholder="010-1234-5678"
+        value={shipping.recipientPhone}
+        onChange={(e) =&gt; setShipping({ recipientPhone: e.target.value })}
+        helper="배송 문의가 있을 때만 쓰여요"
+        error={errors.recipientPhone}
+      /&gt;
+      &lt;Field
+        id={INPUT_ID.address}
+        label="주소"
+        autoComplete="street-address"
+        value={shipping.address}
+        onChange={(e) =&gt; setShipping({ address: e.target.value })}
+        helper="동·호수까지 적어 주세요"
+        error={errors.address}
+      /&gt;
+      &lt;p className={styles.notice}&gt;
+        배송지는 결제가 끝난 뒤, 이 프로젝트의 창작자에게만 보여요. 테스트 결제라 실제로 받을 물건이 없다면 가짜 주소를 적어도 괜찮아요.
+      &lt;/p&gt;
+
+      &lt;div className={styles.bar}&gt;
+        &lt;div className={styles.barInner}&gt;
+          &lt;Button variant="secondary" onClick={onPrev}&gt;
+            이전
+          &lt;/Button&gt;
+          &lt;div className={styles.barAction}&gt;
+            &lt;Button fullWidth onClick={next}&gt;
+              다음: 확인
+            &lt;/Button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 규칙을 한 곳에 두는 이유</span>화면은 칸마다 이유(<code>shippingFieldErrors</code>)를, 서버 검사(<code>quote.ts</code>)와 단계 이동 검사는 첫 번째 이유 하나(<code>shippingStepError</code>)를 씁니다. 같은 파일의 같은 규칙이라, 화면에서는 통과했는데 서버에서 막히는 어긋남이 생기지 않습니다.</div>
+        <div class="box check"><span class="box-title">✅ 개선 후 기록 [실제]</span>
+          <div class="table-wrap"><table>
+            <thead><tr><th></th><th>전</th><th>후</th></tr></thead>
+            <tbody>
+              <tr><td>새 테스트</td><td>6개 실패</td><td><strong>6개 통과</strong> (+ 기존 후원 흐름 테스트 통과)</td></tr>
+              <tr><td>틀림 표시된 칸</td><td>0</td><td>2 (빨간 테두리 + <code>aria-invalid</code> + 설명 연결 → 화면 낭독기도 읽음)</td></tr>
+              <tr><td>커서</td><td>버튼</td><td><strong>연락처 칸</strong></td></tr>
+              <tr><td>데스크톱에서 이유</td><td>가려짐</td><td>보임 (<code>scroll-margin-bottom</code>)</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"어디가 틀렸는지 모르겠다"는 말을, 틀린 칸에서 바로 이유를 보여 주고 그 칸으로 데려가는 화면으로 바꿨습니다. 그리고 그것을 테스트로 증명했습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t19-s2-fix"><span>칸마다 오류 · focus · 가짜 주소 안내 → 테스트 통과</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>개선 ②: 운영 점검에 배송지 통과율</summary>
+      <div class="step-body">
+        <figure class="code" data-src="lib/funnel.ts" data-tag="week19-step1" data-lines="55-75">
+          <figcaption><span class="label">lib/funnel.ts (일부) — getShippingPass</span></figcaption>
+          <pre><code>// 배송지 통과율 (19주차 개선 — 18주차에 운영자가 직접 속았던 것)
+// 배송이 없는 리워드는 배송지를 건너뛰고 결제 요청으로 간다 → 단계 개수로 나눈 "결제 요청 ÷ 배송지" 는 틀린 비율이다
+// (분자에 배송지를 거치지 않은 사람이 섞인다). 그래서 사람 한 명씩 따라가서
+// "배송지에 온 사람 중 결제 요청까지 간 사람" 만 센다 — sql/week18-funnel-paths.sql 의 ① 과 같은 계산
+export type ShippingPass = { arrived: number; passed: number; rate: number | null };
+
+export async function getShippingPass(db: Db, { days = 30, projectId }: { days?: number; projectId?: number } = {}): Promise&lt;ShippingPass&gt; {
+  const result = await db.execute&lt;{ arrived: number; passed: number }&gt;(sql`
+    with path as (
+      select bool_or(step = 'shipping') as shipping, bool_or(step = 'payment_request') as payment_request
+      from ${funnelEvent}
+      where created_at &gt;= now() - make_interval(days =&gt; ${days})
+        ${projectId === undefined ? sql`` : sql`and project_id = ${projectId}`}
+      group by visitor_id, project_id
+    )
+    select count(*) filter (where shipping)::int as arrived,
+           count(*) filter (where shipping and payment_request)::int as passed
+    from path`);
+  const { arrived, passed } = result.rows[0];
+  return { arrived, passed, rate: arrived &gt; 0 ? Math.round((passed / arrived) * 1000) / 10 : null };
+}</code></pre>
+        </figure>
+        <p>DB 테스트를 먼저 썼습니다: 배송지에 온 4명 중 2명 통과 + 배송 없이 결제 요청 2명 → 단계 개수로는 100% (틀림), 사람을 따라가면 <strong>50%</strong>.</p>
+        <div class="box check"><span class="box-title">✅ 전후 [실제] — <code>npm run ops:check -- --project=번호</code> (가상 사례 데이터)</span>
+          <p>전: "결제 요청 (앞 단계의 70%)" 만 → 배송지 문제가 가려짐<br>후: <code>↳ 배송지 통과율 50%  (배송지에 온 20명 중 10명이 결제 요청까지)</code> + "결제 요청의 앞 단계 % 에는 배송지를 건너뛴 사람도 섞여 있어요" 주의 문장</p>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>측정 도구(운영 점검)가 틀린 비율(70%) 대신 맞는 비율(배송지 통과율 50%)을 보여 주게 고쳤습니다. 측정이 맞아야 개선 뒤에 다시 잴 수 있습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t19-s3-pass"><span>getShippingPass + DB 테스트 + ops:check 출력</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>PR → CI → CD, 그리고 재측정</summary>
+      <div class="step-body">
+        <ol>
+          <li>브랜치 → 커밋을 <strong>개선마다 따로</strong> (문제가 생기면 하나만 되돌릴 수 있게) → PR 본문에 18주차 근거와 위 전후 표</li>
+          <li>CI(lint·타입·단위·흐름 테스트·빌드) 통과 → 합치기 → 운영 배포 → 연기 테스트</li>
+          <li><strong>(강의 뒤)</strong> 운영에서 2주 재측정 — 18주차에 적은 기준: <strong>배송지 통과율 50% → 70% 이상</strong></li>
+        </ol>
+        <div class="table-wrap"><table>
+          <thead><tr><th>기간</th><th>배송지 도착</th><th>통과</th><th>통과율</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td>개선 전 2주</td><td></td><td></td><td>%</td><td>ops:check 의 ↳ 줄</td></tr>
+            <tr><td>개선 후 2주</td><td></td><td></td><td>%</td><td>배포한 날짜:</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box help"><span class="box-title">🆘 기준에 못 미치면</span><p>실패가 아니라 <strong>다음 가설</strong>입니다. 무엇이 여전히 막는지 다시 관찰합니다 (18주차로). 사람이 적으면(10명 미만) 숫자가 크게 흔들리니, 설문에서 배송지 이야기가 줄었는지도 함께 봅니다.</p></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>관찰 → 가설 → 테스트 → 고치기 → 배포 → 재측정의 한 바퀴를 돌았습니다. 가짜 "후" 숫자를 지어내지 않고, 실제 사용자로 잴 칸을 비워 둔 것도 중요합니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>개선 전 코드에서 새 테스트가 실패하는 것을 먼저 확인한 이유는?</summary><p>처음부터 통과하는 테스트는 "고쳐서 좋아졌다"를 증명하지 못합니다. 실패 → 통과가 개선의 증거입니다.</p></details>
+          <details><summary>서버의 배송지 검사는 왜 따로 규칙을 만들지 않나?</summary><p>규칙이 두 곳에 있으면 한쪽만 고쳐져 어긋납니다. rules.ts 하나를 화면과 서버가 같이 씁니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t19-s4-pr"><span>PR(커밋 둘) → CI 통과 → 합치기 → 운영 배포</span></label></li>
+          <li><label><input type="checkbox" data-task="t19-s4-measure"><span>(강의 뒤) 2주 재측정 표 채우기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">19주차 회고</h2>
+    <div class="retro card">
+      <label for="t19-note-1">잘된 것</label>
+      <textarea id="t19-note-1" data-note="t19-good"></textarea>
+      <label for="t19-note-2">막힌 것</label>
+      <textarea id="t19-note-2" data-note="t19-stuck"></textarea>
+      <label for="t19-note-3">다음에 다르게 할 것</label>
+      <textarea id="t19-note-3" data-note="t19-next"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t19-retro"><span>19주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week18.html"><small>이전</small>← 18주차 · 우선순위</a>
+      <a class="card next" href="week20.html"><small>다음</small>20주차 · 케이스 스터디 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-29 · Playwright 1.63.0 · Vitest 5.0.2 · Next.js 16.3.6</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

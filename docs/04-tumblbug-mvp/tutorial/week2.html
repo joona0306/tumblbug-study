@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2주차 PRD·결정 기록·개념 ERD · 모아 교재</title>
+  <meta name="description" content="인터뷰 인사이트로 PRD를 쓰고, 중요한 결정을 ADR로 남기고, 개념 ERD와 상태 전이도를 그린다">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week2">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2" aria-current="page">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">2주차 · 4단계 · 무엇을 만들지 정하기</span>
+    <h1>PRD, 결정 기록, 개념 ERD</h1>
+    <p class="lead">
+      1주차 인사이트를 근거로 <strong>무엇을, 누구를 위해, 어디까지 만들지</strong> 한 문서(PRD)에 적습니다.
+      중요한 결정은 <strong>왜 그렇게 정했는지</strong>까지 남기고(ADR), 저장할 데이터의 큰 그림(개념 ERD)과 상태가 바뀌는 규칙(상태 전이도)을 그립니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 문서 네 개가 서로를 가리킨다</span>
+<div class="flow">
+  <div class="node ext"><strong>1주차 인사이트</strong><small>근거</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>PRD</strong><small>문제·사용자·목표/비목표·사용자 스토리·지표·위험</small></div>
+  <span class="arrow" data-label="명사 뽑기"></span>
+  <div class="node"><strong>개념 ERD</strong><small>개체와 관계 (타입 없이)</small></div>
+  <span class="arrow" data-label="바뀌는 것"></span>
+  <div class="node"><strong>상태 전이도</strong><small>어느 상태에서 어느 상태로만</small></div>
+</div>
+<p class="flow-note">갈림길마다 <strong>ADR</strong>(결정 기록)을 남긴다 — "무엇을 골랐고, 무엇을 포기했나"</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead>
+        <tbody>
+          <tr><td><strong>PRD</strong></td><td>제품 요구사항 문서. 개발 중 "이거 해야 해?"라는 질문에 답하는 기준</td></tr>
+          <tr><td><strong>사용자 스토리</strong></td><td>"[누구]로서 [무엇]을 하고 싶다, [왜]". 기능이 아니라 사람의 목적으로 적는다</td></tr>
+          <tr><td><strong>인수 조건</strong></td><td>"이게 되면 이 스토리는 끝". 나중에 테스트가 된다</td></tr>
+          <tr><td><strong>ADR</strong></td><td>결정 기록. 결정 1개 = 파일 1개, 번호는 바꾸지 않는다</td></tr>
+          <tr><td><strong>ERD</strong></td><td>저장할 데이터 덩어리(개체)를 네모로, 관계를 선으로 그린 그림</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>PRD 쓰기</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 문서부터?</span>혼자 만들어도 20주는 깁니다. 중간에 "검색도 넣을까? 댓글도?" 하는 순간이 반드시 옵니다. PRD 의 <strong>비목표</strong>(이번에는 안 한다) 칸이 그때 나를 지켜 줍니다 — 스코프 크립(범위가 슬금슬금 커지는 것) 방지.</div>
+        <p>예시 답안: <a href="../templates/03-prd.md">templates/03-prd.md</a>. 여러분은 <strong>근거 칸을 내 인터뷰 인용으로</strong> 바꿔 씁니다.</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>PRD 칸</th><th>예시 답안의 요점</th></tr></thead>
+          <tbody>
+            <tr><td>1. 문제</td><td>창작자는 제작비를 미리 모으기 어렵고, 후원자는 믿을 만한 프로젝트인지 판단할 정보가 부족하다</td></tr>
+            <tr><td>2. 대상 사용자</td><td>창작자 · 후원자 · 관리자(나)</td></tr>
+            <tr><td>3. 목표</td><td>10분 안에 프로젝트 등록 / 리워드 → 배송지 → 결제 3단계 후원 / <strong>초과 판매 없음</strong> / 마감일에 성공·실패 자동 결정</td></tr>
+            <tr><td>3. 비목표</td><td>리워드 옵션, 정산, 환불, 알림, 댓글, 검색·추천, 실제 결제 — 20주 안에 핵심 흐름을 운영 수준으로 완성하는 게 우선</td></tr>
+            <tr><td>4. 사용자 스토리</td><td>후원자 B-1~B-5, 창작자 C-1~C-5, 관리자 A-1~A-2 + 인수 조건</td></tr>
+            <tr><td>5. 성공 지표</td><td>핵심: 상세를 본 방문자 중 후원 완료 비율 / 퍼널: 상세 → 리워드 → 배송지 → 결제 요청 → 결제 완료</td></tr>
+            <tr><td>6. 위험과 대응</td><td>마감 시각 버그, 금액 위조, 동시 결제 초과 판매, 결제창 이탈, 배송지 노출 …</td></tr>
+          </tbody>
+        </table></div>
+        <figure class="code">
+          <figcaption><span class="label">사용자 스토리 + 인수 조건 한 줄 (03-prd.md 에서)</span></figcaption>
+          <pre><code>B-3 | 후원자로서 마음에 드는 리워드를 골라 후원하고 싶다
+    | 리워드 선택(남은 수량 표시, 품절은 선택 불가) + 수량 + 추가 후원금 → 배송지 → 확인·결제 …</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>목표마다 근거(인터뷰 인용)가 있고, 비목표가 3개 이상이며, 사용자 스토리마다 인수 조건이 있다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>하고 싶은 기능이 너무 많아요</summary><p>"핵심 흐름(등록 → 후원 → 결과)에 꼭 필요한가?"로 걸러 보세요. 아니면 비목표에 적고 "다음에 할 것"으로 남깁니다. 버린 흔적이 판단력을 보여 줍니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"무엇을 만들고 무엇을 안 만들지"를 근거와 함께 정했습니다. 앞으로 16주 동안 범위를 판단할 기준이 생겼어요.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t2-s1-prd"><span>PRD 1~6칸 (근거 = 내 인터뷰)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>결정 기록(ADR) 시작하기</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 남기나?</span>석 달 뒤의 나는 "왜 이렇게 만들었지?"를 기억하지 못합니다. ADR 은 그 질문에 답하고, 포트폴리오에서 <strong>내 판단력</strong>을 보여 주는 가장 좋은 자료예요.</div>
+        <figure class="code">
+          <figcaption><span class="label">ADR 양식 (04-adr.md 에서)</span></figcaption>
+          <pre><code># ADR-000: [결정 제목]
+- 상태: 제안 / 결정 / 대체됨(ADR-0xx)
+- 날짜: YYYY-MM-DD
+## 상황      무엇을 정해야 하나? 왜 지금?
+## 선택지    A — 장점 / 단점,  B — 장점 / 단점
+## 결정      무엇을 골랐나
+## 이유      왜 (인터뷰·지표·제약 조건)
+## 결과      포기한 것, 해야 할 일</code></pre>
+        </figure>
+        <p>예시 네 개: <a href="../templates/04-adr.md">templates/04-adr.md</a></p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>ADR</th><th>고른 것</th><th>포기한 것</th></tr></thead>
+          <tbody>
+            <tr><td>001 모금 상태</td><td>순수 함수로 계산 + 하루 1번 예약 작업이 확정</td><td>한쪽만 쓰기 (화면이 틀리거나 필터가 어려움)</td></tr>
+            <tr><td>002 결제 시점</td><td>후원 즉시 (테스트) 결제</td><td>마감 뒤 결제 (범위가 크게 늘어남) → 알려진 한계로</td></tr>
+            <tr><td>003 초과 판매</td><td>결제 승인 직전 <strong>조건부 차감</strong></td><td>수량 예약(만료 처리 필요)</td></tr>
+            <tr><td>004 브라우저 상태 (5주차)</td><td>Zustand · TanStack Query · Context 를 종류별로</td><td>한 도구로 통일</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>ADR 을 최소 1개(모금 상태 또는 결제 시점) 내 말로 썼다. 선택지가 2개 이상이고 "결과(포기한 것)"가 비어 있지 않다.</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"정답"이 아니라 "이 상황에서의 선택과 그 대가"를 기록했습니다. 결정을 뒤집을 땐 옛 ADR 을 고치지 않고 새 ADR 을 씁니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>ADR-003 에서 "결제 승인 직전"에 차감해도 돈이 잘못 나가지 않는 이유는?</summary><p>토스페이먼츠는 서버가 승인 API 를 부르기 전까지 돈을 가져가지 않습니다. 차감에 실패하면 승인하지 않고 "품절"만 알리면 됩니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t2-s2-adr"><span>ADR 1개 이상 내 말로</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>개념 ERD: 명사에서 개체 찾기</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 모아의 개념 ERD (예시 답안)</span>
+<div class="flow">
+  <div class="node"><strong>사용자</strong><small>이메일, 이름, 역할</small></div>
+  <span class="arrow" data-label="1 : N 만든다"></span>
+  <div class="node"><strong>프로젝트</strong><small>제목, 목표 금액, 마감일, 대표 사진, 상태…</small></div>
+  <span class="arrow" data-label="1 : N"></span>
+  <div class="node"><strong>리워드</strong><small>이름, 금액, 수량 한정, 판매 수량…</small></div>
+</div>
+<div class="flow">
+  <div class="node"><strong>사용자</strong><small>후원자로서</small></div>
+  <span class="arrow" data-label="1 : N"></span>
+  <div class="node"><strong>후원</strong><small>수량, 총액, 배송지, 결제 상태…</small></div>
+  <span class="arrow" data-label="N : 1"></span>
+  <div class="node"><strong>프로젝트</strong><small>(리워드는 0~1개)</small></div>
+</div>
+<div class="flow">
+  <div class="node"><strong>사용자</strong></div>
+  <span class="arrow" data-label="N : M"></span>
+  <div class="node"><strong>찜</strong><small>연결 개체 + 찜한 날짜</small></div>
+  <span class="arrow" data-label="N : M"></span>
+  <div class="node"><strong>프로젝트</strong></div>
+</div>
+        </div>
+        <ol>
+          <li>PRD 사용자 스토리에서 <strong>명사</strong>를 뽑는다: 사용자, 창작자, 후원자, 프로젝트, 리워드, 후원, 결제, 찜, 배송지, 사진, 카테고리…</li>
+          <li><strong>저장해야 하고 여러 개가 생기는 것</strong>만 개체로 남긴다
+            <ul>
+              <li>창작자·후원자·관리자 → 모두 "사용자" 하나 (역할만 다름)</li>
+              <li>배송지 → 후원마다 하나씩 적으니 후원의 속성 · 대표 사진 1장 → 프로젝트의 속성</li>
+            </ul>
+          </li>
+          <li>개체 둘씩 짝지어 <strong>두 방향으로</strong> 묻는다: "프로젝트 1개에 리워드는 몇 개? → 여러 개", "리워드 1개는 프로젝트 몇 개에? → 1개" ⇒ 1 : N</li>
+          <li>양쪽 다 "여러 개"면 N : M → 사이에 연결 개체 (찜)</li>
+        </ol>
+        <p>자세한 예시와 범위 판단: <a href="../templates/07-data-model.md">templates/07-data-model.md</a> ① · Figma 예시 파일의 <strong>Flow</strong> 페이지</p>
+        <div class="box why"><span class="box-title">💡 왜 기획 단계에 ERD 를?</span>ERD 는 범위 판단 도구이기도 합니다. "리워드에 색상·사이즈 옵션" 을 넣으면 옵션 개체와 연결이 생기고 수량 계산이 옵션별로 바뀝니다 → 그림을 그려 보면 "이번 범위 제외"의 근거가 눈에 보여요.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>개체 5개 안팎, 모든 선에 1 : N / N : M 표시, 개체마다 핵심 속성 이름(타입 없이)이 있다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>"카테고리"는 개체인가요, 속성인가요?</summary><p>고정된 몇 개 중 하나라면 프로젝트의 속성, 관리자가 늘리고 줄이는 목록이라면 개체입니다. 모아는 고정 6개라 속성으로 둡니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>"무엇을 저장하고 어떻게 연결되나"를 개발자가 아니어도 읽을 수 있는 그림으로 만들었습니다. 6주차에 이 그림이 실제 표(물리 ERD)가 됩니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>찜을 "사용자" 개체의 속성(찜한 프로젝트 목록)으로 두면 안 되는 이유는?</summary><p>한 사람이 여러 프로젝트를, 한 프로젝트를 여러 사람이 찜하는 N : M 관계라서 한쪽의 칸 하나로 담을 수 없습니다. 연결 개체가 있어야 "누가 언제 무엇을" 찜했는지 한 줄씩 남아요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t2-s3-erd"><span>개념 ERD (개체·관계·핵심 속성)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>상태 전이도</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜?</span>상태 전이도는 "어느 상태에서 어느 상태로만 바뀔 수 있나"를 그린 그림입니다. <strong>화살표가 없는 방향(예: 완료 → 대기)은 코드에서 막아야 할 버그</strong>이고, 각 화살표가 곧 테스트 케이스가 됩니다.</div>
+        <div class="box picture"><span class="box-title">🗺️ 모아의 세 가지 상태</span>
+<div class="flow">
+  <div class="node"><strong>프로젝트: 모금중</strong></div>
+  <span class="arrow" data-label="마감 · 모인 금액 ≥ 목표"></span>
+  <div class="node"><strong>성공</strong><small>끝 — 되돌아가지 않음</small></div>
+</div>
+<div class="flow">
+  <div class="node"><strong>프로젝트: 모금중</strong></div>
+  <span class="arrow" data-label="마감 · 모인 금액 &lt; 목표"></span>
+  <div class="node"><strong>실패</strong><small>끝</small></div>
+</div>
+<div class="flow">
+  <div class="node"><strong>후원: 결제 대기</strong></div>
+  <span class="arrow" data-label="승인 성공"></span>
+  <div class="node"><strong>완료</strong></div>
+  <span class="arrow" data-label="또는"></span>
+  <div class="node warn"><strong>실패</strong><small>품절(SOLD_OUT) · 카드 거절 · 사용자 취소 → 차감 되돌리기</small></div>
+</div>
+<div class="flow">
+  <div class="node"><strong>리워드: 남음</strong></div>
+  <span class="arrow" data-label="판매 수량 = 한정 수량"></span>
+  <div class="node"><strong>품절</strong></div>
+  <span class="arrow" data-label="승인 실패로 되돌림"></span>
+  <div class="node"><strong>남음</strong></div>
+</div>
+        </div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>세 가지(프로젝트·후원·리워드 수량)의 상태와 화살표를 그렸고, "없는 화살표"의 예를 하나 말할 수 있다.</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>바뀌는 규칙을 먼저 그림으로 정했습니다. 8주차의 모금 상태 함수, 11주차의 결제 처리가 이 그림을 코드로 옮긴 것입니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>"성공"한 프로젝트에 후원이 취소되어 목표 아래로 내려가면 다시 "모금중"이 될까?</summary><p>아닙니다. 성공·실패는 끝 상태이고 되돌아가는 화살표가 없습니다 (모아에는 후원 취소 기능도 없어요 — 비목표).</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t2-s4-state"><span>상태 전이도 3개</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">2주차 회고</h2>
+    <div class="retro card">
+      <label for="t2-note-1">잘된 것</label>
+      <textarea id="t2-note-1" data-note="t2-good" placeholder="예: 비목표를 적으니 마음이 편해졌다"></textarea>
+      <label for="t2-note-2">막힌 것 (어디서, 왜)</label>
+      <textarea id="t2-note-2" data-note="t2-stuck" placeholder="예: 개체와 속성 구분이 헷갈렸다"></textarea>
+      <label for="t2-note-3">다음에 다르게 할 것</label>
+      <textarea id="t2-note-3" data-note="t2-next" placeholder="예: ERD 를 그리기 전에 스토리의 명사부터 뽑겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t2-retro"><span>2주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week1.html"><small>이전</small>← 1주차 · 경쟁 분석과 인터뷰</a>
+      <a class="card next" href="week3.html"><small>다음</small>3주차 · 흐름도·와이어프레임 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Figma(무료)</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

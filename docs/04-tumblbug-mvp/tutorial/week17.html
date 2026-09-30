@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>17주차 운영 시작 · 모아 교재</title>
+  <meta name="description" content="실제 사용자를 받기 전 준비(학습용 안내·개인정보 안내·의견 보내기)와 창작자·후원자 초대, 그리고 2주 운영의 모습(가상 사례)">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week17">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17" aria-current="page">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">17주차 · 5단계 · 운영·개선의 시작 (강의 뒤 직접)</span>
+    <h1>운영 시작: 남이 쓰는 것을 지켜본다</h1>
+    <p class="lead">
+      지금까지는 내가 만들고 내가 써 봤습니다. 이번 주부터는 <strong>창작자 1명</strong>의 프로젝트를 올리고 <strong>지인 3~5명</strong>이 테스트 결제로 후원하게 합니다.
+      내가 예상하지 못한 곳에서 막힐 거예요 — 그게 가장 소중한 정보입니다.
+    </p>
+    <div class="box term"><span class="box-title">📌 17~20주차는 강의 뒤에 여러분이 직접</span>교재는 이 과정을 <strong>[가상]</strong> 사례(방문자 42명, 설문 8건)로 끝까지 미리 보여 줍니다. 코드 개선과 측정처럼 실제로 한 것은 <strong>[실제]</strong>로 따로 표시합니다. 여러분은 같은 순서를 진짜 사용자와 반복합니다.</div>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 이것만 기억하세요</span>
+<div class="flow">
+  <div class="node"><strong>창작자 1명</strong><small>프로젝트·리워드 등록</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>모아 (운영 사이트)</strong><small>학습용 안내 · 개인정보 안내 · 의견 보내기</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>지인 3~5명</strong><small>테스트 결제로 후원</small></div>
+</div>
+<div class="flow">
+  <div class="node"><strong>나 (운영자)</strong><small>Sentry · 가동 감시 · 매일 운영 점검 · 퍼널 · 설문</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>운영 일지</strong><small>숫자와 사용자의 말 — 18주차의 재료</small></div>
+</div>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>실제 사람을 받기 전에 필요한 세 가지 (코드)</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 필요한가</span>처음 오는 사람은 진짜 결제 서비스로 오해할 수 있고(<strong>학습용 안내</strong>), 이제 실제 사람의 이메일·이름·배송지를 받게 되며(<strong>개인정보 안내</strong>), 막힌 곳을 들을 통로가 있어야 합니다(<strong>의견 보내기</strong>).</div>
+        <figure class="code" data-src="components/layout/StudyNotice.tsx" data-tag="week17-step1">
+          <figcaption><span class="label">components/layout/StudyNotice.tsx — 모든 화면 맨 위의 띠</span></figcaption>
+          <pre><code>import styles from "./StudyNotice.module.css";
+
+// 모든 화면 맨 위의 얇은 안내 띠 (17주차) — 처음 온 사람이 진짜 결제 서비스로 오해하지 않게
+// 결제 화면에도 같은 안내가 있지만(ConfirmStep), 가입·프로젝트 등록 전에 먼저 알아야 한다
+export function StudyNotice() {
+  return (
+    &lt;p className={styles.notice} role="note"&gt;
+      학습용 서비스예요 · 결제는 모두 &lt;strong&gt;테스트&lt;/strong&gt;라 실제로 돈이 나가지 않아요
+    &lt;/p&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="components/layout/AppFooter.tsx" data-tag="week17-step1">
+          <figcaption><span class="label">components/layout/AppFooter.tsx — 개인정보 안내 · 의견 보내기</span></figcaption>
+          <pre><code>import Link from "next/link";
+import styles from "./AppFooter.module.css";
+
+// 모든 화면 아래 (17주차 — 실제 사용자를 받기 시작하면서)
+//  - 학습용 서비스라는 안내 (위쪽 띠 StudyNotice 와 같은 내용을 한 번 더)
+//  - 개인정보 처리 안내 · 의견 보내기
+// 의견 보내기 주소는 환경 변수 NEXT_PUBLIC_FEEDBACK_URL (Google 설문지 주소). 비어 있으면 링크를 숨긴다
+export function AppFooter() {
+  const feedbackUrl = process.env.NEXT_PUBLIC_FEEDBACK_URL;
+  return (
+    &lt;footer className={styles.footer}&gt;
+      &lt;div className={`container ${styles.inner}`}&gt;
+        &lt;p className="text-caption text-muted"&gt;모아는 크라우드펀딩 교재의 예시 서비스예요. 결제는 모두 테스트라 실제로 돈이 나가지 않아요.&lt;/p&gt;
+        &lt;nav className={styles.links} aria-label="서비스 안내"&gt;
+          &lt;Link href="/privacy" className="text-caption"&gt;
+            개인정보 처리 안내
+          &lt;/Link&gt;
+          {feedbackUrl &amp;&amp; (
+            // 바깥 사이트(Google 설문지)는 새 탭으로. noopener: 새 탭이 우리 창을 건드리지 못하게
+            &lt;a href={feedbackUrl} target="_blank" rel="noopener noreferrer" className="text-caption"&gt;
+              의견 보내기&lt;span className="sr-only"&gt; (새 탭에서 열림)&lt;/span&gt;
+            &lt;/a&gt;
+          )}
+        &lt;/nav&gt;
+      &lt;/div&gt;
+    &lt;/footer&gt;
+  );
+}</code></pre>
+        </figure>
+        <details>
+          <summary><strong>app/privacy/page.tsx 전체 보기</strong> — 무엇을·왜·누가·어디에·언제까지</summary>
+          <figure class="code" data-src="app/privacy/page.tsx" data-tag="week17-step1">
+            <figcaption><span class="label">app/privacy/page.tsx</span></figcaption>
+            <pre><code>import type { Metadata } from "next";
+import styles from "./page.module.css";
+
+export const metadata: Metadata = { title: "개인정보 처리 안내 — 모아" };
+
+// 개인정보 처리 안내 (17주차) — 실제 사람의 이메일·이름·배송지를 받기 시작하므로 "무엇을, 왜, 누가, 언제까지"를 알린다
+// 학습용 서비스의 안내문이다 (법률 검토를 받은 약관이 아니다). 실제 서비스라면 법에 맞는 개인정보처리방침이 필요하다
+// 내용은 코드가 실제로 저장하는 것과 같아야 한다 — 새로 저장하는 값이 생기면 이 화면도 함께 고친다
+export default function PrivacyPage() {
+  const feedbackUrl = process.env.NEXT_PUBLIC_FEEDBACK_URL;
+  return (
+    &lt;main className={`container ${styles.page}`}&gt;
+      &lt;h1 className="text-heading-l"&gt;개인정보 처리 안내&lt;/h1&gt;
+      &lt;p className="text-body-m text-muted"&gt;
+        모아는 크라우드펀딩 교재를 따라 만든 &lt;strong&gt;학습용 서비스&lt;/strong&gt;예요. 결제는 모두 테스트라 실제로 돈이 나가지 않아요. 오프라인 스터디에서 운영을 연습하는 동안만 운영해요.
+      &lt;/p&gt;
+
+      &lt;section&gt;
+        &lt;h2 className="text-heading-m"&gt;무엇을 저장하나요&lt;/h2&gt;
+        &lt;table className={styles.table}&gt;
+          &lt;thead&gt;
+            &lt;tr&gt;
+              &lt;th scope="col"&gt;언제&lt;/th&gt;
+              &lt;th scope="col"&gt;저장하는 것&lt;/th&gt;
+              &lt;th scope="col"&gt;왜&lt;/th&gt;
+            &lt;/tr&gt;
+          &lt;/thead&gt;
+          &lt;tbody&gt;
+            &lt;tr&gt;
+              &lt;td&gt;가입할 때&lt;/td&gt;
+              &lt;td&gt;이메일, 아이디, 이름, 비밀번호(암호화해서 — 운영자도 볼 수 없어요)&lt;/td&gt;
+              &lt;td&gt;로그인, 후원 내역·프로젝트를 내 계정에 연결&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+              &lt;td&gt;로그인할 때&lt;/td&gt;
+              &lt;td&gt;로그인 기록(접속 IP, 브라우저 종류)&lt;/td&gt;
+              &lt;td&gt;로그인 유지, 이상한 접속 확인&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+              &lt;td&gt;배송이 필요한 리워드로 후원할 때&lt;/td&gt;
+              &lt;td&gt;받는 사람 이름, 연락처, 주소&lt;/td&gt;
+              &lt;td&gt;창작자가 리워드를 보내기 위해&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+              &lt;td&gt;후원할 때&lt;/td&gt;
+              &lt;td&gt;후원 금액, 응원 메시지, 테스트 결제 기록&lt;/td&gt;
+              &lt;td&gt;후원 내역, 모금액 계산&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+              &lt;td&gt;프로젝트를 올릴 때&lt;/td&gt;
+              &lt;td&gt;프로젝트 내용과 사진&lt;/td&gt;
+              &lt;td&gt;프로젝트를 보여 주기 위해 (누구나 볼 수 있어요)&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+              &lt;td&gt;화면을 볼 때&lt;/td&gt;
+              &lt;td&gt;브라우저 쿠키의 무작위 값(방문자 구분), 화면 테마 설정&lt;/td&gt;
+              &lt;td&gt;&amp;ldquo;상세를 본 사람 중 몇 명이 후원했나&amp;rdquo; 통계 — 계정·IP 와 연결하지 않아요&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+              &lt;td&gt;요청이 너무 많을 때&lt;/td&gt;
+              &lt;td&gt;접속 IP (하루가 지나면 지워요)&lt;/td&gt;
+              &lt;td&gt;짧은 시간에 요청을 너무 많이 보내는 것 막기&lt;/td&gt;
+            &lt;/tr&gt;
+          &lt;/tbody&gt;
+        &lt;/table&gt;
+        &lt;p className="text-body-s text-muted"&gt;
+          &lt;strong&gt;배송지는 실제 주소가 아니어도 돼요.&lt;/strong&gt; 테스트 후원이라 실제로 물건이 가지 않는다면 가짜 주소를 적어 주세요. 카드 번호 같은 결제 정보는 모아가 받지 않아요 (토스페이먼츠 테스트 결제창에서 처리해요).
+        &lt;/p&gt;
+      &lt;/section&gt;
+
+      &lt;section&gt;
+        &lt;h2 className="text-heading-m"&gt;누가 볼 수 있나요&lt;/h2&gt;
+        &lt;ul className={styles.list}&gt;
+          &lt;li&gt;배송지는 &lt;strong&gt;그 프로젝트의 창작자만&lt;/strong&gt; 볼 수 있어요. 다른 사용자는 볼 수 없어요.&lt;/li&gt;
+          &lt;li&gt;운영자(스터디 진행자)는 서비스 운영과 문제 해결을 위해 데이터베이스를 볼 수 있어요.&lt;/li&gt;
+          &lt;li&gt;에러 기록(Sentry)에는 이름·이메일·쿠키·입력한 내용을 보내지 않도록 설정했어요.&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/section&gt;
+
+      &lt;section&gt;
+        &lt;h2 className="text-heading-m"&gt;어디에 보관하나요&lt;/h2&gt;
+        &lt;ul className={styles.list}&gt;
+          &lt;li&gt;데이터베이스: Neon (싱가포르 서버)&lt;/li&gt;
+          &lt;li&gt;화면·서버: Vercel · 프로젝트 사진: Vercel Blob&lt;/li&gt;
+          &lt;li&gt;에러 기록: Sentry · 테스트 결제: 토스페이먼츠 (테스트 모드)&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/section&gt;
+
+      &lt;section&gt;
+        &lt;h2 className="text-heading-m"&gt;언제까지 보관하나요&lt;/h2&gt;
+        &lt;ul className={styles.list}&gt;
+          &lt;li&gt;&lt;strong&gt;스터디가 끝나면 모든 계정과 후원 기록을 지워요.&lt;/strong&gt;&lt;/li&gt;
+          &lt;li&gt;그 전이라도 지워 달라고 하면 바로 지워요. 아직 &amp;ldquo;탈퇴&amp;rdquo; 버튼이 없어서 운영자에게 알려 주세요.&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/section&gt;
+
+      &lt;section&gt;
+        &lt;h2 className="text-heading-m"&gt;문의·삭제 요청&lt;/h2&gt;
+        {feedbackUrl ? (
+          &lt;p className="text-body-m"&gt;
+            스터디 진행자에게 직접 말하거나{" "}
+            &lt;a href={feedbackUrl} target="_blank" rel="noopener noreferrer"&gt;
+              의견 보내기&lt;span className="sr-only"&gt; (새 탭에서 열림)&lt;/span&gt;
+            &lt;/a&gt;
+            로 알려 주세요.
+          &lt;/p&gt;
+        ) : (
+          &lt;p className="text-body-m"&gt;스터디 진행자에게 직접 알려 주세요.&lt;/p&gt;
+        )}
+      &lt;/section&gt;
+
+      &lt;p className="text-caption text-muted"&gt;마지막 수정: 2026-09-28 · 학습용 안내문이며 법률 검토를 받은 약관이 아니에요.&lt;/p&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+          </figure>
+        </details>
+        <div class="box why"><span class="box-title">💡 개인정보 안내는 코드와 같아야 한다</span>"무엇을 저장하나" 표는 코드가 <strong>실제로</strong> 저장하는 것과 하나하나 맞췄습니다 (가입 정보, 로그인 기록의 IP·브라우저, 배송지, 방문자 무작위 쿠키, 요청 수 제한용 IP 는 하루 뒤 삭제). 새로 저장하는 값이 생기면 이 화면도 함께 고칩니다. 학습용 안내문이며 법률 검토를 받은 약관은 아닙니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법 [실제]</span>모든 화면 위에 노란 띠, 아래에 푸터, <code>/privacy</code> 200 · 흐름 테스트 <code>e2e/launch.spec.ts</code></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>처음 오는 사람이 <strong>진짜 결제로 오해하지 않게</strong>(안내 띠), <strong>무엇을 저장하는지 알 수 있게</strong>(개인정보 안내), <strong>막힌 곳을 알려 줄 수 있게</strong>(의견 보내기) 했습니다. 실제 사람을 받기 위한 최소한의 예의입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t17-s1-code"><span>학습용 안내 띠 · 푸터 · 개인정보 안내 화면</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>의견 보내기 — Google 설문지</summary>
+      <div class="step-body">
+        <ol>
+          <li>forms.google.com → 새 설문지. 질문은 짧게 (2분): 역할 · 어디까지 해 봤나 · <strong>가장 헷갈리거나 막혔던 곳</strong>(가장 중요) · 좋았던 점 · 기기 · (선택) 연락처</li>
+          <li>위쪽 <strong>설정</strong> 탭 → <strong>응답</strong>: <strong>이메일 주소 수집 → 수집하지 않음</strong> · <strong>응답 횟수 1회로 제한 → 끔</strong> (켜면 Google 로그인을 해야 답할 수 있다)</li>
+          <li>오른쪽 위 <strong>게시</strong> → 응답자: <strong>링크가 있는 모든 사용자</strong> → <strong>응답자 링크 복사</strong> (URL 단축 → <code>https://forms.gle/…</code>)</li>
+          <li>Vercel → Settings → Environment Variables → <code>NEXT_PUBLIC_FEEDBACK_URL</code> = 그 주소 · Production · 종류 <strong>Config</strong></li>
+          <li><strong>다시 배포</strong>해야 반영됩니다 (아무 PR 이나 합치거나 Deployments → Redeploy)</li>
+        </ol>
+        <div class="box help"><span class="box-title">🆘 작성자가 실제로 막힌 곳</span>
+          <details><summary>"보내기" 버튼이 없고 "게시"가 있어요</summary><p>2026-09 화면 기준 Google 설문지는 <strong>게시</strong>로 공개합니다. 예전 안내의 "보내기 → 링크"와 같은 일이에요.</p></details>
+          <details><summary>주소창의 주소를 넣었더니 이상해요</summary><p>편집 화면의 <code>…/edit</code> 주소는 <strong>편집용</strong>입니다. 반드시 <strong>응답자 링크</strong>를 넣으세요. 시크릿 창(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>)에서 로그인 없이 열리면 맞습니다.</p></details>
+          <details><summary>넣었는데 화면에 링크가 안 보여요</summary><p>Type 을 <strong>Secret</strong> 으로 넣으면 GitHub Actions 빌드 때 값이 오지 않습니다 (14주차). <code>NEXT_PUBLIC_</code> 값은 빌드할 때 화면 코드에 새겨지므로 <strong>Config</strong> 로 넣고 다시 배포합니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>로그인·이메일 없이 답할 수 있는 설문지를 만들고, 그 주소를 Vercel 에 <strong>Config</strong> 종류로 넣었습니다. <code>NEXT_PUBLIC_</code> 값은 빌드 때 화면 코드에 새겨지므로 다시 배포해야 링크가 나타납니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t17-s2-form"><span>설문지 (이메일 수집 끔 · 링크가 있는 모든 사용자) + Vercel Config + 재배포</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>운영 시작 전 점검과 초대</summary>
+      <div class="step-body">
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>운영 시작 전에 관리자 계정·테스트 데이터 숨김·알림을 점검하고, 창작자와 후원자에게 보낼 안내를 준비했습니다. 이제 남이 쓰는 것을 지켜볼 차례입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t17-s3-admin"><span>운영 사이트용 관리자 계정이 있다 (계정은 DB 마다 따로 — 개발용 예시 계정으로는 운영에 로그인할 수 없다, <code>docs/accounts.md</code>)</span></label></li>
+          <li><label><input type="checkbox" data-task="t17-s3-hide"><span>연습하면서 만든 테스트 프로젝트를 관리자 화면에서 숨겼다 (지우지 않고 숨기면 후원 기록은 남는다)</span></label></li>
+          <li><label><input type="checkbox" data-task="t17-s3-alerts"><span>알림이 살아 있다: Sentry · UptimeRobot Up · Ops check 최근 성공</span></label></li>
+          <li><label><input type="checkbox" data-task="t17-s3-dryrun"><span>관리자가 아닌 두 번째 계정으로 운영에서 테스트 결제 1건이 끝까지 된다</span></label></li>
+        </ul>
+        <h3>초대하기</h3>
+        <p>운영 주소를 <strong>QR 코드</strong>로 (Chrome 주소창 → 공유 → QR 코드 만들기). 소개할 때 말할 것: ① 교재로 만든 학습용 서비스 ② <strong>결제는 테스트</strong>, 청구 없음 ③ <strong>배송지는 가짜 주소도 된다</strong>, 스터디가 끝나면 모두 지운다 ④ 막힌 곳이 가장 소중한 정보 — "의견 보내기"로. 창작자·후원자에게 보낼 안내문은 <code>projects/04-tumblbug-mvp/docs/launch.md</code> 4·5번에 있습니다.</p>
+        <div class="box why"><span class="box-title">💡 사용자가 막혔다고 하면</span>그 자리에서 고쳐 주지 말고 <strong>먼저 적습니다</strong> — 어느 화면에서, 무엇을 하려다, 무엇을 봤나. 한 명이 막힌 곳은 다른 사람도 막힙니다.</div>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>2주 동안 쌓이는 것 [가상 사례]</summary>
+      <div class="step-body">
+        <p>교재에서는 개발 DB 에 정해 둔 시나리오를 넣어 운영 2주를 흉내 냅니다. 무작위 값이 없어서 몇 번을 돌려도 교재의 숫자와 똑같습니다 (이름이 <code>_dev</code> 로 끝나는 DB 에서만 돈다).</p>
+        <figure class="code" data-src="scripts/simulate-ops.mts" data-tag="week17-step2" data-lines="71-91">
+          <figcaption><span class="label">scripts/simulate-ops.mts (시나리오 부분)</span></figcaption>
+          <pre><code>// ---------- 2. 시나리오: 방문자 42명이 어디까지 갔나 ----------
+//  A 상세만 보고 나감                         18명
+//  C 배송 리워드 → 배송지 화면에서 멈춤       10명   ← 가장 많이 빠지는 곳 (18주차에 찾는다)
+//  D 배송 리워드 → 배송지 → 결제 완료          8명
+//  E 배송 리워드 → 배송지 → 결제 실패          2명
+//  F 엽서(배송 없음) → 결제 완료               3명
+//  G 엽서(배송 없음) → 결제 실패               1명
+type Plan = { steps: ("view" | "reward" | "shipping" | "payment_request" | "paid")[]; reward?: RewardKey; qty?: number; extra?: number; fail?: string };
+const plans: Plan[] = [
+  ...Array.from({ length: 18 }, (): Plan =&gt; ({ steps: ["view"] })),
+  ...Array.from({ length: 10 }, (): Plan =&gt; ({ steps: ["view", "reward", "shipping"], reward: "vase1" })),
+  ...Array.from({ length: 5 }, (): Plan =&gt; ({ steps: ["view", "reward", "shipping", "payment_request", "paid"], reward: "vase1" })),
+  ...Array.from({ length: 2 }, (): Plan =&gt; ({ steps: ["view", "reward", "shipping", "payment_request", "paid"], reward: "vase2" })),
+  { steps: ["view", "reward", "shipping", "payment_request", "paid"], reward: "vase1", qty: 2 },
+  { steps: ["view", "reward", "shipping", "payment_request"], reward: "vase1", fail: "PAY_PROCESS_CANCELED" }, // 결제창을 닫음
+  { steps: ["view", "reward", "shipping", "payment_request"], reward: "vase1", fail: "REJECT_CARD_COMPANY" }, // 카드사 거절
+  { steps: ["view", "reward", "payment_request", "paid"], reward: "card" },
+  { steps: ["view", "reward", "payment_request", "paid"], reward: "card" },
+  { steps: ["view", "reward", "payment_request", "paid"], reward: "card", extra: 5_000 },
+  { steps: ["view", "reward", "payment_request"], reward: "card", fail: "PAY_PROCESS_CANCELED" },
+];</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm run ops:simulate
+npm run ops:check -- --project=번호</code></pre>
+        </figure>
+        <div class="table-wrap"><table>
+          <thead><tr><th>퍼널 [가상]</th><th>사람</th><th>앞 단계의 %</th></tr></thead>
+          <tbody>
+            <tr><td>상세 보기</td><td>42</td><td>—</td></tr>
+            <tr><td>후원 시작 (리워드)</td><td>24</td><td>57.1%</td></tr>
+            <tr><td>배송지</td><td>20</td><td>83.3%</td></tr>
+            <tr><td>결제 요청</td><td>14</td><td>70%</td></tr>
+            <tr><td>결제 완료</td><td>11</td><td>78.6% (핵심 지표: 상세의 26.2%)</td></tr>
+          </tbody>
+        </table></div>
+        <p>결제 실패 3건(결제창 닫음 2 · 카드사 거절 1), 가동 감시 알림 1건(외부 원인 4분), 그리고 설문 8건 — 그중 3건이 "배송지에서 무엇이 틀렸는지 모르겠다". 전체 기록: <code>docs/case-study/week17-operate.md</code></p>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>운영하면 <strong>숫자</strong>(퍼널·결제 실패·점검)와 <strong>사용자의 말</strong>(설문)이 쌓입니다. 한 주가 끝나면 둘을 운영 일지(<code>templates/09-ops-log.md</code>)에 옮겨 적습니다 — 사용자의 말은 고치지 말고 그대로.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>핵심 지표 26.2% 는 무엇을 무엇으로 나눈 값인가?</summary><p>결제 완료(11) ÷ 상세 보기(42). 상세를 본 사람 중 후원을 끝낸 비율입니다.</p></details>
+          <details><summary>퍼널만 보면 가장 많이 빠지는 곳은 "상세 → 리워드(57.1%)"다. 정말 그럴까?</summary><p>18주차에 다시 봅니다. 힌트: 배송이 없는 리워드는 배송지를 건너뜁니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t17-s4-sim"><span>가상 사례 만들기 + ops:check --project 로 퍼널 보기</span></label></li>
+          <li><label><input type="checkbox" data-task="t17-s4-log"><span>(강의 뒤) 실제 2주 운영 → 운영 일지 1주차</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">17주차 회고</h2>
+    <div class="retro card">
+      <label for="t17-note-1">잘된 것</label>
+      <textarea id="t17-note-1" data-note="t17-good"></textarea>
+      <label for="t17-note-2">막힌 것 · 사용자가 막힌 것</label>
+      <textarea id="t17-note-2" data-note="t17-stuck"></textarea>
+      <label for="t17-note-3">다음에 다르게 할 것</label>
+      <textarea id="t17-note-3" data-note="t17-next"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t17-retro"><span>17주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week16.html"><small>이전</small>← 16주차 · Docker와 AWS EC2</a>
+      <a class="card next" href="week18.html"><small>다음</small>18주차 · 우선순위 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-29 · Next.js 16.3.6 · Google 설문지 (2026-09 화면) · Playwright 1.63.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

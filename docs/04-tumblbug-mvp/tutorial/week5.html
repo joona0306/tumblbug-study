@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>5주차 프로젝트 준비 · 모아 교재</title>
+  <meta name="description" content="Figma 토큰을 CSS 변수로, 디자인 시스템 컴포넌트, zod·Vitest·Playwright, GitHub Actions CI, Sentry, 상태 관리 지도">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week5">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5" aria-current="page">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">5주차 · 8단계 · 구현 파트의 시작</span>
+    <h1>프로젝트 준비: 안전망부터 깔기</h1>
+    <p class="lead">이제부터 코드를 씁니다. 첫 주에는 기능 대신 <strong>실수를 잡아 주는 도구</strong>를 먼저 준비합니다 — 디자인과 코드의 약속(토큰), 입력 검사(zod), 테스트(Vitest·Playwright), 자동 검사(CI), 에러 모니터링(Sentry).</p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 코드를 쓰기 전에 "안전망"부터</span>
+<div class="flow">
+  <div class="node"><strong>디자인 토큰·컴포넌트</strong><small>Figma 와 같은 이름</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>zod · Vitest · Playwright</strong><small>틀리면 바로 알림</small></div>
+  <span class="arrow" data-label="PR 마다"></span>
+  <div class="node"><strong>GitHub Actions CI</strong><small>검사를 통과해야 main 으로</small></div>
+  <span class="arrow" data-label="운영 중"></span>
+  <div class="node"><strong>Sentry</strong><small>에러를 모은다</small></div>
+</div>
+<p class="flow-note">5주차에는 화면(기능)이 거의 없다. 대신 6~20주 내내 실수를 잡아 줄 도구를 먼저 깐다.</p>
+        </div>
+
+        <div class="table-wrap"><table><thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead><tbody><tr><td><strong>디자인 토큰</strong></td><td>색·간격 같은 디자인 값에 붙인 이름 (<code>--color-primary</code>)</td></tr><tr><td><strong>단위 테스트</strong></td><td>함수 하나가 맞게 동작하는지 확인 (Vitest)</td></tr><tr><td><strong>흐름 테스트 (e2e)</strong></td><td>진짜 브라우저로 사람처럼 눌러 보는 테스트 (Playwright)</td></tr><tr><td><strong>CI</strong></td><td>지속적 통합 — 코드를 올릴 때마다 자동으로 검사</td></tr><tr><td><strong>Sentry</strong></td><td>앱에서 난 에러를 모아서 보여 주는 서비스</td></tr></tbody></table></div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>프로젝트 만들기 + Figma 토큰을 CSS 변수로</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — Figma 와 코드가 같은 이름을 쓴다</span>
+<div class="flow">
+  <div class="node"><strong>Figma 변수</strong><small>color/primary, spacing/lg</small></div>
+  <span class="arrow" data-label="내보내기"></span>
+  <div class="node"><strong>design/figma-tokens.json</strong><small>값을 글자로 저장</small></div>
+  <span class="arrow" data-label="같은 이름"></span>
+  <div class="node"><strong>app/globals.css</strong><small>--color-primary, --spacing-lg</small></div>
+  <span class="arrow" data-label="비교"></span>
+  <div class="node warn"><strong>tests/tokens.test.ts</strong><small>둘이 다르면 CI 실패</small></div>
+</div>
+<p class="flow-note">디자이너(Figma)와 개발자(코드)가 같은 단어로 말하게 한다. 한쪽만 바꾸면 테스트가 알려 준다 (이번 주 3단계에서 만든다).</p>
+        </div>
+        <p>1~3단계처럼 Next.js 프로젝트를 새로 만듭니다. 이번에는 처음부터 <strong>TypeScript</strong>(<code>--ts</code>)로 — 3단계 1주차에 손으로 바꾼 것을 도구가 대신 해 줍니다. 정답 코드 폴더 이름은 <code>04-tumblbug-mvp</code>, 여러분의 폴더는 <code>my-moa</code> 로 합니다.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 (Git Bash, 작업 폴더에서)</span></figcaption>
+          <pre><code>npx create-next-app@16.3.6 my-moa --ts --no-tailwind --eslint --app --no-src-dir --no-react-compiler --import-alias "@/*" --use-npm --yes
+cd my-moa</code></pre>
+        </figure>
+        <p>4주차 Figma 에서 만든 색·간격 변수를 그대로 옮깁니다. 먼저 값을 파일로 내보내고, 같은 이름의 CSS 변수를 만듭니다.</p>
+        <figure class="code" data-src="design/figma-tokens.json" data-tag="tumblbug-week5-step1" data-lines="1-27">
+          <figcaption><span class="label">design/figma-tokens.json</span></figcaption>
+          <pre><code>{
+  "_comment": "Figma 예시 파일(Local variables)에서 내보낸 토큰 값. Figma를 고치면 이 파일도 다시 내보낸다. tests/tokens.test.ts가 app/globals.css와 비교한다.",
+  "exportedAt": "2026-09-26",
+  "colors": {
+    "--color-bg": { "light": "#f7f7f8", "dark": "#121214" },
+    "--color-surface": { "light": "#ffffff", "dark": "#1c1c1f" },
+    "--color-surface-muted": { "light": "#ededf0", "dark": "#2a2a2f" },
+    "--color-text": { "light": "#1a1a1a", "dark": "#f0f0f0" },
+    "--color-text-muted": { "light": "#5f5f66", "dark": "#a0a0a6" },
+    "--color-subtle-text": { "light": "#5f5f66", "dark": "#b4b4bb" },
+    "--color-border": { "light": "#e2e2e5", "dark": "#2e2e33" },
+    "--color-primary": { "light": "#c8342a", "dark": "#ff7a6b" },
+    "--color-primary-hover": { "light": "#b42318", "dark": "#ffb3a9" },
+    "--color-on-primary": { "light": "#ffffff", "dark": "#1a0b09" },
+    "--color-primary-subtle": { "light": "#fdecea", "dark": "#3a1a16" },
+    "--color-primary-strong": { "light": "#b42318", "dark": "#ffb3a9" },
+    "--color-success": { "light": "#17703c", "dark": "#6ee79a" },
+    "--color-success-subtle": { "light": "#e6f4ec", "dark": "#12301f" },
+    "--color-danger": { "light": "#c42b2b", "dark": "#ff6b6b" },
+    "--color-warning": { "light": "#9a5b00", "dark": "#fbbf5a" },
+    "--color-warning-subtle": { "light": "#fff4e0", "dark": "#33220a" },
+    "--color-accent": { "light": "#1f2a44", "dark": "#dfe5f2" },
+    "--color-on-accent": { "light": "#ffffff", "dark": "#1f2a44" },
+    "--color-focus": { "light": "#2563eb", "dark": "#93c5fd" },
+    "--color-overlay": { "light": "rgb(0 0 0 / 0.5)", "dark": "rgb(0 0 0 / 0.5)" },
+    "--color-on-image": { "light": "#ffffff", "dark": "#ffffff" }
+  },</code></pre>
+        </figure>
+        <figure class="code" data-src="app/globals.css" data-tag="tumblbug-week5-step1" data-lines="1-60">
+          <figcaption><span class="label">app/globals.css</span></figcaption>
+          <pre><code>/*
+ * 디자인 토큰 — Figma 예시 파일의 변수 이름과 1:1로 같다.
+ *   Figma  color/primary  →  CSS  var(--color-primary)
+ *   Figma  spacing/lg     →  CSS  var(--spacing-lg)
+ * 색은 Figma처럼 두 층이다: 원시 색(--red-600) → 의미 색(--color-primary).
+ * 화면 코드에서는 의미 색만 쓴다. 원시 색을 직접 쓰면 다크 모드에서 바뀌지 않는다.
+ */
+
+:root {
+  /* ---------- 원시 색 (Primitives) ---------- */
+  --white: #ffffff;
+  --gray-50: #f7f7f8;
+  --gray-100: #ededf0;
+  --gray-200: #e2e2e5;
+  --gray-500: #5f5f66;
+  --gray-900: #1a1a1a;
+  --dark-bg: #121214;
+  --dark-surface: #1c1c1f;
+  --dark-surface-2: #2a2a2f;
+  --dark-border: #2e2e33;
+  --dark-muted: #a0a0a6;
+  --dark-subtle-text: #b4b4bb;
+  --dark-text: #f0f0f0;
+  --red-50: #fdecea;
+  --red-200: #ffb3a9;
+  --red-300: #ff7a6b;
+  --red-600: #c8342a;
+  --red-700: #b42318;
+  --red-950: #3a1a16;
+  --red-ink: #1a0b09;
+  --green-50: #e6f4ec;
+  --green-300: #6ee79a;
+  --green-700: #17703c;
+  --green-950: #12301f;
+  --danger-300: #ff6b6b;
+  --danger-600: #c42b2b;
+  --navy-900: #1f2a44;
+  --navy-100: #dfe5f2;
+  --blue-600: #2563eb;
+  --blue-300: #93c5fd;
+  --amber-50: #fff4e0;
+  --amber-700: #9a5b00;
+  --amber-950: #33220a;
+  --amber-300: #fbbf5a;
+  --black-alpha-50: rgb(0 0 0 / 0.5);
+
+  /* ---------- 의미 색 (Color / Light) ---------- */
+  --color-bg: var(--gray-50);
+  --color-surface: var(--white);
+  --color-surface-muted: var(--gray-100);
+  --color-text: var(--gray-900);
+  --color-text-muted: var(--gray-500);
+  --color-subtle-text: var(--gray-500);
+  --color-border: var(--gray-200);
+  --color-primary: var(--red-600);
+  --color-primary-hover: var(--red-700);
+  --color-on-primary: var(--white);
+  --color-primary-subtle: var(--red-50);
+  --color-primary-strong: var(--red-700);
+  --color-success: var(--green-700);</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 색이 두 층(원시 색 → 의미 색)인가요?</span>화면 코드는 <code>var(--color-primary)</code> 처럼 <strong>의미</strong>로만 씁니다. 다크 모드가 되면 의미 색이 가리키는 원시 색만 바뀌어요. 화면 코드에서 <code>--red-600</code> 을 직접 쓰면 다크 모드에서 안 바뀌는 곳이 생깁니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li><code>npm run dev</code> → http://localhost:3000 이 뜬다</li><li>브라우저 개발자 도구 → Elements → <code>:root</code> 에 <code>--color-primary</code> 가 보인다</li></ul></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>Figma 의 이름(<code>color/primary</code>)이 코드의 이름(<code>--color-primary</code>)이 되었습니다. 이제 "그 버튼 색"을 말할 때 디자인과 코드가 같은 단어를 씁니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>화면 코드에서 원시 색(<code>--red-600</code>)을 직접 쓰면 무엇이 곤란할까?</summary><p>다크 모드에서 의미 색만 바뀌기 때문에, 원시 색을 직접 쓴 곳은 라이트 모드 색 그대로 남습니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s1-create"><span>Next.js 16.3.6 프로젝트 만들기</span></label></li>
+          <li><label><input type="checkbox" data-task="t5-s1-tokens"><span>figma-tokens.json · globals.css 에 토큰 옮기기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>디자인 시스템 컴포넌트 (Button · Badge · ProgressBar · Chip · Field)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — Figma 컴포넌트 = React 컴포넌트</span>
+<div class="flow">
+  <div class="node"><strong>Figma Button</strong><small>Variant × Size × State</small></div>
+  <span class="arrow" data-label="같은 속성 이름"></span>
+  <div class="node"><strong>components/ui/Button.tsx</strong><small>variant · size · icon</small></div>
+  <span class="arrow" data-label="색·간격"></span>
+  <div class="node"><strong>CSS 변수(토큰)만</strong><small>숫자·색을 직접 적지 않는다</small></div>
+</div>
+        </div>
+        <figure class="code" data-src="components/ui/Button.tsx" data-tag="tumblbug-week5-step2">
+          <figcaption><span class="label">components/ui/Button.tsx</span></figcaption>
+          <pre><code>import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import styles from "./Button.module.css";
+
+// Figma Button 컴포넌트와 같은 속성: Variant(Primary/Secondary/Ghost) × Size(L/M), Icon(선택)
+// Hover·Focus·Disabled 상태는 CSS가 알아서 보여준다 (:hover, :focus-visible, disabled)
+type Variant = "primary" | "secondary" | "ghost";
+type Size = "l" | "m";
+
+type CommonProps = {
+  variant?: Variant;
+  size?: Size;
+  icon?: LucideIcon;
+  fullWidth?: boolean;
+  children: React.ReactNode;
+};
+
+function classNames(variant: Variant, size: Size, fullWidth: boolean) {
+  return [styles.button, styles[variant], styles[size], fullWidth ? styles.full : ""].join(" ");
+}
+
+// &lt;button&gt; 으로 쓰는 버튼 (폼 제출, 클릭 동작)
+export function Button({
+  variant = "primary",
+  size = "l",
+  icon: Icon,
+  fullWidth = false,
+  children,
+  ...rest
+}: CommonProps &amp; React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt;) {
+  return (
+    &lt;button className={classNames(variant, size, fullWidth)} {...rest}&gt;
+      {Icon &amp;&amp; &lt;Icon size={20} aria-hidden="true" /&gt;}
+      {children}
+    &lt;/button&gt;
+  );
+}
+
+// 다른 페이지로 이동하는 버튼 모양 링크 (&lt;a&gt;). 이동은 링크, 동작은 버튼 — 화면 낭독기가 구분한다
+export function ButtonLink({
+  variant = "primary",
+  size = "l",
+  icon: Icon,
+  fullWidth = false,
+  children,
+  href,
+}: CommonProps &amp; { href: string }) {
+  return (
+    &lt;Link href={href} className={classNames(variant, size, fullWidth)}&gt;
+      {Icon &amp;&amp; &lt;Icon size={20} aria-hidden="true" /&gt;}
+      {children}
+    &lt;/Link&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 링크 모양 버튼(ButtonLink)을 따로 만드나요?</span><strong>이동은 링크(&lt;a&gt;), 동작은 버튼(&lt;button&gt;)</strong>. 겉모양이 같아도 화면 낭독기는 둘을 다르게 읽고, 키보드 동작도 다릅니다 (링크는 Enter, 버튼은 Enter·Space). 모양만 보고 고르지 않습니다.</div>
+        <p>같은 방법으로 <code>Badge</code>(모금중·성공·실패·D-3), <code>ProgressBar</code>(달성률 — 132% 여도 막대는 100에서 멈추고 읽어 주는 글자는 132%), <code>Chip</code>(카테고리 선택 = 주소가 바뀌는 링크), <code>Field</code>(이름표 + 칸 + 에러 문장)를 만들고, 한 화면(<code>/design-system</code>)에 모아 봅니다.</p>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li>http://localhost:3000/design-system 에 버튼(보통·비활성), 배지, 진행률 3개, 칩, 입력칸(보통·에러)이 보인다</li><li>Tab 키로 이동하면 파란 초점 테두리가 보인다</li></ul></div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>아이콘이 안 보여요</summary><p>lucide-react 가 설치됐는지(<code>npm i lucide-react@1.48.0</code>), 아이콘 이름이 Figma Icons 페이지의 이름과 같은지 확인하세요.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>Figma 에서 만든 부품을 코드 부품으로 옮겼습니다. 앞으로 화면을 만들 때는 이 부품만 조립합니다 — 색과 간격을 다시 고민하지 않아도 돼요.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>ProgressBar 가 132% 일 때 막대와 읽어 주는 글자를 다르게 하는 이유는?</summary><p>막대는 화면을 넘칠 수 없으니 100에서 멈추지만, 실제 달성률(132%)은 정확히 알려야 하기 때문입니다 (aria-valuenow=100, aria-valuetext=132%).</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s2-ui"><span>Button · Badge · ProgressBar · Chip · Field + /design-system 화면</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>zod 로 환경 변수 검사 + Vitest 단위 테스트</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 틀린 설정을 "켜는 순간" 잡는다</span>
+<div class="flow">
+  <div class="node"><strong>.env.local</strong><small>사람이 손으로 적는 값</small></div>
+  <span class="arrow" data-label="읽기"></span>
+  <div class="node"><strong>lib/env.ts (zod)</strong><small>모양 검사</small></div>
+  <span class="arrow" data-label="틀리면"></span>
+  <div class="node warn"><strong>시작할 때 멈춤</strong><small>무엇이 틀렸는지 문장으로</small></div>
+</div>
+<p class="flow-note">검사가 없으면 앱은 켜지고, 한참 뒤 엉뚱한 화면에서 이상하게 동작한다 — 원인을 찾기 어렵다.</p>
+        </div>
+        <p><strong>zod</strong> = 값의 "모양"을 선언하고 검사하는 도구. <strong>Vitest</strong> = 함수 하나하나가 맞게 동작하는지 빠르게 확인하는 단위 테스트 도구.</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm i zod@4.6.5
+npm i -D vitest@5.0.2 @types/node@22</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/env.ts" data-tag="tumblbug-week5-step3">
+          <figcaption><span class="label">lib/env.ts</span></figcaption>
+          <pre><code>import { z } from "zod";
+
+// 환경 변수의 "모양"을 한 곳에서 선언하고 검사한다.
+// 빠뜨리거나 잘못 넣으면 앱이 이상하게 동작하는 대신, 시작할 때 무엇이 틀렸는지 바로 알려준다.
+// 주차가 지날수록 여기에 항목이 늘어난다 (6주차 DATABASE_URL, 7주차 BETTER_AUTH_SECRET …)
+export const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  // Sentry 주소 (6단계). 비워 두면 에러 모니터링을 끈 채로 동작한다.
+  NEXT_PUBLIC_SENTRY_DSN: z.url({ error: "NEXT_PUBLIC_SENTRY_DSN은 https:// 로 시작하는 주소여야 합니다" }).optional(),
+});
+
+export type Env = z.infer&lt;typeof envSchema&gt;;
+
+// 값 묶음을 받아 검사한다 (테스트하기 쉽도록 process.env를 직접 읽지 않고 인자로 받는다)
+export function parseEnv(values: Record&lt;string, string | undefined&gt;): Env {
+  const result = envSchema.safeParse(values);
+  if (!result.success) {
+    throw new Error(`환경 변수가 올바르지 않습니다:\n${z.prettifyError(result.error)}`);
+  }
+  return result.data;
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="lib/env.test.ts" data-tag="tumblbug-week5-step3">
+          <figcaption><span class="label">lib/env.test.ts</span></figcaption>
+          <pre><code>import { describe, expect, it } from "vitest";
+import { parseEnv } from "./env";
+
+describe("parseEnv", () =&gt; {
+  it("아무것도 없으면 기본값으로 동작한다 (Sentry 꺼짐)", () =&gt; {
+    expect(parseEnv({})).toEqual({ NODE_ENV: "development" });
+  });
+
+  it("올바른 Sentry 주소는 통과한다", () =&gt; {
+    const env = parseEnv({ NODE_ENV: "production", NEXT_PUBLIC_SENTRY_DSN: "https://abc@o1.ingest.sentry.io/1" });
+    expect(env.NEXT_PUBLIC_SENTRY_DSN).toBe("https://abc@o1.ingest.sentry.io/1");
+  });
+
+  it("주소 모양이 아니면 이유와 함께 멈춘다", () =&gt; {
+    expect(() =&gt; parseEnv({ NEXT_PUBLIC_SENTRY_DSN: "sentry-dsn-here" })).toThrow(/https:\/\//);
+  });
+
+  it("NODE_ENV에 정해진 값 말고 다른 값이 오면 멈춘다", () =&gt; {
+    expect(() =&gt; parseEnv({ NODE_ENV: "staging" })).toThrow();
+  });
+});</code></pre>
+        </figure>
+        <p>1단계에서 말한 "디자인 = 코드" 약속도 테스트로 지킵니다:</p>
+        <figure class="code" data-src="tests/tokens.test.ts" data-tag="tumblbug-week5-step3" data-lines="20-48">
+          <figcaption><span class="label">tests/tokens.test.ts</span></figcaption>
+          <pre><code>const darkStart = css.indexOf("@media (prefers-color-scheme: dark)");
+const lightVars = readVariables(css.slice(0, darkStart));
+const darkVars = { ...lightVars, ...readVariables(css.slice(darkStart)) };
+
+// var(--red-600) 처럼 다른 변수를 가리키면 끝까지 따라가서 실제 값을 찾는다
+function resolve(vars: Record&lt;string, string&gt;, name: string): string {
+  let value = vars[name];
+  for (let i = 0; value?.startsWith("var(") &amp;&amp; i &lt; 5; i++) {
+    value = vars[value.slice(4, -1).trim()];
+  }
+  return (value ?? "(없음)").toLowerCase();
+}
+
+describe("Figma 색 토큰 = CSS 변수", () =&gt; {
+  for (const [name, { light, dark }] of Object.entries(figma.colors)) {
+    it(`${name} (라이트·다크)`, () =&gt; {
+      expect(resolve(lightVars, name)).toBe(light.toLowerCase());
+      expect(resolve(darkVars, name)).toBe(dark.toLowerCase());
+    });
+  }
+});
+
+describe("Figma 간격·모서리 토큰 = CSS 변수", () =&gt; {
+  for (const [name, px] of Object.entries(figma.sizes)) {
+    it(`${name} = ${px}px`, () =&gt; {
+      expect(resolve(lightVars, name)).toBe(`${px}px`);
+    });
+  }
+});</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 process.env 를 직접 읽지 않고 인자로 받나요?</span><code>parseEnv(values)</code> 처럼 값을 인자로 받으면 테스트에서 아무 값이나 넣어 볼 수 있습니다. 함수가 바깥(환경 변수)을 몰래 읽으면 테스트하기 어려워요 — 8주차 "순수 함수"에서 다시 만납니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li><code>npm test</code> → env·format·tokens 테스트 모두 통과</li><li>globals.css 의 <code>--color-primary</code> 값을 하나 바꾸고 <code>npm test</code> → 토큰 테스트가 <strong>실패</strong>하는지 (확인 뒤 되돌리기)</li></ul></div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>Vitest 가 @types/node 버전 경고를 내요</summary><p>Vitest 5 는 Node 22 타입을 요구합니다. <code>@types/node@22</code> 로 고정하세요.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>설정이 틀리면 앱이 "켜지지 않고 이유를 말하게" 했고, 디자인과 코드가 어긋나면 테스트가 실패하게 했습니다. 사람이 기억하지 않아도 도구가 지켜 줍니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>일부러 토큰 값을 바꿔 테스트를 실패시켜 보는 이유는?</summary><p>테스트가 정말 그 실수를 잡는지 확인하기 위해서입니다. 한 번도 실패해 본 적 없는 테스트는 아무것도 지키지 못할 수도 있어요.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s3-zod"><span>lib/env.ts + 테스트</span></label></li>
+          <li><label><input type="checkbox" data-task="t5-s3-tokens"><span>토큰 테스트 — 일부러 실패시켜 보기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>Playwright 흐름 테스트 (휴대폰·데스크톱)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 단위 테스트와 흐름 테스트</span>
+<div class="flow">
+  <div class="node"><strong>Vitest (단위)</strong><small>함수 하나 · 수 ms · 화면 없음</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>Playwright (흐름)</strong><small>진짜 브라우저로 사람처럼 누른다 · 수 초</small></div>
+</div>
+<p class="flow-note">둘 다 필요하다: 규칙(계산)은 단위 테스트로 촘촘히, 사람이 겪는 흐름은 흐름 테스트로 굵게.</p>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm i -D @playwright/test@1.63.0
+npx playwright install chromium</code></pre>
+        </figure>
+        <figure class="code" data-src="playwright.config.ts" data-tag="tumblbug-week5-step4">
+          <figcaption><span class="label">playwright.config.ts</span></figcaption>
+          <pre><code>import { defineConfig, devices } from "@playwright/test";
+
+// 흐름 테스트(e2e) 설정: 진짜 브라우저를 띄워 사람이 쓰듯 화면을 눌러 본다.
+const PORT = 3100;
+const isCI = Boolean(process.env.CI);
+
+export default defineConfig({
+  testDir: "./e2e",
+  // CI에서는 실수로 남긴 test.only 를 막고, 가끔 생기는 일시적 실패를 한 번 더 시도한다
+  forbidOnly: isCI,
+  retries: isCI ? 1 : 0,
+  reporter: isCI ? [["github"], ["html", { open: "never" }]] : "list",
+  use: {
+    baseURL: `http://localhost:${PORT}`,
+    // 실패했을 때만 과정 기록(trace)을 남겨 원인을 볼 수 있게 한다
+    trace: "retain-on-failure",
+  },
+  projects: [
+    { name: "mobile", use: { ...devices["Pixel 7"] } }, // 모바일 우선
+    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
+  ],
+  // 테스트 전에 앱을 띄운다. CI는 이미 빌드한 결과로, 내 컴퓨터는 개발 서버로.
+  webServer: {
+    command: isCI ? `npm run start -- -p ${PORT}` : `npm run dev -- -p ${PORT}`,
+    url: `http://localhost:${PORT}`,
+    reuseExistingServer: !isCI,
+    timeout: 120_000,
+  },
+});</code></pre>
+        </figure>
+        <figure class="code" data-src="e2e/design-system.spec.ts" data-tag="tumblbug-week5-step4" data-lines="1-21">
+          <figcaption><span class="label">e2e/design-system.spec.ts</span></figcaption>
+          <pre><code>import { expect, test } from "@playwright/test";
+
+// 5주차 흐름 테스트: 앱이 뜨고, 디자인 시스템 부품이 사람이 쓸 수 있는 상태로 보이는지.
+// 화면을 찾을 때는 "보이는 글자·역할"로 찾는다 (getByRole) — 화면 낭독기가 찾는 방식과 같아서 접근성도 함께 확인된다.
+
+test("첫 화면에 서비스 소개가 보인다", async ({ page }) =&gt; {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: "작은 응원이 모여 창작이 돼요" })).toBeVisible();
+});
+
+test("디자인 시스템: 버튼·배지·진행률이 보인다", async ({ page }) =&gt; {
+  await page.goto("/design-system");
+  await expect(page.getByRole("button", { name: "후원하기" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "마감됨" })).toBeDisabled();
+  await expect(page.getByText("모금중", { exact: true })).toBeVisible();
+  // 132%여도 막대는 100에서 멈추고, 읽어주는 글자는 132%
+  const bars = page.getByRole("progressbar", { name: "달성률" });
+  await expect(bars).toHaveCount(3);
+  await expect(bars.nth(2)).toHaveAttribute("aria-valuenow", "100");
+  await expect(bars.nth(2)).toHaveAttribute("aria-valuetext", "132%");
+});</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 getByRole(역할)로 찾나요?</span>"버튼 중에 이름이 '후원하기'인 것"처럼 <strong>화면 낭독기가 찾는 방식</strong>과 같습니다. 그래서 테스트가 통과하면 접근성도 어느 정도 확인됩니다. CSS 클래스로 찾으면 디자인만 바꿔도 테스트가 깨져요.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><code>npm run test:e2e</code> → mobile·desktop 두 기기로 모두 통과</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>진짜 브라우저가 휴대폰 크기와 데스크톱 크기로 앱을 열어 보고, 사람이 보는 것(역할·이름)으로 확인했습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s4-e2e"><span>Playwright 설치 · 흐름 테스트 통과 (mobile·desktop)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>GitHub Actions CI + PR 템플릿</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — PR 을 열면 GitHub 이 대신 검사한다</span>
+<div class="flow">
+  <div class="node"><strong>PR 열기</strong><small>브랜치에서 main 으로</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>CI</strong><small>코드 검사 → 타입 → 단위 → 빌드 → 흐름</small></div>
+  <span class="arrow" data-label="하나라도 실패"></span>
+  <div class="node warn"><strong>빨간 X</strong><small>합치기 전에 고친다</small></div>
+</div>
+        </div>
+        <figure class="code" data-src=".github/workflows/ci.yml" data-tag="tumblbug-week5-step5">
+          <figcaption><span class="label">.github/workflows/ci.yml</span></figcaption>
+          <pre><code># CI(지속적 통합): 코드를 올리거나 PR을 만들 때마다 GitHub이 자동으로 검사한다.
+# 하나라도 실패하면 PR 화면에 빨간 X가 뜬다 → 합치기 전에 고친다.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # package-lock.json 그대로 설치 (npm install 과 달리 버전을 바꾸지 않는다)
+      - run: npm ci
+
+      - name: 코드 검사 (ESLint)
+        run: npm run lint
+
+      - name: 타입 검사 (TypeScript)
+        run: npm run typecheck
+
+      - name: 단위 테스트 (Vitest)
+        run: npm test
+
+      - name: 빌드
+        run: npm run build
+
+      - name: 흐름 테스트용 브라우저 설치
+        run: npx playwright install --with-deps chromium
+
+      - name: 흐름 테스트 (Playwright)
+        run: npm run test:e2e
+
+      # 흐름 테스트가 실패하면 보고서(스크린샷·과정 기록)를 내려받을 수 있게 올려 둔다
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7</code></pre>
+        </figure>
+        <figure class="code" data-src=".github/pull_request_template.md" data-tag="tumblbug-week5-step5">
+          <figcaption><span class="label">.github/pull_request_template.md</span></figcaption>
+          <pre><code>## 무엇을 바꿨나
+- 
+
+## 왜
+- 관련 사용자 스토리: (예: B-3) / 관련 결정 기록: (예: ADR-003)
+
+## 화면 (바뀐 게 있으면)
+- 전/후 스크린샷 또는 짧은 영상
+
+## 확인한 것
+- [ ] 로컬에서 직접 눌러봄: (어떤 흐름을)
+- [ ] 새 로직에 테스트를 추가함 (또는 필요 없는 이유: )
+
+## 합치기 전 셀프 리뷰
+- [ ] 인수 조건을 모두 만족한다 / 실패하는 경우(빈 값·잘못된 값·권한 없음)를 직접 해봤다
+- [ ] 브라우저에서 오는 값은 서버에서 zod로 검사한다 / "내 것"만 바꾸는 곳에 소유자 조건이 있다
+- [ ] 비밀 키·토큰이 코드나 로그에 들어가지 않았다
+- [ ] CI(코드 검사·타입 검사·테스트·빌드·흐름 테스트)가 모두 통과했다
+- [ ] 로딩·빈 화면·에러 상태가 Figma 시안대로 있다 / 색·간격은 토큰(CSS 변수)만 썼다
+- [ ] 키보드로 조작 가능하고, 사진에 alt가 있다
+- [ ] 중요한 결정이 있었다면 ADR을 썼다</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 합치기 전에 검사하나요?</span>main 은 "언제든 배포해도 되는 코드"여야 합니다(14주차에 자동 배포). 사람이 매번 기억해서 검사하면 빠뜨리는 날이 생겨요. PR 템플릿은 스스로 점검할 목록 — 코드 리뷰어가 없는 1인 프로젝트에서 특히 중요합니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li>브랜치 → 커밋 → push → PR 을 열면 Checks 탭에서 CI 가 돈다</li><li>모두 초록이면 합치기</li></ul></div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>npm ci 가 lockfile 오류로 멈춰요</summary><p><code>package.json</code> 을 바꾸고 <code>npm install</code> 을 안 해서 <code>package-lock.json</code> 이 옛날 그대로인 경우입니다. 내 컴퓨터에서 <code>npm install</code> 후 lockfile 까지 커밋하세요.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>이제 모든 코드는 "GitHub 이 검사한 뒤에야" main 에 들어갑니다. 1인 프로젝트에서도 실무와 같은 흐름(브랜치 → PR → CI → 합치기)을 씁니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s5-ci"><span>CI 워크플로 + PR 템플릿 → 첫 PR 에서 초록 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 6단계 ======================= -->
+    <details class="step" id="step-6">
+      <summary><span class="step-num">6</span>Sentry 에러 모니터링</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 사용자가 알려 주기 전에 내가 안다</span>
+<div class="flow">
+  <div class="node"><strong>브라우저·서버에서 에러</strong><small>사용자는 흰 화면</small></div>
+  <span class="arrow" data-label="자동 전송"></span>
+  <div class="node"><strong>Sentry</strong><small>어느 파일 몇 줄, 몇 명</small></div>
+  <span class="arrow" data-label="15주차"></span>
+  <div class="node"><strong>알림 메일</strong><small>내가 먼저 안다</small></div>
+</div>
+        </div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm i @sentry/nextjs@11.0.0</code></pre>
+        </figure>
+        <figure class="code" data-src="sentry.shared.ts" data-tag="tumblbug-week5-step6">
+          <figcaption><span class="label">sentry.shared.ts</span></figcaption>
+          <pre><code>// Sentry 공통 설정 — 브라우저·서버·Edge 세 곳에서 함께 쓴다.
+const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+
+export const sentryOptions = {
+  dsn,
+  // DSN이 없으면(내 컴퓨터, 아직 Sentry를 만들기 전) 꺼진 채로 동작한다
+  enabled: Boolean(dsn),
+  // 운영/미리보기/개발 중 어디서 난 에러인지 구분 (Vercel이 값을 넣어 준다)
+  environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.NODE_ENV,
+  // 성능 기록은 요청 10개 중 1개만 (무료 사용량 아끼기)
+  tracesSampleRate: 0.1,
+  // 개인정보는 보내지 않는다 — 11주차에 배송지(이름·연락처·주소)를 다루기 때문.
+  // Sentry 11은 기본값이 "대부분 수집"이라 하나씩 꺼 둔다.
+  dataCollection: {
+    userInfo: false, // 로그인 사용자 정보
+    cookies: false, // 로그인 쿠키
+    httpBodies: [], // 요청·응답 본문 (폼에 입력한 주소 등)
+    databaseQueryData: false, // DB 쿼리에 들어간 값
+  },
+};</code></pre>
+        </figure>
+        <figure class="code" data-src="next.config.ts" data-tag="tumblbug-week5-step6">
+          <figcaption><span class="label">next.config.ts</span></figcaption>
+          <pre><code>import { withSentryConfig } from "@sentry/nextjs/config";
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {};
+
+// Sentry 연결. 소스맵(압축된 코드를 원래 코드 줄로 되돌리는 지도)을 올려야 에러 위치가 원래 코드로 보인다.
+// 올리려면 SENTRY_AUTH_TOKEN 이 필요하다 — 없으면 올리기만 건너뛰고 빌드는 정상으로 된다.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  // 빌드 로그를 조용히 (CI에서만 자세히)
+  silent: !process.env.CI,
+  telemetry: false,
+});</code></pre>
+        </figure>
+        <figure class="code" data-src="instrumentation.ts" data-tag="tumblbug-week5-step6">
+          <figcaption><span class="label">instrumentation.ts</span></figcaption>
+          <pre><code>import * as Sentry from "@sentry/nextjs";
+import { parseEnv } from "@/lib/env";
+
+// 서버가 시작될 때 한 번 실행된다 (Next.js 규칙: register 함수)
+export async function register() {
+  // 환경 변수가 잘못되면 여기서 바로 멈추고 이유를 보여준다 (3단계의 zod 검사)
+  parseEnv(process.env);
+
+  // 서버 종류에 맞는 Sentry 설정을 불러온다
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    await import("./sentry.server.config");
+  }
+  if (process.env.NEXT_RUNTIME === "edge") {
+    await import("./sentry.edge.config");
+  }
+}
+
+// 서버에서 처리하지 못한 에러(페이지·API·서버 액션)를 Sentry로 보낸다
+export const onRequestError = Sentry.captureRequestError;</code></pre>
+        </figure>
+        <div class="box term"><span class="box-title">📌 Sentry 11 에서 바뀐 것</span><code>withSentryConfig</code> 는 <code>@sentry/nextjs/config</code> 에서 가져오고, 개인정보는 <code>dataCollection</code> 으로 끕니다 (예전 <code>sendDefaultPii</code> 는 없어졌어요). 인터넷의 옛 글과 다를 수 있습니다.</div>
+        <figure class="code" data-src=".env.example" data-tag="tumblbug-week5-step6">
+          <figcaption><span class="label">.env.example</span></figcaption>
+          <pre><code># 이 파일을 복사해 .env.local 을 만들고 값을 채운다 (.env.local 은 git에 올라가지 않는다)
+# cp .env.example .env.local
+
+# Sentry (5주차) — 비워 두면 에러 모니터링이 꺼진 채로 동작한다
+# Sentry → Settings → Projects → (프로젝트) → Client Keys (DSN)
+NEXT_PUBLIC_SENTRY_DSN=
+
+# 소스맵 업로드용 (선택, Vercel 환경 변수에만 넣어도 된다)
+SENTRY_ORG=
+SENTRY_PROJECT=
+SENTRY_AUTH_TOKEN=</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">⚠️ 작성자가 실제로 한 실수</span><code>.env.example</code> 에 진짜 DSN·토큰을 적었다가 커밋 직전에 발견했습니다. <strong>.env.example 은 git 에 올라가는 "빈 양식"</strong>이고, 진짜 값은 <code>.env.local</code>(git 에 안 올라감)에만 적습니다. 커밋 전에 <code>git diff</code> 로 한 번 더 보세요.</div>
+        <div class="box why"><span class="box-title">💡 왜 개인정보 수집을 하나씩 끄나요?</span>11주차부터 배송지(이름·연락처·주소)를 다룹니다. 에러와 함께 이런 값이 외부 서비스로 가면 안 됩니다. Sentry 11 은 기본값이 "대부분 수집"이라 직접 끕니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span><ul><li>Sentry 에서 프로젝트를 만들고 DSN 을 <code>.env.local</code> 에</li><li>http://localhost:3000/debug/sentry 에서 버튼으로 에러 → 1~2분 뒤 Sentry Issues 에 보인다</li></ul></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>에러가 나면 Sentry 에 모입니다. 아직 "모으기만" 하고, 알림은 15주차에 켭니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>.env.example 과 .env.local 의 차이는?</summary><p>.env.example 은 git 에 올라가는 빈 양식(어떤 값이 필요한지 알려 주는 용도), .env.local 은 git 에 올라가지 않는 진짜 값입니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s6-sentry"><span>Sentry 연결 · 테스트 에러가 Issues 에 보인다</span></label></li>
+          <li><label><input type="checkbox" data-task="t5-s6-env"><span>.env.example 에 진짜 값이 없는지 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 7단계 ======================= -->
+    <details class="step" id="step-7">
+      <summary><span class="step-num">7</span>상태 관리 지도 (어떤 값을 어디에 둘까)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 질문을 위에서부터 차례로</span>
+<div class="flow">
+  <div class="node"><strong>서버에 저장?</strong><small>→ 서버 상태 (DB)</small></div>
+  <span class="arrow" data-label="아니면"></span>
+  <div class="node"><strong>주소 공유·뒤로가기?</strong><small>→ URL 상태</small></div>
+  <span class="arrow" data-label="아니면"></span>
+  <div class="node"><strong>폼 결과?</strong><small>→ 폼 상태</small></div>
+  <span class="arrow" data-label="아니면"></span>
+  <div class="node"><strong>여러 화면이 함께?</strong><small>→ Zustand</small></div>
+  <span class="arrow" data-label="아니면"></span>
+  <div class="node"><strong>한 컴포넌트만</strong><small>→ useState</small></div>
+</div>
+        </div>
+        <figure class="code" data-src="docs/state-map.md" data-tag="tumblbug-week5-step7" data-lines="1-40">
+          <figcaption><span class="label">docs/state-map.md</span></figcaption>
+          <pre><code># 상태 관리 지도 — 모아
+
+&gt; **상태(state)**: 시간이 지나면서 바뀌는 값. 화면은 상태를 그린 그림이다.
+&gt; 상태마다 **어디에 두는지**를 먼저 정하면, "이 값이 왜 새로고침하면 사라지지?" 같은 버그를 설계 단계에서 막을 수 있다.
+&gt; 새 기능을 만들 때마다 이 표에 한 줄씩 추가한다. (5주차 작성, 이후 주차마다 갱신)
+
+## 어디에 둘지 고르는 질문 (위에서부터 차례로)
+
+1. **서버(DB)에 저장해야 하나?** (다른 사람도 보거나, 기기를 바꿔도 남아야 함) → **서버 상태**
+   - 처음 화면은 서버 컴포넌트가 DB에서 읽어 그린다
+   - 그 뒤 브라우저에서 이어서 가져오거나 바꾸면 → **TanStack Query**
+2. **주소를 공유하거나 뒤로가기 했을 때 그대로여야 하나?** → **URL 상태** (`?category=living`)
+3. **폼 제출 결과·에러 메시지인가?** → **폼 상태** (`useActionState`, `useFormStatus`)
+4. **여러 화면(페이지)이 함께 쓰는데 서버에는 없는 값인가?** → **Zustand** (필요하면 `persist`로 새로고침 유지)
+5. **앱 전체에 하나뿐이고 자주 안 바뀌나?** → **React Context**
+6. **그 외: 한 컴포넌트 안에서만 쓰는 값** → **`useState`**
+
+## 이 앱의 상태
+
+| 상태 | 종류 | 어디에 | 주차 | 이유 |
+|---|---|---|---|---|
+| 프로젝트·리워드·후원 목록, 모인 금액 | 서버 상태 | DB → 서버 컴포넌트 | 8 | 모두가 같은 값을 봐야 함 |
+| 목록의 카테고리·상태 필터, 정렬 | URL 상태 | `searchParams` | 8~9 | 공유·새로고침·뒤로가기해도 유지 |
+| 목록 다음 페이지 (무한 스크롤) | 서버 상태 (브라우저에서 이어서) | TanStack Query `useInfiniteQuery` + `/api/projects?cursor=` | 9 | 이미 받은 페이지를 캐시하고, 이어서만 가져옴 |
+| 찜 여부·내 찜 개수 | 서버 상태 (브라우저에서 바꿈) | TanStack Query `useMutation` (낙관적 업데이트) | 12 | 카드·상세·헤더가 같은 캐시를 봄, 실패 시 되돌림 |
+| 대시보드 새 후원 | 서버 상태 | TanStack Query `refetchInterval` (30초) | 12 | 새로고침 없이 새 후원 확인 |
+| 후원 단계에서 고른 리워드·수량·추가 후원금·배송지 | 클라이언트 상태 (여러 페이지) | Zustand + `persist` (sessionStorage) | 10 | 결제 전까지 서버에 없음, 단계 이동·새로고침에도 유지, 결제 완료 시 비움 |
+| 현재 후원 단계 (1·2·3) | URL 상태 | `?step=2` | 10 | 뒤로가기가 이전 단계로 가게 |
+| 프로젝트 등록 폼 에러, 제출 중 표시 | 폼 상태 | `useActionState`, `useFormStatus` | 7 | 서버 액션 결과를 그대로 보여줌 |
+| 토스트 알림 | 앱 전체 값 | React Context | 12 | 어디서든 띄움, 앱에 하나 |
+| 상세 탭 선택, 수량 +/− 입력 중 값, 메뉴 열림 | 화면 임시 상태 | `useState` | 8~10 | 한 컴포넌트 안에서만 씀 |
+| 로그인 사용자 | 서버 상태 | 쿠키(세션) → 서버에서 읽기 | 7 | 브라우저 상태로 복사해 두지 않음 (어긋나기 쉬움) |
+
+## 하지 않기로 한 것
+
+- 서버 데이터를 Zustand에 복사해 두기 → 서버 값과 어긋난다 (그래서 찜은 TanStack Query)
+- 필터를 `useState`로 들고 있기 → 새로고침·공유 시 사라진다 (그래서 URL)
+- 로그인 사용자 정보를 Context에 넣어 두기 → 로그아웃·만료 시 어긋난다 (그래서 매번 서버에서 확인)
+
+관련 결정 기록: ADR-004 (브라우저 쪽 상태 도구 선택)</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 코드를 쓰기 전에 표부터?</span>"새로고침하면 왜 선택이 사라지지?", "다른 화면에서는 왜 옛 값이지?" 같은 버그는 대부분 <strong>값을 잘못된 곳에 둬서</strong> 생깁니다. 표로 먼저 정하면 설계 단계에서 막을 수 있어요. 10주차(Zustand)·12주차(TanStack Query)에 이 표로 돌아옵니다.</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>앱의 모든 "바뀌는 값"에 집 주소를 정했습니다. 새 기능을 만들 때마다 이 표에 한 줄씩 추가합니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>목록의 카테고리 필터를 useState 에 두면 무엇이 곤란할까?</summary><p>새로고침·주소 공유·뒤로가기를 하면 사라집니다. 그래서 URL(?category=)에 둡니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s7-map"><span>상태 관리 지도 읽기 — 내 말로 표의 세 줄 설명해 보기</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 8단계 ======================= -->
+    <details class="step" id="step-8">
+      <summary><span class="step-num">8</span>첫 CI 실패 고치기 — 글꼴을 npm 패키지로</summary>
+      <div class="step-body">
+        <p>작성자의 첫 CI 는 <strong>빌드에서 실패</strong>했습니다. <code>next/font/google</code> 이 한국어 글꼴(Noto Sans KR)의 조각 파일 100개 이상을 빌드 중에 내려받다가 가끔 실패했기 때문이에요.</p>
+        <figure class="code" data-src="app/layout.tsx" data-tag="tumblbug-week5-step8" data-lines="1-5">
+          <figcaption><span class="label">app/layout.tsx</span></figcaption>
+          <pre><code>import type { Metadata } from "next";
+// Figma와 같은 글꼴(Noto Sans KR). npm 패키지로 설치해 우리 서버에서 함께 보낸다.
+// 빌드할 때 구글 서버에 접속하지 않아도 되므로 CI에서도 안정적이다. (한국어 글꼴은 조각 파일이 많아 내려받기가 자주 실패한다)
+import "@fontsource-variable/noto-sans-kr";
+import "./globals.css";</code></pre>
+        </figure>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npm i @fontsource-variable/noto-sans-kr@5.3.0</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 이게 해결책인가요?</span>글꼴 파일을 npm 패키지로 설치하면 우리 서버가 함께 보내 줍니다. <strong>빌드할 때 인터넷(구글 서버)에 기대지 않으니</strong> CI 가 안정적입니다. "가끔 실패하는 테스트"는 무시하지 말고 원인을 없애야 해요 — 아니면 진짜 실패를 놓칩니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>PR 의 CI 가 다시 돌아 초록</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>CI 가 "내 컴퓨터에서는 되는데" 문제를 찾아 줬습니다. CI 는 늘 깨끗한 컴퓨터에서 처음부터 돌리기 때문에 이런 숨은 의존성이 드러납니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t5-s8-font"><span>글꼴을 @fontsource 로 바꾸고 CI 초록</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">5주차 회고</h2>
+    <div class="retro card">
+      <label for="t5-note-1">잘된 것</label>
+      <textarea id="t5-note-1" data-note="t5-good" placeholder="예: 토큰 테스트가 일부러 바꾼 색을 바로 잡았다"></textarea>
+      <label for="t5-note-2">막힌 것 (어디서, 왜 — 그림의 어느 부분이었나?)</label>
+      <textarea id="t5-note-2" data-note="t5-stuck" placeholder="예: CI 가 글꼴 때문에 실패해서 원인을 찾는 데 오래 걸렸다"></textarea>
+      <label for="t5-note-3">다음에 다르게 할 것</label>
+      <textarea id="t5-note-3" data-note="t5-next" placeholder="예: 커밋 전에 git diff 로 .env.example 을 확인하겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t5-retro"><span>5주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week4.html"><small>이전</small>← 4주차 · 디자인 시스템</a>
+      <a class="card next" href="week6.html"><small>다음</small>6주차 · DB·SQL 심화 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Next.js 16.3.6 · TypeScript 5.9.3 · zod 4.6.5 · Vitest 5.0.2 · Playwright 1.63.0 · @sentry/nextjs 11.0.0 · lucide-react 1.48.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

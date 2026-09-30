@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>13주차 대시보드·관리자·예약 작업 · 모아 교재</title>
+  <meta name="description" content="창작자 대시보드(SQL 집계), 관리자 화면(숨기기·결제 실패), 매일 도는 예약 작업(Vercel Cron), 로딩·빈 화면·에러·404 상태와 스트리밍 404 함정">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week13">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13" aria-current="page">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">13주차 · 5단계 · 구현의 마무리</span>
+    <h1>대시보드·관리자·예약 작업, 그리고 상태 화면</h1>
+    <p class="lead">
+      서비스를 <strong>쓰는 사람</strong>뿐 아니라 <strong>돌보는 사람</strong>을 위한 화면을 만듭니다.
+      창작자는 숫자로 모금 현황을 보고, 관리자는 문제 있는 프로젝트를 숨기고, 서버는 <strong>매일 밤 스스로</strong> 뒷정리를 합니다.
+      마지막으로 "불러오는 중·비어 있음·에러" 화면을 챙겨 구현 파트를 마무리합니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 누가 무엇을 보나</span>
+      <div class="flow">
+        <div class="node"><strong>창작자 → /studio</strong><small>모인 금액·날짜별 모금·리워드별 판매·후원자·배송지 (SQL 로 매번 계산)</small></div>
+        <div class="node"><strong>관리자 → /admin</strong><small>프로젝트 숨기기·다시 보이기, 결제 실패 목록·이유별 개수</small></div>
+        <div class="node warn"><strong>Vercel Cron → /api/cron/daily</strong><small>매일 한국 시간 0시: 상태 확정 · 오래된 결제 대기 정리 · 기록 청소</small></div>
+      </div>
+      <div class="flow">
+        <div class="node ext"><strong>loading.tsx</strong><small>불러오는 동안 뼈대</small></div>
+        <div class="node ext"><strong>EmptyState</strong><small>비었을 때 — 왜 + 다음에 할 일</small></div>
+        <div class="node ext"><strong>error.tsx</strong><small>그리다 에러 — Sentry 로 보내고 "다시 시도"</small></div>
+        <div class="node ext"><strong>not-found.tsx</strong><small>없는 주소·숨긴 프로젝트</small></div>
+      </div>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>창작자 대시보드: 숫자는 저장하지 않고 SQL 로 계산</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 "모인 금액" 칸을 따로 저장하지 않나요?</span>후원이 생기고, 실패하고, 웹훅으로 뒤늦게 완료되는 길이 여러 개입니다. 합계를 따로 저장하면 어느 한 길에서 더하기를 빠뜨리는 순간 숫자가 틀어집니다. <strong>후원 기록(원본)에서 매번 계산</strong>하면 틀릴 수가 없습니다 — 6주차에 배운 SQL 집계를 화면으로 옮기는 것입니다.</div>
+        <figure class="code" data-src="lib/queries/dashboard.ts" data-tag="tumblbug-week13-step1">
+          <figcaption><span class="label">lib/queries/dashboard.ts</span></figcaption>
+          <pre><code>import { and, asc, desc, eq, sql } from "drizzle-orm";
+import type { Db } from "@/db";
+import { funding, project, reward, user } from "@/db/schema";
+
+// 창작자 대시보드 (13주차) — 모든 숫자는 저장하지 않고 후원 기록에서 SQL로 계산한다 (6주차 집계를 화면으로)
+// 모든 조회는 "결제 완료(paid)" 후원만 센다
+
+// ① 요약: 모인 금액·후원자 수·후원 건수·평균 후원액
+export async function getDashboardSummary(db: Db, projectId: number) {
+  const [row] = await db
+    .select({
+      goalAmount: project.goalAmount,
+      deadline: project.deadline,
+      raised: sql&lt;number&gt;`coalesce(sum(${funding.amount}), 0)::int`,
+      supporters: sql&lt;number&gt;`count(distinct ${funding.supporterId})::int`,
+      fundings: sql&lt;number&gt;`count(${funding.id})::int`,
+      // avg 는 소수가 나온다 → round 로 원 단위 정수
+      average: sql&lt;number&gt;`coalesce(round(avg(${funding.amount})), 0)::int`,
+    })
+    .from(project)
+    .leftJoin(funding, and(eq(funding.projectId, project.id), eq(funding.status, "paid")))
+    .where(eq(project.id, projectId))
+    .groupBy(project.id);
+  return row;
+}
+
+// ② 최근 며칠의 날짜별 모금 (sql/week6-stats.sql ⑤ 와 같은 방법)
+//  - 한국 시간으로 날짜를 자른다 (UTC 로 자르면 새벽 0~9시 후원이 전날로 잡힌다)
+//  - generate_series 로 날짜 목록을 먼저 만들고 LEFT JOIN → 후원이 없는 날도 0으로 나온다
+export async function getDailyRaised(db: Db, projectId: number, days = 14): Promise&lt;{ day: string; amount: number; count: number }[]&gt; {
+  const result = await db.execute&lt;{ day: string; amount: number; count: number }&gt;(sql`
+    select d::date::text as day,
+           coalesce(sum(f.amount), 0)::int as amount,
+           count(f.id)::int as count
+    from generate_series(
+      (now() at time zone 'Asia/Seoul')::date - ${days - 1}::int,
+      (now() at time zone 'Asia/Seoul')::date,
+      interval '1 day'
+    ) as d
+    left join ${funding} f
+      on f.project_id = ${projectId}
+      and f.status = 'paid'
+      and (f.paid_at at time zone 'Asia/Seoul')::date = d::date
+    group by d
+    order by d`);
+  return result.rows;
+}
+
+// ③ 리워드별 판매: 몇 개·얼마 (리워드 없이 후원은 따로 한 줄)
+export async function getRewardBreakdown(db: Db, projectId: number) {
+  const rewards = await db
+    .select({
+      id: reward.id,
+      title: reward.title,
+      price: reward.price,
+      limitQty: reward.limitQty,
+      soldQty: reward.soldQty,
+      paidQty: sql&lt;number&gt;`coalesce(sum(${funding.quantity}), 0)::int`,
+      revenue: sql&lt;number&gt;`coalesce(sum(${funding.amount}), 0)::int`,
+    })
+    .from(reward)
+    .leftJoin(funding, and(eq(funding.rewardId, reward.id), eq(funding.status, "paid")))
+    .where(eq(reward.projectId, projectId))
+    .groupBy(reward.id)
+    .orderBy(asc(reward.sortOrder), asc(reward.id));
+
+  const [noReward] = await db
+    .select({ count: sql&lt;number&gt;`count(*)::int`, revenue: sql&lt;number&gt;`coalesce(sum(${funding.amount}), 0)::int` })
+    .from(funding)
+    .where(and(eq(funding.projectId, projectId), eq(funding.status, "paid"), sql`${funding.rewardId} is null`));
+  return { rewards, noReward };
+}
+
+// ④ 후원자·배송지 목록 — 개인정보: 결제 완료 후원만, 그 프로젝트의 창작자에게만 보여 준다 (호출하는 쪽이 주인 확인)
+export async function listSupporters(db: Db, projectId: number) {
+  return db
+    .select({
+      id: funding.id,
+      supporterName: user.name,
+      supporterEmail: user.email,
+      rewardTitle: reward.title,
+      quantity: funding.quantity,
+      amount: funding.amount,
+      recipientName: funding.recipientName,
+      recipientPhone: funding.recipientPhone,
+      address: funding.address,
+      paidAt: funding.paidAt,
+    })
+    .from(funding)
+    .innerJoin(user, eq(user.id, funding.supporterId))
+    .leftJoin(reward, eq(reward.id, funding.rewardId))
+    .where(and(eq(funding.projectId, projectId), eq(funding.status, "paid")))
+    .orderBy(desc(funding.paidAt), desc(funding.id));
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/studio/page.tsx" data-tag="tumblbug-week13-step1" data-lines="18-43">
+          <figcaption><span class="label">app/studio/page.tsx (일부)</span></figcaption>
+          <pre><code>export default async function StudioPage({ searchParams }: Props) {
+  const me = await requireUser("/studio");
+  const projects = await listMyProjects(db, me.id);
+
+  if (projects.length === 0) {
+    return (
+      &lt;main className="container" style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-lg)", paddingBlock: "var(--spacing-xl)" }}&gt;
+        &lt;h1 className="text-heading-l"&gt;창작자 스튜디오&lt;/h1&gt;
+        &lt;p className="text-body-m text-muted"&gt;아직 만든 프로젝트가 없어요.&lt;/p&gt;
+        &lt;ButtonLink href="/projects/new"&gt;첫 프로젝트 만들기&lt;/ButtonLink&gt;
+      &lt;/main&gt;
+    );
+  }
+
+  // 고른 프로젝트는 주소(?project=)에 둔다 (URL 상태 — 새로고침·공유해도 유지). 잘못된 값이면 첫 프로젝트
+  const requested = Number((await searchParams).project);
+  const selected = projects.find((p) =&gt; p.id === requested) ?? projects[0];
+  // 서로 기다릴 필요 없는 조회는 동시에 보낸다 (Promise.all) → 가장 느린 하나만큼만 걸린다
+  const [initial, summary, days, breakdown, supporters] = await Promise.all([
+    listRecentFundings(db, selected.id),
+    getDashboardSummary(db, selected.id),
+    getDailyRaised(db, selected.id),
+    getRewardBreakdown(db, selected.id),
+    listSupporters(db, selected.id),
+  ]);
+</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>창작자 예시 계정(<code>ohneul_workshop@seed.moa.test</code>)으로 <code>/studio</code> → 모인 금액·후원자 수·평균 후원액, 14일 막대, 리워드별 판매, 후원자·배송지 표</li>
+            <li>프로젝트 칩을 바꾸면 주소가 <code>?project=번호</code> 로 바뀌고, 새로고침해도 그 프로젝트</li>
+            <li><code>npx vitest run tests/db/dashboard.test.ts</code> 통과</li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>새벽에 한 후원이 전날 막대에 들어가요</summary><p>날짜를 UTC 로 자르면 한국 시간 0~9시가 전날이 됩니다. <code>(paid_at at time zone 'Asia/Seoul')::date</code> 처럼 한국 시간으로 자릅니다.</p></details>
+          <details><summary>후원이 없는 날이 막대에서 빠져요</summary><p>후원 기록만 GROUP BY 하면 없는 날은 줄 자체가 없습니다. <code>generate_series</code> 로 날짜 목록을 먼저 만들고 LEFT JOIN 하면 0 으로 나옵니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>창작자가 궁금한 숫자 네 가지를 SQL 집계 네 개로 만들고, 서로 기다릴 필요 없는 조회는 <code>Promise.all</code> 로 동시에 보냈습니다. 배송지(개인정보)는 결제 완료 후원만, 그 프로젝트의 창작자에게만 보입니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary><code>count(distinct supporter_id)</code> 와 <code>count(id)</code> 는 어떻게 다른가?</summary><p>앞은 <strong>후원자 수</strong>(한 사람이 두 번 후원해도 1명), 뒤는 <strong>후원 건수</strong>(2건)입니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t13-s1-code"><span>대시보드 SQL 네 개 + 스튜디오 화면</span></label></li>
+          <li><label><input type="checkbox" data-task="t13-s1-check"><span>창작자 계정으로 숫자·표 확인, DB 테스트 통과</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>관리자 화면: 숨기기와 결제 실패 목록</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 버튼을 관리자에게만 보여 주면 충분하지 않나요?</span>아닙니다. 서버 액션은 버튼이 없어도 <strong>누구나 직접 부를 수 있습니다</strong>. 버튼 숨기기는 편의일 뿐, 진짜 막는 것은 서버 액션 안의 <code>requireAdmin()</code> 입니다. 관리자가 아닌 사람이 <code>/admin</code> 에 오면 "없는 페이지"(404)를 보여 줘서 그런 화면이 있다는 사실조차 알리지 않습니다.</div>
+        <figure class="code" data-src="app/actions/admin.ts" data-tag="tumblbug-week13-step2">
+          <figcaption><span class="label">app/actions/admin.ts</span></figcaption>
+          <pre><code>"use server";
+
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { db } from "@/db";
+import { project } from "@/db/schema";
+import { requireAdmin } from "@/lib/session";
+
+// 프로젝트 숨기기·다시 보이기 (관리자만).
+// 버튼을 숨기는 것만으로는 막은 게 아니다 — 서버 액션도 누구나 직접 부를 수 있으므로, 여기서 다시 관리자인지 확인한다
+export async function setProjectHidden(formData: FormData) {
+  await requireAdmin();
+  const projectId = Number(formData.get("projectId"));
+  const hidden = formData.get("hidden") === "true";
+  if (!Number.isInteger(projectId) || projectId &lt;= 0) return;
+
+  await db.update(project).set({ hidden }).where(eq(project.id, projectId));
+  console.log(`[관리자] 프로젝트 ${projectId} ${hidden ? "숨김" : "다시 보임"}`); // 누가 무엇을 바꿨는지 로그로 남긴다 (운영)
+
+  // 숨김 여부가 보이는 화면들을 새로 그리게 한다
+  revalidatePath("/");
+  revalidatePath("/projects");
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/admin");
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/admin/page.tsx" data-tag="tumblbug-week13-step2" data-lines="16-63">
+          <figcaption><span class="label">app/admin/page.tsx (일부)</span></figcaption>
+          <pre><code>// 관리자 (/admin) — 관리자만 (그 밖의 사람에게는 "없는 페이지" 404)
+// ① 프로젝트 숨기기·다시 보이기 ② 최근 30일 결제 실패 목록 + 이유별 개수
+export default async function AdminPage() {
+  await requireAdmin();
+  const [projects, failures, reasons] = await Promise.all([listAllProjects(db), listPaymentFailures(db), countFailureReasons(db)]);
+
+  return (
+    &lt;main className="container" style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-2xl)", paddingBlock: "var(--spacing-xl) var(--spacing-3xl)", maxWidth: 960 }}&gt;
+      &lt;h1 className="text-heading-l"&gt;관리자&lt;/h1&gt;
+
+      &lt;section className={table.section} aria-labelledby="projects-title"&gt;
+        &lt;h2 id="projects-title" className="text-heading-m"&gt;
+          프로젝트 &lt;span className="text-body-s text-muted"&gt;· {projects.length}개&lt;/span&gt;
+        &lt;/h2&gt;
+        &lt;div className={table.tableWrap}&gt;
+          &lt;table className={table.table}&gt;
+            &lt;thead&gt;
+              &lt;tr&gt;
+                &lt;th scope="col"&gt;프로젝트&lt;/th&gt;
+                &lt;th scope="col"&gt;창작자&lt;/th&gt;
+                &lt;th scope="col"&gt;마감일&lt;/th&gt;
+                &lt;th scope="col"&gt;확정 상태&lt;/th&gt;
+                &lt;th scope="col"&gt;공개&lt;/th&gt;
+              &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+              {projects.map((p) =&gt; (
+                &lt;tr key={p.id}&gt;
+                  &lt;td&gt;{p.hidden ? p.title : &lt;Link href={`/projects/${p.id}`}&gt;{p.title}&lt;/Link&gt;}&lt;/td&gt;
+                  &lt;td&gt;{p.creatorName}&lt;/td&gt;
+                  &lt;td&gt;{p.deadline}&lt;/td&gt;
+                  &lt;td&gt;{STATUS_LABEL[p.status]}&lt;/td&gt;
+                  &lt;td&gt;
+                    {/* 서버 액션을 부르는 폼 — 자바스크립트가 없어도 동작한다 */}
+                    &lt;form action={setProjectHidden}&gt;
+                      &lt;input type="hidden" name="projectId" value={p.id} /&gt;
+                      &lt;input type="hidden" name="hidden" value={String(!p.hidden)} /&gt;
+                      &lt;Button type="submit" variant={p.hidden ? "primary" : "secondary"} size="m" aria-label={`${p.title} ${p.hidden ? "다시 보이기" : "숨기기"}`}&gt;
+                        {p.hidden ? "다시 보이기" : "숨기기"}
+                      &lt;/Button&gt;
+                    &lt;/form&gt;
+                  &lt;/td&gt;
+                &lt;/tr&gt;
+              ))}
+            &lt;/tbody&gt;
+          &lt;/table&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li><code>moa_admin@seed.moa.test</code> 로 <code>/admin</code> → 숨기기를 누르면 목록·상세에서 사라지고, 다시 보이기로 돌아온다</li>
+            <li>일반 계정으로 <code>/admin</code> → 404</li>
+            <li>결제 실패 이유별 개수 (예: <code>PAY_PROCESS_CANCELED</code> = 결제창을 닫음) — 15주차 운영 점검에서 다시 봅니다</li>
+          </ul>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>운영자가 문제에 대응할 최소한의 도구를 만들었습니다. 숨긴 프로젝트는 지우지 않으므로 후원 기록은 그대로 남습니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t13-s2-code"><span>관리자 화면 + 숨기기 서버 액션 + DB 테스트</span></label></li>
+          <li><label><input type="checkbox" data-task="t13-s2-check"><span>관리자·일반 계정으로 각각 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>예약 작업: 매일 밤 서버가 스스로 하는 뒷정리 (Vercel Cron)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 매일 0시에 세 가지</span>
+          <div class="flow">
+            <div class="node ext"><strong>Vercel Cron</strong><small>매일 15:00 UTC (= 한국 0시), 비밀값을 붙여 부른다</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>① 상태 확정</strong><small>마감이 지난 모금중 → 성공/실패</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>② 결제 대기 정리</strong><small>돌아오지 않은 결제 → 실패, 결과 모르는 결제 → 토스에 물어서 맞춤</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>③ 기록 청소</strong><small>하루 지난 요청 수 기록</small></div>
+          </div>
+        </div>
+        <figure class="code" data-src="lib/cron/daily.ts" data-tag="tumblbug-week13-step3">
+          <figcaption><span class="label">lib/cron/daily.ts</span></figcaption>
+          <pre><code>import { and, eq, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
+import type { Db } from "@/db";
+import { funding, rateLimit } from "@/db/schema";
+import { markFailed, markPaid } from "@/lib/funding/settle";
+import type { TossClient } from "@/lib/payments/toss";
+
+// 하루 한 번 도는 예약 작업 (13주차) — Vercel Cron 이 /api/cron/daily 를 부른다 (vercel.json)
+// 모든 작업은 "여러 번 돌려도 결과가 같게" 만든다 (멱등) — 예약 작업은 늦게·두 번 돌 수 있다
+
+// ① 마감된 프로젝트의 상태를 DB에 확정 저장 (ADR-001: 화면은 항상 계산값, DB 값은 목록 필터·기록용)
+//    아직 'funding' 인 것만 바꾼다 → 두 번 돌려도 이미 확정된 줄은 건드리지 않는다
+//    마감 = 마감일 다음 날 00:00 한국 시간 (getProjectStatus·listing.ts 와 같은 규칙)
+export async function finalizeProjectStatuses(db: Db): Promise&lt;{ id: number; status: string }[]&gt; {
+  const result = await db.execute&lt;{ id: number; status: string }&gt;(sql`
+    update project p
+    set status = case
+      when coalesce((select sum(f.amount) from funding f where f.project_id = p.id and f.status = 'paid'), 0) &gt;= p.goal_amount then 'success'
+      else 'failed' end
+    where p.status = 'funding'
+      and now() &gt;= (p.deadline + 1)::timestamp at time zone 'Asia/Seoul'
+    returning p.id, p.status`);
+  return result.rows;
+}
+
+// ② 오래된 결제 대기 정리. scope.projectIds: 테스트에서 "이 프로젝트들만" 정리하게 할 때 (운영에서는 비워 둔다)
+export async function expireStalePendings(db: Db, toss: TossClient, { olderThanMinutes = 60, scope }: { olderThanMinutes?: number; scope?: { projectIds: number[] } } = {}) {
+  const old = and(
+    eq(funding.status, "pending"),
+    lt(funding.createdAt, sql`now() - make_interval(mins =&gt; ${olderThanMinutes})`),
+    scope ? inArray(funding.projectId, scope.projectIds) : undefined,
+  );
+
+  // 2-1) 결제창을 열고 돌아오지 않은 후원 (승인 단계 전 — 돈도 재고도 오간 적 없음) → 실패로 기록만
+  const abandoned = await db
+    .update(funding)
+    .set({ status: "failed", failReason: "ABANDONED" })
+    .where(and(old, isNull(funding.paymentKey)))
+    .returning({ id: funding.id });
+
+  // 2-2) 승인 단계에서 결과를 모르는 채 남은 후원 (웹훅도 오지 않았음) → 토스에 직접 물어서 맞춘다
+  const unknown = await db
+    .select({ id: funding.id, orderId: funding.orderId, rewardId: funding.rewardId, quantity: funding.quantity, paymentKey: funding.paymentKey })
+    .from(funding)
+    .where(and(old, isNotNull(funding.paymentKey)));
+
+  const reconciled = { paid: 0, failed: 0, skipped: 0 };
+  for (const f of unknown) {
+    try {
+      const result = await toss.getPayment(f.paymentKey!);
+      if (result.ok &amp;&amp; result.payment.status === "DONE" &amp;&amp; result.payment.orderId === f.orderId) {
+        await markPaid(db, f, result.payment);
+        reconciled.paid += 1;
+      } else if (result.ok &amp;&amp; result.payment.status === "IN_PROGRESS") {
+        reconciled.skipped += 1; // 아직 진행 중 — 다음 날 다시 본다
+      } else {
+        // 토스가 모르는 결제(NOT_FOUND)·취소·만료 → 실패 + 차감했던 재고 되돌리기
+        await markFailed(db, f, result.ok ? `EXPIRED_${result.payment.status}` : `EXPIRED_${result.code}`);
+        reconciled.failed += 1;
+      }
+    } catch {
+      reconciled.skipped += 1; // 토스 조회가 안 됨(네트워크) — 다음 날 다시 본다
+    }
+  }
+  return { abandoned: abandoned.length, ...reconciled };
+}
+
+// ③ 요청 수 제한 기록 청소 — 1분짜리 시간 칸이라 하루 지난 기록은 쓸모가 없다 (9주차에 "13주차 예약 작업이 지운다"고 적어 둠)
+export async function cleanupRateLimits(db: Db): Promise&lt;number&gt; {
+  const deleted = await db
+    .delete(rateLimit)
+    .where(lt(rateLimit.windowStart, sql`now() - interval '1 day'`))
+    .returning({ key: rateLimit.key });
+  return deleted.length;
+}
+
+export async function runDailyJobs(db: Db, toss: TossClient) {
+  const finalized = await finalizeProjectStatuses(db);
+  const pendings = await expireStalePendings(db, toss);
+  const rateLimitRows = await cleanupRateLimits(db);
+  return { finalized, pendings, rateLimitRows };
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/api/cron/daily/route.ts" data-tag="tumblbug-week13-step3">
+          <figcaption><span class="label">app/api/cron/daily/route.ts</span></figcaption>
+          <pre><code>import * as Sentry from "@sentry/nextjs";
+import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { apiError } from "@/lib/api";
+import { runDailyJobs } from "@/lib/cron/daily";
+import { serverEnv } from "@/lib/env";
+import { tossClient } from "@/lib/payments/toss";
+
+// GET /api/cron/daily — 하루 한 번 예약 작업 (vercel.json 의 crons: 매일 15:00 UTC = 한국 시간 00:00)
+// 아무나 부르지 못하게: Vercel Cron 은 환경 변수 CRON_SECRET 이 있으면 "Authorization: Bearer &lt;그 값&gt;" 을 붙여 부른다
+export const maxDuration = 60; // 토스 조회가 여러 건이면 오래 걸릴 수 있다 (초)
+
+export async function GET(request: Request) {
+  const secret = serverEnv().CRON_SECRET;
+  if (!secret) return apiError("INTERNAL", "CRON_SECRET 이 설정되지 않았어요");
+  if (request.headers.get("authorization") !== `Bearer ${secret}`) return apiError("UNAUTHORIZED", "예약 작업 비밀값이 맞지 않아요");
+
+  try {
+    const summary = await runDailyJobs(db, tossClient);
+    // 운영: "예약 작업이 매일 돌았는지" 로그로 확인한다 (15주차 운영 준비에서 이 줄을 찾는다)
+    console.log(
+      `[예약 작업] 상태 확정 ${summary.finalized.length}건 · 결제 대기 정리 ${JSON.stringify(summary.pendings)} · 요청 수 기록 삭제 ${summary.rateLimitRows}줄`,
+    );
+    return NextResponse.json(summary);
+  } catch (error) {
+    Sentry.captureException(error);
+    console.error("[예약 작업] 실패", error);
+    return apiError("INTERNAL", "예약 작업이 실패했어요");
+  }
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="vercel.json" data-tag="tumblbug-week13-step3">
+          <figcaption><span class="label">vercel.json</span></figcaption>
+          <pre><code>{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [{ "path": "/api/cron/daily", "schedule": "0 15 * * *" }]
+}</code></pre>
+        </figure>
+        <p><code>.env.local</code> 에 무작위 비밀값을 넣습니다 (Vercel 환경 변수에도 같은 값 — 14주차 배포 때):</p>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널 — 무작위 값 만들기 (결과를 .env.local 의 CRON_SECRET= 뒤에)</span></figcaption>
+          <pre><code>node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"</code></pre>
+        </figure>
+        <div class="box why"><span class="box-title">💡 왜 "두 번 돌려도 결과가 같게"(멱등)?</span>예약 작업은 늦게 돌 수도, 실패 후 다시 돌 수도, 사람이 손으로 한 번 더 돌릴 수도 있습니다. 그래서 "아직 모금중인 것만 확정", "아직 결제 대기인 것만 정리"처럼 <strong>이미 처리한 줄은 건드리지 않는 조건</strong>을 모든 작업에 넣습니다.</div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npx vitest run tests/db/cron.test.ts</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>DB 테스트: 마감 지난 것만 확정·두 번 돌려도 같음 · 돌아오지 않은 결제 → ABANDONED · 토스가 DONE 이면 완료 · 모르는 결제면 실패 + 재고 되돌리기 · 토스 조회 실패면 다음 날로</li>
+            <li>비밀값 없이 <code>/api/cron/daily</code> → 401 (설정 전이면 500) — 아무나 부를 수 없다</li>
+          </ul>
+        </div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>내 컴퓨터에서 Cron 이 돌지 않아요</summary><p>정상입니다. Vercel Cron 은 <strong>배포된 운영 환경</strong>에서만 돕니다. 내 컴퓨터에서는 테스트로 확인하고, 배포 뒤(14주차) Vercel → Settings → Cron Jobs 에서 확인·수동 실행합니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>사람이 매일 챙겨야 할 일을 서버가 매일 밤 하게 했습니다. 11주차에 "웹훅도 안 오면 예약 작업이 마무리한다"고 했던 그 마지막 안전망입니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>화면은 모금 상태를 매번 계산하는데, 왜 예약 작업이 DB 에도 확정해 두나?</summary><p>화면은 항상 정확한 계산값을 보여 주지만(ADR-001), "성공한 프로젝트만" 같은 목록 필터와 기록에는 DB 에 저장된 값이 편하고 빠릅니다. 둘이 어긋나지 않게 같은 마감 규칙을 씁니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t13-s3-code"><span>예약 작업 세 가지 + 주소 + vercel.json + CRON_SECRET</span></label></li>
+          <li><label><input type="checkbox" data-task="t13-s3-test"><span>예약 작업 DB 테스트 통과, 비밀값 없이 401</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>로딩·빈 화면·에러·404</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 상태 화면까지 챙기나요?</span>실제 사용자는 느린 인터넷, 빈 목록, 가끔 나는 에러를 만납니다. 그때 하얀 화면이나 "Error"만 보이면 떠납니다. <strong>무슨 일인지 + 다음에 할 일</strong>을 보여 주는 것까지가 기능입니다 (Figma 의 State 컴포넌트).</div>
+        <figure class="code" data-src="components/ui/EmptyState.tsx" data-tag="tumblbug-week13-step4">
+          <figcaption><span class="label">components/ui/EmptyState.tsx</span></figcaption>
+          <pre><code>import type { LucideIcon } from "lucide-react";
+import { ButtonLink } from "./Button";
+import styles from "./EmptyState.module.css";
+
+// 빈 화면 (Figma State/Empty): "비어 있다"만 말하지 말고, 왜 비었는지 + 다음에 할 일(버튼)을 함께 보여 준다
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description?: string;
+  action?: { href: string; label: string };
+}) {
+  return (
+    &lt;div className={styles.empty}&gt;
+      &lt;Icon size={40} className={styles.icon} aria-hidden="true" /&gt;
+      &lt;p className="text-body-m-strong"&gt;{title}&lt;/p&gt;
+      {description &amp;&amp; &lt;p className="text-body-s text-muted"&gt;{description}&lt;/p&gt;}
+      {action &amp;&amp; (
+        &lt;ButtonLink href={action.href} variant="secondary" size="m"&gt;
+          {action.label}
+        &lt;/ButtonLink&gt;
+      )}
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </figure>
+        <figure class="code" data-src="app/error.tsx" data-tag="tumblbug-week13-step4">
+          <figcaption><span class="label">app/error.tsx</span></figcaption>
+          <pre><code>"use client";
+
+import * as Sentry from "@sentry/nextjs";
+import { CircleAlert } from "lucide-react";
+import Link from "next/link";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/Button";
+
+// 페이지를 그리다 에러가 나면 보여 주는 화면 (Next.js 규칙 파일). 헤더는 그대로 두고 본문만 바뀐다.
+// (global-error.tsx 는 레이아웃까지 망가졌을 때의 마지막 화면)
+//  - 에러 내용은 사용자에게 보여 주지 않는다 (내부 정보가 새지 않게) → Sentry 로 보내고, 문의용 번호(digest)만 보여 준다
+//  - reset(): 이 부분만 다시 그려 본다 (일시적인 DB·네트워크 문제면 대부분 해결된다)
+export default function ErrorPage({ error, reset }: { error: Error &amp; { digest?: string }; reset: () =&gt; void }) {
+  useEffect(() =&gt; {
+    Sentry.captureException(error);
+  }, [error]);
+
+  return (
+    &lt;main className="container" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--spacing-md)", paddingBlock: "var(--spacing-3xl)", textAlign: "center" }}&gt;
+      &lt;CircleAlert size={48} style={{ color: "var(--color-primary)" }} aria-hidden="true" /&gt;
+      &lt;h1 className="text-heading-l"&gt;화면을 불러오지 못했어요&lt;/h1&gt;
+      &lt;p className="text-body-m text-muted"&gt;잠시 후 다시 시도해 주세요. 같은 문제가 계속되면 아래 번호와 함께 알려 주세요.&lt;/p&gt;
+      {error.digest &amp;&amp; &lt;p className="text-caption text-muted"&gt;오류 번호: {error.digest}&lt;/p&gt;}
+      &lt;div style={{ display: "flex", gap: "var(--spacing-sm)" }}&gt;
+        &lt;Button onClick={reset}&gt;다시 시도&lt;/Button&gt;
+        &lt;Link href="/" className="text-body-m" style={{ alignSelf: "center" }}&gt;
+          홈으로
+        &lt;/Link&gt;
+      &lt;/div&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>
+          <ul>
+            <li>개발자 도구 → Network → "Slow 4G" 로 목록을 열면 카드 모양 뼈대가 먼저 보인다</li>
+            <li>찜이 없는 계정의 <code>/me/likes</code> → 빈 화면 안내 + "프로젝트 둘러보기"</li>
+            <li><code>/debug/sentry?throw=render</code> → "화면을 불러오지 못했어요" + 오류 번호 (에러 내용 자체는 보이지 않음)</li>
+          </ul>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>Next.js 의 규칙 파일(loading·error·not-found)과 빈 화면 컴포넌트로 "정상이 아닌 순간"의 화면을 만들었습니다. 에러는 사용자에게 내부 정보를 보여 주지 않고 Sentry 로 보냅니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t13-s4-code"><span>뼈대 · 빈 화면 · 에러 · 404 화면</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 5단계 ======================= -->
+    <details class="step" id="step-5">
+      <summary><span class="step-num">5</span>흐름 테스트 + 스트리밍 404 함정 (라우트 그룹)</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 없는 프로젝트인데 왜 200 이 나올까</span>
+          <div class="flow">
+            <div class="node"><strong>app/projects/loading.tsx</strong><small>projects 아래 모든 페이지를 스트리밍으로</small></div>
+            <span class="arrow"></span>
+            <div class="node"><strong>뼈대를 먼저 보냄</strong><small>이때 상태 코드 200 도 먼저 나가 버림</small></div>
+            <span class="arrow"></span>
+            <div class="node warn"><strong>그 뒤 notFound()</strong><small>화면은 404 지만 응답은 이미 200</small></div>
+          </div>
+          <div class="flow">
+            <div class="node"><strong>해결: app/projects/(list)/loading.tsx</strong><small>괄호 폴더(라우트 그룹)는 주소에 안 나타남 → 목록(/projects)에만 뼈대, 상세·후원은 제대로 404</small></div>
+          </div>
+        </div>
+        <figure class="code" data-src="app/projects/(list)/loading.tsx" data-tag="tumblbug-week13-step5">
+          <figcaption><span class="label">app/projects/(list)/loading.tsx</span></figcaption>
+          <pre><code>import grid from "@/components/project/ProjectGrid.module.css";
+import { CardSkeleton, Skeleton } from "@/components/ui/Skeleton";
+
+// 프로젝트 목록을 불러오는 동안: 제목·필터·카드 8장 모양의 뼈대
+//
+// 왜 (list) 폴더 안에 있나 — loading.tsx 는 "같은 폴더와 그 아래 모든 페이지"를 스트리밍으로 바꾼다.
+// 스트리밍은 뼈대를 먼저 보내느라 상태 코드(200)를 먼저 보내 버려서, 그 뒤에 notFound() 를 불러도 404 가 되지 않는다.
+// app/projects/loading.tsx 에 두면 상세(/projects/[id])·수정·후원의 "없는 페이지"까지 200 이 된다.
+// (list) 처럼 괄호 폴더(라우트 그룹)는 주소에 나타나지 않으므로, 목록(/projects)에만 뼈대를 붙일 수 있다.
+export default function ProjectsLoading() {
+  return (
+    &lt;main className="container" style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-lg)", paddingBlock: "var(--spacing-xl)" }}&gt;
+      &lt;p className="sr-only" role="status"&gt;
+        프로젝트를 불러오는 중…
+      &lt;/p&gt;
+      &lt;Skeleton width={200} height={28} /&gt;
+      &lt;div style={{ display: "flex", gap: "var(--spacing-sm)" }}&gt;
+        {Array.from({ length: 5 }, (_, i) =&gt; (
+          &lt;Skeleton key={i} width={64} height={36} radius="var(--radius-full)" /&gt;
+        ))}
+      &lt;/div&gt;
+      &lt;div className={grid.grid}&gt;
+        {Array.from({ length: 8 }, (_, i) =&gt; (
+          &lt;CardSkeleton key={i} /&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+        </figure>
+        <div class="box help"><span class="box-title">🆘 작성자가 실제로 겪은 문제</span><p>없는 프로젝트 주소가 화면에는 "페이지를 찾을 수 없어요"를 보여 주는데, 흐름 테스트의 <code>expect(res.status()).toBe(404)</code> 가 200 으로 실패했습니다. 검색 엔진과 가동 감시는 상태 코드를 보기 때문에, 화면만 404 인 것은 404 가 아닙니다. 위처럼 뼈대(loading.tsx)를 목록 폴더 안으로 옮겨 해결했습니다.</p></div>
+        <figure class="code cmd">
+          <figcaption><span class="label">터미널</span></figcaption>
+          <pre><code>npx playwright test e2e/ops.spec.ts e2e/browse.spec.ts</code></pre>
+        </figure>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>대시보드 숫자·표 · 남의 프로젝트 번호로 남의 대시보드 불가 · 관리자 숨기기 · 예약 작업 비밀값 · 없는 주소는 <strong>진짜 404</strong></div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>13주차 기능을 흐름 테스트로 굳히고, 스트리밍이 상태 코드를 먼저 보내 버리는 함정을 라우트 그룹으로 피했습니다. 이것으로 구현 파트(5~13주)가 끝났습니다 — 다음 주부터는 이 앱을 <strong>자동으로 배포하고 지키는 법</strong>입니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>라우트 그룹 <code>(list)</code> 폴더 이름이 주소에 나타나지 않는다는 게 왜 중요한가?</summary><p>주소(<code>/projects</code>)는 그대로 두고 파일 구조만 나눌 수 있어서, loading.tsx 가 적용되는 범위를 "목록 페이지만"으로 좁힐 수 있습니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t13-s5-e2e"><span>대시보드·관리자·예약 작업·상태 화면 흐름 테스트 통과 (없는 주소 = 404)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">13주차 회고</h2>
+    <div class="retro card">
+      <label for="t13-note-1">잘된 것</label>
+      <textarea id="t13-note-1" data-note="t13-good" placeholder="예: 합계를 저장하지 않으니 숫자가 틀릴 걱정이 없었다"></textarea>
+      <label for="t13-note-2">막힌 것 (그림의 어느 부분이었나?)</label>
+      <textarea id="t13-note-2" data-note="t13-stuck" placeholder="예: 화면은 404 인데 테스트는 200 이라서 한참 헤맸다"></textarea>
+      <label for="t13-note-3">다음에 다르게 할 것</label>
+      <textarea id="t13-note-3" data-note="t13-next" placeholder="예: 매일 해야 하는 일은 처음부터 예약 작업으로 뺄 수 있는지 생각하겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t13-retro"><span>13주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week12.html"><small>이전</small>← 12주차 · 찜하기</a>
+      <a class="card next" href="week14.html"><small>다음</small>14주차 · CD 파이프라인 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Next.js 16.3.6 · Drizzle ORM 0.45.3 · PostgreSQL 18 · Vitest 5.0.2 · Playwright 1.63.0</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>

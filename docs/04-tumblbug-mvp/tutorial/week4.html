@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko" data-course="tumblbug">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4주차 디자인 시스템·시안·프로토타입 · 모아 교재</title>
+  <meta name="description" content="토큰·아이콘·상태별 컴포넌트로 디자인 시스템을 만들고, 모바일·데스크톱 시안과 클릭 프로토타입으로 사용성 테스트 3명">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body data-page="week4">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-row">
+        <a class="brand" href="index.html">🎁 모아 교재 (4단계)</a>
+        <div class="progress">
+          <div class="progress-track" id="progress-track" role="progressbar" aria-label="전체 진행률" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-text" id="progress-text">진행률 계산 중</span>
+        </div>
+        <button class="icon-button" id="theme-toggle" type="button">☾ 다크</button>
+      </div>
+      <nav class="week-tabs" aria-label="주차 이동">
+        <a href="index.html" data-page="index">시작하기 전 <span class="tab-count"></span></a>
+        <a href="week1.html" data-page="week1">1주 · 인터뷰 <span class="tab-count"></span></a>
+        <a href="week2.html" data-page="week2">2주 · PRD·ERD <span class="tab-count"></span></a>
+        <a href="week3.html" data-page="week3">3주 · 흐름·와이어 <span class="tab-count"></span></a>
+        <a href="week4.html" data-page="week4" aria-current="page">4주 · 디자인 시스템 <span class="tab-count"></span></a>
+        <a href="week5.html" data-page="week5">5주 · 프로젝트 준비 <span class="tab-count"></span></a>
+        <a href="week6.html" data-page="week6">6주 · DB·SQL <span class="tab-count"></span></a>
+        <a href="week7.html" data-page="week7">7주 · 인증·등록 <span class="tab-count"></span></a>
+        <a href="week8.html" data-page="week8">8주 · 리워드·상태 <span class="tab-count"></span></a>
+        <a href="week9.html" data-page="week9">9주 · API <span class="tab-count"></span></a>
+        <a href="week10.html" data-page="week10">10주 · 후원 단계 <span class="tab-count"></span></a>
+        <a href="week11.html" data-page="week11">11주 · 결제 <span class="tab-count"></span></a>
+        <a href="week12.html" data-page="week12">12주 · 찜 <span class="tab-count"></span></a>
+        <a href="week13.html" data-page="week13">13주 · 대시보드 <span class="tab-count"></span></a>
+        <a href="week14.html" data-page="week14">14주 · CD <span class="tab-count"></span></a>
+        <a href="week15.html" data-page="week15">15주 · 운영 준비 <span class="tab-count"></span></a>
+        <a href="week16.html" data-page="week16">16주 · Docker·AWS <span class="tab-count"></span></a>
+        <a href="week17.html" data-page="week17">17주 · 운영 시작 <span class="tab-count"></span></a>
+        <a href="week18.html" data-page="week18">18주 · 우선순위 <span class="tab-count"></span></a>
+        <a href="week19.html" data-page="week19">19주 · 개선 <span class="tab-count"></span></a>
+        <a href="week20.html" data-page="week20">20주 · 케이스 스터디 <span class="tab-count"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <span class="eyebrow">4주차 · 5단계 · UI 설계</span>
+    <h1>디자인 시스템, 시안, 클릭 프로토타입</h1>
+    <p class="lead">
+      와이어프레임에 옷을 입힙니다. 그런데 화면을 한 장씩 칠하지 않고, 먼저 <strong>재료(색·글자·간격 = 토큰)</strong>와 <strong>부품(버튼·입력칸·카드 = 컴포넌트)</strong>을 만든 뒤 그걸로 화면을 조립합니다.
+      마지막으로 클릭되는 프로토타입을 <strong>3명에게 써 보게 하고</strong> 고칩니다. 코드는 5주차부터 — 이번 주의 토큰 이름이 그대로 코드의 이름이 됩니다.
+    </p>
+
+    <div class="box picture"><span class="box-title">🗺️ 이번 주 그림 — 재료 → 부품 → 화면 → 사람에게 시험</span>
+<div class="flow">
+  <div class="node"><strong>① 토큰</strong><small>색·글자·간격·모서리 (Light/Dark)</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>② 컴포넌트</strong><small>버튼·입력칸·카드 — 상태별로</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>③ 시안</strong><small>모바일 먼저 + 데스크톱</small></div>
+  <span class="arrow"></span>
+  <div class="node"><strong>④ 프로토타입 + 사용성 테스트</strong><small>3명 → 고치기</small></div>
+  <span class="arrow" data-label="5주차"></span>
+  <div class="node ext"><strong>코드</strong><small>color/primary → var(--color-primary)</small></div>
+</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>용어</th><th>한 줄 뜻</th></tr></thead>
+        <tbody>
+          <tr><td><strong>디자인 토큰</strong></td><td>색·간격 같은 값에 붙인 이름. 화면은 값(#c8342a) 대신 이름(color/primary)을 쓴다</td></tr>
+          <tr><td><strong>컴포넌트</strong></td><td>여러 화면에서 다시 쓰는 부품. 하나를 고치면 쓰인 곳이 모두 바뀐다</td></tr>
+          <tr><td><strong>상태 (variant)</strong></td><td>같은 부품의 여러 모습 — 기본·포커스·에러·비활성, 선택됨·품절 …</td></tr>
+          <tr><td><strong>프로토타입</strong></td><td>시안의 버튼을 눌렀을 때 다음 화면으로 넘어가게 연결한 것. 코드 없이 흐름을 시험</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ======================= 1단계 ======================= -->
+    <details class="step" id="step-1" open>
+      <summary><span class="step-num">1</span>토큰: 색·글자·간격·모서리</summary>
+      <div class="step-body">
+        <div class="box picture"><span class="box-title">🗺️ 그림 먼저 — 색은 두 층</span>
+<div class="flow">
+  <div class="node"><strong>원시 색 (Primitives)</strong><small>red/600 = #c8342a, gray/50 …</small></div>
+  <span class="arrow" data-label="가리킨다"></span>
+  <div class="node"><strong>의미 색 (Color)</strong><small>color/primary · color/bg · color/text …</small></div>
+  <span class="arrow" data-label="쓴다"></span>
+  <div class="node"><strong>화면·컴포넌트</strong><small>의미 색만 쓴다</small></div>
+</div>
+<p class="flow-note">다크 모드는 의미 색이 가리키는 원시 색만 바꿔 끼운다 (color/primary: Light → red/600, Dark → red/300). 화면이 원시 색을 직접 쓰면 다크 모드에서 안 바뀐다.</p>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>종류</th><th>Figma 변수 이름 (예시 파일)</th><th>코드 (5주차, <code>app/globals.css</code>)</th></tr></thead>
+          <tbody>
+            <tr><td>의미 색 22개 (Light/Dark)</td><td><code>color/bg</code> · <code>color/surface</code> · <code>color/text</code> · <code>color/text-muted</code> · <code>color/border</code> · <code>color/primary</code> · <code>color/danger</code> …</td><td><code>var(--color-bg)</code> · <code>var(--color-primary)</code> …</td></tr>
+            <tr><td>간격 7단계</td><td><code>spacing/xs</code>(4) · <code>sm</code>(8) · <code>md</code>(12) · <code>lg</code>(16) · <code>xl</code>(24) · <code>2xl</code>(32) · <code>3xl</code>(48)</td><td><code>var(--spacing-lg)</code> …</td></tr>
+            <tr><td>모서리 4단계</td><td><code>radius/sm</code>(6) · <code>md</code>(12) · <code>lg</code>(16) · <code>full</code></td><td><code>var(--radius-md)</code> …</td></tr>
+            <tr><td>글자 9단계 (Noto Sans KR)</td><td>Display · Heading XL/L/M · Body M · Body M Strong · Body S · Label · Caption</td><td><code>.text-display</code> · <code>.text-heading-l</code> · <code>.text-caption</code> …</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box why"><span class="box-title">💡 왜 이름을 코드와 똑같이?</span>디자이너가 "color/primary 를 조금 어둡게" 하면 개발자는 <code>--color-primary</code> 한 곳만 고치면 됩니다. 이름이 다르면 매번 "이 빨강이 그 빨강인가?"를 맞춰 봐야 해요. 정답 코드에는 이름이 같은지 검사하는 테스트(<code>tests/tokens.test.ts</code>)까지 있습니다.</div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>Figma <strong>Local variables</strong> 에 Primitives · Color(Light/Dark) · Spacing · Radius 모음이 있고, 글자색과 배경의 <strong>대비가 4.5 : 1 이상</strong>이다 (Figma 플러그인이나 온라인 대비 검사기로).</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>Figma 변수(Variables)가 어디 있나요?</summary><p>아무것도 선택하지 않은 상태에서 오른쪽 패널의 <strong>Local variables</strong>(로컬 변수) → 새 모음(Collection) → 변수 추가. 모드(Mode)를 추가하면 Light/Dark 두 칸이 생깁니다. 메뉴 이름은 Figma 업데이트로 바뀔 수 있어요 — 예시 파일의 Foundations 페이지를 복제해서 시작해도 됩니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>화면에 쓸 모든 값에 이름을 붙였습니다. 이제 화면은 "빨강"이 아니라 "주요 색(primary)"을 씁니다 — 그래서 다크 모드와 코드 옮기기가 쉬워집니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t4-s1-tokens"><span>색(두 층, Light/Dark)·간격·모서리·글자 토큰</span></label></li>
+          <li><label><input type="checkbox" data-task="t4-s1-contrast"><span>텍스트 대비 4.5 이상 확인</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 2단계 ======================= -->
+    <details class="step" id="step-2">
+      <summary><span class="step-num">2</span>아이콘과 상태별 컴포넌트</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 "상태별"로?</span>버튼은 평소·눌렀을 때·비활성·처리 중… 모습이 여럿입니다. 시안에 기본 모습만 있으면 개발할 때 나머지를 즉석에서 지어내게 되고, 화면마다 제각각이 됩니다.</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>컴포넌트 (예시 파일 19종 중)</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td>Button</td><td>종류(주요·보조…) × 크기 × 상태(기본·호버·비활성…)</td></tr>
+            <tr><td>Input</td><td>기본 · 포커스 · 에러(이유 문장) · 비활성</td></tr>
+            <tr><td>ProgressBar · Badge</td><td>진행률, D-day 배지</td></tr>
+            <tr><td>RewardCard</td><td>기본 · 선택됨 · <strong>품절</strong></td></tr>
+            <tr><td>LikeButton</td><td>찜 안 함 · 찜함</td></tr>
+            <tr><td>Steps · BottomBar · Toast</td><td>후원 단계 표시, 하단 고정 바, 알림</td></tr>
+          </tbody>
+        </table></div>
+        <p>아이콘은 <strong>Lucide</strong>(무료, ISC 라이선스) 24개 — 코드에서도 <code>lucide-react</code> 의 <strong>같은 이름</strong>을 씁니다 (예: <code>Heart</code>, <code>Plus</code>).</p>
+        <p>입력 규칙 문장은 코드의 검사 문장과 같아야 합니다. 예: 목표 금액 <strong>10,000원 ~ 1억 원</strong>, 마감일 <strong>내일 ~ 60일 뒤</strong>, 리워드 가격 <strong>1,000원 ~ 1,000,000원</strong> (<code>lib/validation/project.ts</code>, <code>reward.ts</code>).</p>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>Button·Input·RewardCard 의 모든 상태가 컴포넌트 변형(variant)으로 있고, 에러 상태의 문장이 위 규칙과 같다.</div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>화면을 조립할 부품을, 모든 모습까지 포함해 만들었습니다. 5주차에 같은 이름의 React 컴포넌트가 됩니다.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>RewardCard 에 "품절" 상태가 꼭 있어야 하는 이유는?</summary><p>PRD 인수 조건(B-3)이 "품절은 선택 불가" 이고, 상태 전이도의 "남음 → 품절" 이 화면에서 보여야 하기 때문입니다. 시안에 없으면 품절 모습을 개발하면서 즉석으로 정하게 됩니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t4-s2-components"><span>상태별 컴포넌트 + Lucide 아이콘</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 3단계 ======================= -->
+    <details class="step" id="step-3">
+      <summary><span class="step-num">3</span>시안 (모바일 먼저 + 데스크톱)</summary>
+      <div class="step-body">
+        <p>3주차 와이어프레임을 컴포넌트로 조립합니다. 예시 파일 <strong>Screens</strong>: 모바일 14개 + 데스크톱 3개 + 다크 모드 2개.</p>
+        <ul>
+          <li>화면에는 <strong>컴포넌트 인스턴스와 토큰만</strong> — 색 값을 직접 넣지 않는다</li>
+          <li>로딩·비어 있음·에러 상태 화면도 함께</li>
+          <li>상태를 어디에 두는지 메모(💡)를 시안 옆에 달아 두면 5주차 상태 관리 지도가 쉬워진다 (예: "필터 = 주소(URL)", "후원 단계 선택 = 브라우저 저장")</li>
+        </ul>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>와이어프레임의 세 화면이 모바일·데스크톱 시안으로 있고, 다크 모드로 바꿔도 글자가 잘 보인다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>작성자 경험: 첫 시안이 "포트폴리오 수준이 아니다"</summary><p>교재의 예시 파일도 v1 을 버리고 v2 로 다시 만들었습니다 (<strong>Archive — v1</strong> 페이지에 개선 전 시안이 남아 있어요). 브랜드(이름·로고)·아이콘·상태별 컴포넌트·데스크톱 화면을 더하면서 좋아졌습니다. 전후 비교는 케이스 스터디의 좋은 재료예요.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>재료와 부품으로 실제 화면을 조립했습니다. 부품이 같으니 화면들이 자연스럽게 한 서비스처럼 보입니다.</div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t4-s3-screens"><span>모바일·데스크톱 시안 + 상태 화면 + 다크 모드</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ======================= 4단계 ======================= -->
+    <details class="step" id="step-4">
+      <summary><span class="step-num">4</span>클릭 프로토타입과 사용성 테스트 3명</summary>
+      <div class="step-body">
+        <div class="box why"><span class="box-title">💡 왜 코드 전에 시험하나?</span>코드로 만든 뒤 고치면 몇 시간, 프로토타입에서 고치면 몇 분입니다. 만든 사람은 어디를 눌러야 하는지 알기 때문에 막히는 곳을 보지 못해요 — <strong>다른 사람의 손</strong>이 필요합니다.</div>
+        <ol>
+          <li>Figma <strong>Prototype</strong> 탭에서 버튼마다 다음 화면을 연결: 홈 → 상세 → 후원 1·2·3단계 → 완료</li>
+          <li>3명에게 <strong>과제 하나만</strong> 줍니다: "마음에 드는 프로젝트에 리워드를 골라 후원해 보세요"</li>
+          <li>도와주지 않고, 생각을 소리 내어 말해 달라고 부탁한 뒤 <strong>관찰만</strong> 합니다 — 어디서 멈칫했나, 무엇을 눌렀나</li>
+          <li>3명 중 2명 이상이 막힌 곳부터 고칩니다</li>
+        </ol>
+        <div class="table-wrap"><table>
+          <thead><tr><th>기록 양식</th><th>예</th></tr></thead>
+          <tbody>
+            <tr><td>어느 화면에서</td><td>후원 1단계</td></tr>
+            <tr><td>무엇을 하려다</td><td>수량을 늘리려고</td></tr>
+            <tr><td>무엇을 했나 / 말했나 (그대로)</td><td>"숫자를 눌러도 안 바뀌네요?"</td></tr>
+            <tr><td>고친 것</td><td>+/− 버튼을 크게, 숫자 옆에 배치</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box check"><span class="box-title">✅ 확인하는 법</span>3명의 관찰 기록이 있고, 고친 것 1~2개의 전/후 캡처가 있다.</div>
+        <div class="box help"><span class="box-title">🆘 막혔을 때</span>
+          <details><summary>참가자가 막히면 알려 줘도 되나요?</summary><p>1~2분은 기다립니다. 정말 멈추면 "지금 무엇을 찾고 계세요?" 라고만 묻고, 답은 알려 주지 않아요. 막힌 그 순간이 가장 소중한 기록입니다.</p></details>
+        </div>
+        <div class="box recap"><span class="box-title">🔁 방금 무슨 일이 일어났나</span>코드 한 줄 없이 흐름 전체를 다른 사람의 손으로 시험하고 고쳤습니다. 17~20주차의 "관찰 → 가설 → 개선"을 작게 한 번 해 본 것이에요.</div>
+        <div class="quiz"><span class="box-title">🤔 스스로 확인</span>
+          <details><summary>참가자에게 "이 버튼 누르시면 돼요"라고 알려 주면 무엇을 잃나?</summary><p>그 버튼이 찾기 어렵다는 사실을 잃습니다. 실제 사용자 옆에는 알려 줄 사람이 없으니까요.</p></details>
+          <details><summary>한 명만 막힌 곳은 어떻게 할까?</summary><p>바로 고치기보다 기록해 두고 다음 참가자에게서 반복되는지 봅니다. 쉽게 고칠 수 있는 문구 문제라면 같이 고쳐도 됩니다.</p></details>
+        </div>
+        <ul class="checklist">
+          <li><label><input type="checkbox" data-task="t4-s4-proto"><span>클릭 프로토타입 (홈 → 상세 → 후원 3단계 → 완료)</span></label></li>
+          <li><label><input type="checkbox" data-task="t4-s4-test"><span>사용성 테스트 3명 → 1~2개 고침 (전/후 캡처)</span></label></li>
+        </ul>
+      </div>
+    </details>
+
+    <h2 id="retro">4주차 회고</h2>
+    <div class="retro card">
+      <label for="t4-note-1">잘된 것</label>
+      <textarea id="t4-note-1" data-note="t4-good" placeholder="예: 토큰을 먼저 만드니 다크 모드가 쉬웠다"></textarea>
+      <label for="t4-note-2">막힌 것 (어디서, 왜)</label>
+      <textarea id="t4-note-2" data-note="t4-stuck" placeholder="예: 참가자가 수량 버튼을 못 찾았다"></textarea>
+      <label for="t4-note-3">다음에 다르게 할 것</label>
+      <textarea id="t4-note-3" data-note="t4-next" placeholder="예: 컴포넌트 상태를 처음부터 다 그리겠다"></textarea>
+    </div>
+    <ul class="checklist">
+      <li><label><input type="checkbox" data-task="t4-retro"><span>4주차 회고 쓰기</span></label></li>
+    </ul>
+
+    <nav class="pager" aria-label="이전/다음 페이지">
+      <a class="card" href="week3.html"><small>이전</small>← 3주차 · 흐름도·와이어프레임</a>
+      <a class="card next" href="week5.html"><small>다음</small>5주차 · 프로젝트 준비 →</a>
+    </nav>
+  </main>
+
+  <footer class="page-footer">
+    <div class="row">
+      <span>마지막 검증: 2026-09-30 · Figma(무료) · Lucide 아이콘</span>
+      <button class="icon-button" id="reset-progress" type="button">진행 상황 초기화</button>
+    </div>
+  </footer>
+</body>
+</html>
